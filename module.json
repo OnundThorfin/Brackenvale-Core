@@ -1,0 +1,43 @@
+{
+  "id": "brackenvale-core",
+  "title": "Brackenvale Core",
+  "description": "A movable and minimizable Brackenvale campaign overlay with a custom calendar, seasonal weather, Travel Points, location, and campaign notes.",
+  "version": "0.2.3",
+  "authors": [
+    {
+      "name": "Joe Acone"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.365",
+    "maximum": "14"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.3.3",
+          "verified": "5.3.3"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/brackenvale-core.js"
+  ],
+  "styles": [
+    "styles/brackenvale-core.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "license": "LICENSE.txt",
+  "readme": "README.md"
+}

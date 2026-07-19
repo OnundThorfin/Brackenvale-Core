@@ -1,0 +1,93 @@
+<div class="brackenvale-core">
+  <header class="bv-header">
+    <div class="bv-kicker">BRACKENVALE</div>
+    <h1>{{date.month}} {{date.day}}</h1>
+    <div class="bv-date-line">{{date.weekday}} · {{date.year}}</div>
+    <div class="bv-season">{{date.season}}</div>
+    {{#if holidays.length}}
+      <div class="bv-holidays">
+        {{#each holidays}}<span class="bv-holiday"><i class="fa-solid fa-bell"></i> {{this}}</span>{{/each}}
+      </div>
+    {{/if}}
+  </header>
+
+  <section class="bv-grid">
+    <article class="bv-card">
+      <h2><i class="fa-solid fa-cloud-sun-rain"></i> Weather</h2>
+      {{#if weather}}
+        <p class="bv-weather-result">{{weather.text}}</p>
+        <div class="bv-effects">
+          {{#each weather.effectLabels}}<span>{{this}}</span>{{/each}}
+        </div>
+        <small>Rolled {{weather.roll}} on 2d6</small>
+      {{else}}
+        <p class="bv-muted">No weather has been generated for this date.</p>
+      {{/if}}
+      {{#if isGM}}
+        <button type="button" data-action="weather"><i class="fa-solid fa-dice"></i> Generate Weather</button>
+      {{/if}}
+    </article>
+
+    <article class="bv-card">
+      <h2><i class="fa-solid fa-route"></i> Journey</h2>
+      <div class="bv-travel-value">{{travel.current}} <span>/ {{travel.maximum}} TP</span></div>
+      <div class="bv-meter"><div style="width: {{travel.percent}}%"></div></div>
+      {{#if location}}<p><strong>Location:</strong> {{location}}</p>{{/if}}
+      {{#if isGM}}
+        <div class="bv-button-row">
+          <button type="button" data-action="travelDown" title="Spend one Travel Point"><i class="fa-solid fa-minus"></i></button>
+          <button type="button" data-action="travelUp" title="Restore one Travel Point"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" data-action="travelReset" title="Restore all Travel Points"><i class="fa-solid fa-rotate-left"></i></button>
+        </div>
+      {{/if}}
+    </article>
+
+    <article class="bv-card bv-notes-card">
+      <h2><i class="fa-solid fa-book-open"></i> Campaign Notes</h2>
+      {{#if notes}}<p class="bv-notes">{{notes}}</p>{{else}}<p class="bv-muted">No campaign note has been entered.</p>{{/if}}
+    </article>
+  </section>
+
+  {{#if isGM}}
+  <section class="bv-gm-panel">
+    <h2>Game Master Controls</h2>
+    <div class="bv-button-row bv-date-buttons">
+      <button type="button" data-action="previousDay"><i class="fa-solid fa-chevron-left"></i> Previous Day</button>
+      <button type="button" data-action="nextDay">Next Day <i class="fa-solid fa-chevron-right"></i></button>
+      <button type="button" data-action="nextWeek">Advance 11 Days</button>
+      <button type="button" data-action="nextMonth">Advance One Month</button>
+    </div>
+
+    <form class="bv-settings-form">
+      <div class="bv-form-grid">
+        <label>Month
+          <select name="monthIndex">
+            {{#each months}}<option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Day
+          <input name="day" type="number" min="1" max="44" value="{{date.day}}">
+        </label>
+        <label>Year
+          <input name="year" type="number" min="1" value="{{date.year}}">
+        </label>
+        <label>Current TP
+          <input name="travelCurrent" type="number" min="0" value="{{travel.current}}">
+        </label>
+        <label>Maximum TP
+          <input name="travelMaximum" type="number" min="1" value="{{travel.maximum}}">
+        </label>
+        <label class="bv-wide">Current Location
+          <input name="location" type="text" value="{{location}}" placeholder="Guildgate, Hex 1005, etc.">
+        </label>
+        <label class="bv-wide">Campaign Note
+          <textarea name="notes" rows="3" placeholder="What the party is doing now...">{{notes}}</textarea>
+        </label>
+      </div>
+      <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </form>
+  </section>
+  {{/if}}
+
+  <footer class="bv-footer">Brackenvale Core v{{version}}</footer>
+</div>

@@ -1,0 +1,227 @@
+:root {
+  --bv-ink: #e9e1cb;
+  --bv-muted: #b9b09a;
+  --bv-green: #263f31;
+  --bv-green-light: #466a50;
+  --bv-gold: #b99a5a;
+  --bv-shadow: rgba(0, 0, 0, 0.55);
+}
+
+.brackenvale-core {
+  padding: 0.8rem;
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+}
+.brackenvale-core button { cursor: pointer; }
+.bv-header {
+  text-align: center;
+  padding: 1.2rem;
+  border: 1px solid var(--color-border-light-2);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(42, 67, 45, 0.28), rgba(0, 0, 0, 0.08));
+}
+.bv-kicker { font-size: 0.8rem; letter-spacing: 0.28em; font-weight: 700; opacity: 0.8; }
+.bv-header h1 { margin: 0.25rem 0 0; font-family: var(--font-h1); font-size: 2rem; }
+.bv-date-line { font-size: 1.05rem; }
+.bv-season { display: inline-block; margin-top: 0.55rem; padding: 0.2rem 0.65rem; border: 1px solid currentColor; border-radius: 999px; font-size: 0.82rem; }
+.bv-holidays { margin-top: 0.65rem; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem; }
+.bv-holiday { padding: 0.25rem 0.55rem; background: rgba(159, 122, 65, 0.18); border-radius: 4px; }
+.bv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+.bv-card, .bv-gm-panel { padding: 0.8rem; border: 1px solid var(--color-border-light-2); border-radius: 7px; background: rgba(0, 0, 0, 0.08); }
+.bv-card h2, .bv-gm-panel h2 { margin: 0 0 0.55rem; font-size: 1.05rem; border-bottom: 1px solid var(--color-border-light-2); padding-bottom: 0.35rem; }
+.bv-notes-card { grid-column: 1 / -1; }
+.bv-weather-result { font-size: 1.05rem; font-weight: 600; margin: 0.35rem 0; }
+.bv-effects { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.45rem 0; }
+.bv-effects span { padding: 0.18rem 0.4rem; border-radius: 4px; background: rgba(116, 145, 107, 0.25); font-size: 0.78rem; }
+.bv-travel-value { font-size: 1.85rem; font-weight: 700; }
+.bv-travel-value span { font-size: 0.9rem; font-weight: 400; opacity: 0.75; }
+.bv-meter { height: 9px; border-radius: 999px; background: rgba(0, 0, 0, 0.25); overflow: hidden; margin: 0.35rem 0 0.65rem; }
+.bv-meter div { height: 100%; background: currentColor; opacity: 0.55; }
+.bv-button-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.bv-button-row button { flex: 1 1 auto; }
+.bv-gm-panel { margin-top: 0.75rem; }
+.bv-date-buttons { margin-bottom: 0.8rem; }
+.bv-settings-form { margin-top: 0.6rem; }
+.bv-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; }
+.bv-form-grid label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.82rem; font-weight: 600; }
+.bv-form-grid input, .bv-form-grid select, .bv-form-grid textarea { width: 100%; }
+.bv-wide { grid-column: 1 / -1; }
+.bv-settings-form > button { margin-top: 0.7rem; width: 100%; }
+.bv-muted { opacity: 0.65; font-style: italic; }
+.bv-notes { white-space: pre-wrap; }
+.bv-footer { text-align: center; opacity: 0.55; font-size: 0.72rem; margin-top: 0.7rem; }
+#brackenvale-core-launcher { margin: 0.4rem 0.5rem; }
+#brackenvale-core-launcher button { width: 100%; }
+
+/* Persistent scene overlay */
+#brackenvale-core-overlay {
+  position: fixed;
+  z-index: 70;
+  top: 74px;
+  right: 324px;
+  width: 292px;
+  display: flex;
+  color: var(--bv-ink);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(185, 154, 90, 0.12), transparent 42%),
+    linear-gradient(155deg, rgba(31, 51, 40, 0.97), rgba(15, 24, 20, 0.97));
+  border: 1px solid rgba(185, 154, 90, 0.58);
+  border-radius: 9px;
+  box-shadow: 0 8px 24px var(--bv-shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+#brackenvale-core-overlay:hover,
+#brackenvale-core-overlay:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(215, 184, 113, 0.88);
+  box-shadow: 0 11px 30px rgba(0, 0, 0, 0.66), 0 0 0 1px rgba(185, 154, 90, 0.22);
+  outline: none;
+}
+.bv-overlay-crest {
+  width: 43px;
+  flex: 0 0 43px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(185, 154, 90, 0.18), rgba(185, 154, 90, 0.035));
+  border-right: 1px solid rgba(185, 154, 90, 0.28);
+  color: var(--bv-gold);
+  font-size: 1.15rem;
+}
+.bv-overlay-body { flex: 1; min-width: 0; padding: 10px 11px 9px; }
+.bv-overlay-title { color: var(--bv-gold); letter-spacing: 0.2em; font-size: 0.68rem; font-weight: 800; }
+.bv-overlay-date { margin-top: 2px; font-family: var(--font-h1); font-size: 1.04rem; line-height: 1.15; }
+.bv-overlay-subdate { color: var(--bv-muted); font-size: 0.74rem; }
+.bv-overlay-holiday {
+  margin-top: 6px;
+  padding: 3px 6px;
+  border-left: 2px solid var(--bv-gold);
+  background: rgba(185, 154, 90, 0.1);
+  color: #e7d6aa;
+  font-size: 0.72rem;
+}
+.bv-overlay-weather, .bv-overlay-location {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  min-width: 0;
+  font-size: 0.78rem;
+}
+.bv-overlay-weather i, .bv-overlay-location i { width: 14px; color: #c9b57e; text-align: center; }
+.bv-overlay-weather span, .bv-overlay-location { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bv-overlay-location { color: var(--bv-muted); }
+.bv-overlay-travel-row { display: flex; align-items: baseline; justify-content: space-between; margin-top: 8px; font-size: 0.72rem; }
+.bv-overlay-travel-row span { color: var(--bv-muted); }
+.bv-overlay-travel-row strong { color: var(--bv-ink); font-size: 0.8rem; }
+.bv-overlay-meter { height: 5px; margin-top: 4px; overflow: hidden; border-radius: 999px; background: rgba(0, 0, 0, 0.44); }
+.bv-overlay-meter span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #597e5f, #b99a5a); transition: width 180ms ease; }
+.bv-overlay-quick { display: flex; justify-content: flex-end; gap: 4px; margin-top: 7px; }
+.bv-overlay-quick button {
+  width: 25px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: 1px solid rgba(185, 154, 90, 0.3);
+  border-radius: 4px;
+  color: var(--bv-ink);
+  background: rgba(255, 255, 255, 0.04);
+  line-height: 1;
+}
+.bv-overlay-quick button:hover { border-color: var(--bv-gold); background: rgba(185, 154, 90, 0.16); }
+
+@media (max-width: 900px) {
+  #brackenvale-core-overlay { right: 14px; top: 70px; width: 268px; }
+}
+@media (max-width: 600px) {
+  .bv-grid, .bv-form-grid { grid-template-columns: 1fr; }
+  .bv-notes-card, .bv-wide { grid-column: auto; }
+  #brackenvale-core-overlay { width: 242px; }
+  .bv-overlay-crest { display: none; }
+}
+
+/* v0.2.1 stability and window layout */
+.brackenvale-core-window .window-content {
+  overflow: auto;
+  min-height: 0;
+}
+.brackenvale-core-window .brackenvale-core {
+  min-width: 0;
+}
+
+/* Movable/minimizable overlay */
+#brackenvale-core-overlay {
+  right: auto;
+  cursor: default;
+  transform: none !important;
+  transition: box-shadow 140ms ease, border-color 140ms ease, width 140ms ease;
+}
+#brackenvale-core-overlay:hover,
+#brackenvale-core-overlay:focus-visible {
+  transform: none;
+}
+#brackenvale-core-overlay.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 14px 34px rgba(0,0,0,.72), 0 0 0 1px rgba(185,154,90,.28);
+}
+.bv-overlay-drag {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.bv-overlay-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.bv-overlay-window-controls {
+  display: flex;
+  gap: 3px;
+}
+.bv-overlay-window-controls button,
+.bv-overlay-compact button {
+  width: 22px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  border: 0;
+  color: var(--bv-muted);
+  background: transparent;
+  line-height: 1;
+  cursor: pointer;
+}
+.bv-overlay-window-controls button:hover,
+.bv-overlay-compact button:hover {
+  color: var(--bv-gold);
+  background: rgba(185,154,90,.12);
+}
+#brackenvale-core-overlay.is-minimized {
+  width: auto;
+  min-width: 225px;
+}
+.bv-overlay-compact {
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  color: var(--bv-ink);
+}
+.bv-overlay-compact > i { color: var(--bv-gold); }
+.bv-overlay-compact span {
+  flex: 1;
+  font-family: var(--font-h1);
+  white-space: nowrap;
+}
+.bv-overlay-compact strong {
+  color: var(--bv-muted);
+  font-size: .75rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  #brackenvale-core-overlay { right: auto; }
+}
