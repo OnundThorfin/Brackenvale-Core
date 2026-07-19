@@ -22,7 +22,19 @@ Hooks.once("init", () => {
    * For now, this inherits the standard D&D 5e character sheet unchanged.
    * Once registration is confirmed, we will begin replacing its layout.
    */
-  class BrackenvaleCharacterSheet extends CharacterActorSheet {}
+class BrackenvaleCharacterSheet extends CharacterActorSheet {
+  static DEFAULT_OPTIONS = {
+    ...super.DEFAULT_OPTIONS,
+    classes: [
+      ...(super.DEFAULT_OPTIONS?.classes ?? []),
+      "brackenvale-character-sheet"
+    ],
+    window: {
+      ...super.DEFAULT_OPTIONS?.window,
+      title: "Brackenvale Character Sheet"
+    }
+  };
+}
 
   foundry.applications.apps.DocumentSheetConfig.registerSheet(
     Actor,

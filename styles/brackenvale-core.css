@@ -225,3 +225,18 @@
 @media (max-width: 900px) {
   #brackenvale-core-overlay { right: auto; }
 }
+/* =========================================================
+   Brackenvale Character Sheet
+   ========================================================= */
+
+.brackenvale-character-sheet {
+  outline: 4px solid darkgreen;
+}
+
+.brackenvale-character-sheet .window-header {
+  border-bottom: 3px solid darkgreen;
+}
+
+.brackenvale-character-sheet .window-title::before {
+  content: "✦ ";
+}
