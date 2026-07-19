@@ -1,0 +1,54 @@
+name: Build Foundry Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify tag matches module version
+        shell: bash
+        run: |
+          MODULE_VERSION=$(python -c "import json; print(json.load(open('module.json'))['version'])")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+
+          echo "Module version: $MODULE_VERSION"
+          echo "Tag version: $TAG_VERSION"
+
+          if [ "$MODULE_VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: module.json version does not match the Git tag."
+            exit 1
+          fi
+
+      - name: Build module ZIP
+        shell: bash
+        run: |
+          zip -r brackenvale-core.zip \
+            lang \
+            scripts \
+            styles \
+            templates \
+            LICENSE.txt \
+            module.json \
+            README.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            brackenvale-core.zip \
+            module.json \
+            --title "Brackenvale Core ${GITHUB_REF_NAME}" \
+            --generate-notes
