@@ -140,27 +140,27 @@
               aria-label="{{label}}"
             >
               <div class="death-save-row successes">
-                {{#each (range 1 4)}}
+                {{#each successDots}}
                   <button
                     type="button"
-                    class="death-save-dot {{#if (lte this ../successes)}}filled{{/if}}"
+                    class="death-save-dot {{#if filled}}filled{{/if}}"
                     data-action="set-death-save"
                     data-path="system.attributes.death.success"
-                    data-value="{{this}}"
-                    aria-label="Set death save successes to {{this}}"
+                    data-value="{{value}}"
+                    aria-label="Set death save successes to {{value}}"
                     {{#unless ../editable}}disabled{{/unless}}
                   ></button>
                 {{/each}}
               </div>
               <div class="death-save-row failures">
-                {{#each (range 1 4)}}
+                {{#each failureDots}}
                   <button
                     type="button"
-                    class="death-save-dot {{#if (lte this ../failures)}}filled{{/if}}"
+                    class="death-save-dot {{#if filled}}filled{{/if}}"
                     data-action="set-death-save"
                     data-path="system.attributes.death.failure"
-                    data-value="{{this}}"
-                    aria-label="Set death save failures to {{this}}"
+                    data-value="{{value}}"
+                    aria-label="Set death save failures to {{value}}"
                     {{#unless ../editable}}disabled{{/unless}}
                   ></button>
                 {{/each}}

@@ -202,11 +202,26 @@ function prepareHitDiceSummary(component, actor) {
 }
 
 function prepareDeathSaves(component, actor, editable) {
+  const successes = Number(
+    foundry.utils.getProperty(actor, "system.attributes.death.success") ?? 0
+  );
+  const failures = Number(
+    foundry.utils.getProperty(actor, "system.attributes.death.failure") ?? 0
+  );
+
   return {
     ...component,
     isDeathSaves: true,
-    successes: Number(foundry.utils.getProperty(actor, "system.attributes.death.success") ?? 0),
-    failures: Number(foundry.utils.getProperty(actor, "system.attributes.death.failure") ?? 0),
+    successes,
+    failures,
+    successDots: [1, 2, 3].map((value) => ({
+      value,
+      filled: value <= successes
+    })),
+    failureDots: [1, 2, 3].map((value) => ({
+      value,
+      filled: value <= failures
+    })),
     editable,
     style: createPositionStyle(component)
   };
