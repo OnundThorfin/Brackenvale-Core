@@ -209,7 +209,13 @@ Hooks.once("init", () => {
         root.classList.toggle("calibration-mode", this._calibrationMode);
         toggle.classList.toggle("active", this._calibrationMode);
         toggle.textContent = this._calibrationMode ? "Finish Layout" : "Calibrate";
+
+        if (!this._calibrationMode) {
+          this._selectedCalibrationField = null;
+        }
+
         this._setCalibrationFieldState(root);
+        this._updateCalibrationStatus(root);
       });
 
       exportButton?.addEventListener("click", (event) => {
@@ -327,6 +333,7 @@ Hooks.once("init", () => {
         field.style.left = `${left}%`;
         field.style.top = `${top}%`;
         this._updateWorkingLayoutFromField(field, {left, top});
+        this._updateCalibrationStatus(root);
       });
     }
 
@@ -338,6 +345,33 @@ Hooks.once("init", () => {
       field.classList.add("calibration-selected");
       field.focus({preventScroll: true});
       this._selectedCalibrationField = field;
+      this._updateCalibrationStatus(root);
+    }
+
+    _updateCalibrationStatus(root) {
+      const status = root.querySelector(".brackenvale-calibration-status");
+      if (!status) return;
+
+      if (!this._calibrationMode) {
+        status.textContent = "";
+        return;
+      }
+
+      const field = this._selectedCalibrationField;
+      if (!field) {
+        status.textContent = "No field selected";
+        return;
+      }
+
+      const label =
+        field.getAttribute("aria-label")
+        ?? field.dataset.componentKey
+        ?? "Selected field";
+
+      const left = Number.parseFloat(field.style.left || "0").toFixed(2);
+      const top = Number.parseFloat(field.style.top || "0").toFixed(2);
+
+      status.textContent = `${label} · Left ${left}% · Top ${top}%`;
     }
 
     _updateWorkingLayoutFromField(field, values) {
