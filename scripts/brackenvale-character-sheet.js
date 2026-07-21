@@ -122,6 +122,7 @@ Hooks.once("init", () => {
       this._activateDeathSaveControls(root);
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
+      this._activateWeaponConditionControls(root);
     }
 
     _activateArtworkPageTabs(root) {
@@ -364,6 +365,30 @@ Hooks.once("init", () => {
           } else {
             item.sheet?.render(true);
           }
+        });
+      }
+    }
+
+    _activateWeaponConditionControls(root) {
+      for (const button of root.querySelectorAll("[data-action='set-weapon-condition']")) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+
+          const clicked = Number(button.dataset.value ?? 0);
+          const path = "flags.brackenvale-core.weaponConditions";
+          const currentMap = foundry.utils.deepClone(
+            foundry.utils.getProperty(this.actor, path) ?? {}
+          );
+          const current = Number(currentMap[itemId] ?? 0);
+          currentMap[itemId] = current === clicked ? Math.max(0, clicked - 1) : clicked;
+
+          await this.actor.update({[path]: currentMap});
         });
       }
     }

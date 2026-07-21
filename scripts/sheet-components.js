@@ -244,8 +244,17 @@ function prepareDeathSaves(component, actor, editable) {
 }
 
 function prepareWeaponTable(component, actor) {
+  const conditionMap =
+    foundry.utils.getProperty(actor, "flags.brackenvale-core.weaponConditions") ?? {};
+
   const weapons = actor.items
-    ?.filter((item) => item.type === "weapon" && Boolean(foundry.utils.getProperty(item, "system.equipped")))
+    ?.filter((item) => item.type === "weapon")
+    .sort((a, b) => {
+      const equippedA = isWeaponEquipped(a) ? 1 : 0;
+      const equippedB = isWeaponEquipped(b) ? 1 : 0;
+      if (equippedA !== equippedB) return equippedB - equippedA;
+      return a.name.localeCompare(b.name);
+    })
     .slice(0, component.maxRows ?? 4)
     .map((item) => ({
       id: item.id,
@@ -255,11 +264,26 @@ function prepareWeaponTable(component, actor) {
       mastery:
         foundry.utils.getProperty(item, "system.mastery")
         ?? foundry.utils.getProperty(item, "system.properties.mastery")
-        ?? ""
+        ?? "",
+      equipped: isWeaponEquipped(item),
+      condition: Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0))),
+      conditionDots: [1, 2, 3, 4, 5].map((value) => ({
+        value,
+        filled: value <= Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0)))
+      }))
     })) ?? [];
 
   while (weapons.length < (component.maxRows ?? 4)) {
-    weapons.push({id: "", name: "", attack: "", damage: "", mastery: ""});
+    weapons.push({
+      id: "",
+      name: "",
+      attack: "",
+      damage: "",
+      mastery: "",
+      equipped: false,
+      condition: 0,
+      conditionDots: [1, 2, 3, 4, 5].map((value) => ({value, filled: false}))
+    });
   }
 
   return {
@@ -268,6 +292,18 @@ function prepareWeaponTable(component, actor) {
     weapons,
     style: createPositionStyle(component)
   };
+}
+
+function isWeaponEquipped(item) {
+  const direct = foundry.utils.getProperty(item, "system.equipped");
+  if (typeof direct === "boolean") return direct;
+  if (direct && typeof direct === "object" && "value" in direct) return Boolean(direct.value);
+
+  const carried =
+    foundry.utils.getProperty(item, "system.carried")
+    ?? foundry.utils.getProperty(item, "system.container");
+
+  return Boolean(carried === true);
 }
 
 function getWeaponAttackLabel(item) {

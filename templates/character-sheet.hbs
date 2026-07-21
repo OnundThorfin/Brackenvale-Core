@@ -206,7 +206,7 @@
             >
               {{#each weapons}}
                 <div
-                  class="weapon-table-row {{#unless id}}empty{{/unless}}"
+                  class="weapon-table-row {{#unless id}}empty{{/unless}} {{#unless equipped}}unequipped{{/unless}}"
                   data-item-id="{{id}}"
                 >
                   <button
@@ -214,7 +214,7 @@
                     class="weapon-cell weapon-name"
                     data-action="edit-weapon"
                     data-item-id="{{id}}"
-                    title="{{#if id}}Open weapon item to edit{{/if}}"
+                    title="{{#if id}}{{#if equipped}}Equipped — open weapon item{{else}}Unequipped — open weapon item{{/if}}{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{name}}</button>
 
@@ -244,6 +244,19 @@
                     title="{{#if id}}Open weapon item to edit mastery and properties{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{mastery}}</button>
+
+                  <div class="weapon-condition" aria-label="{{#if id}}Weapon condition{{/if}}">
+                    {{#each conditionDots}}
+                      <button
+                        type="button"
+                        class="weapon-condition-dot {{#if filled}}filled{{/if}}"
+                        data-action="set-weapon-condition"
+                        data-item-id="{{../id}}"
+                        data-value="{{value}}"
+                        {{#unless ../id}}disabled{{/unless}}
+                      ></button>
+                    {{/each}}
+                  </div>
 
                   <button
                     type="button"

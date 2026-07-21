@@ -444,12 +444,11 @@
 
 .death-save-row {
   position: absolute;
-  left: 49%;
+  left: 45.5%;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 6%;
-  width: 42%;
+  justify-content: space-between;
+  width: 48%;
   height: 20%;
 }
 
@@ -483,7 +482,7 @@
 .weapon-table-row {
   position: relative;
   display: grid;
-  grid-template-columns: 23% 20% 20% 19% 18%;
+  grid-template-columns: 23% 20% 20% 18% 16% 3%;
   align-items: stretch;
   width: 100%;
   min-height: 0;
@@ -545,3 +544,43 @@
   pointer-events: none;
 }
 
+
+
+.weapon-table-row.unequipped .weapon-name {
+  opacity: 0.58;
+  font-style: italic;
+}
+
+.weapon-condition {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  padding: 0 5%;
+}
+
+.weapon-condition-dot {
+  width: 0.72em;
+  height: 0.72em;
+  min-width: 7px;
+  min-height: 7px;
+  padding: 0;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1px solid #171717;
+  cursor: pointer;
+}
+
+.weapon-condition-dot.filled {
+  background: #171717;
+}
+
+.weapon-condition-dot:hover:not(:disabled),
+.weapon-condition-dot:focus-visible:not(:disabled) {
+  outline: 1px solid rgba(95, 69, 22, 0.65);
+  outline-offset: 1px;
+}
+
+.brackenvale-art-sheet.calibration-mode .weapon-condition-dot {
+  pointer-events: none;
+}
