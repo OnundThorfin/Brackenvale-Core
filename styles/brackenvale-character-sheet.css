@@ -1,6 +1,6 @@
 /* =========================================================
-   Brackenvale Character Sheet — v0.3.6
-   Page 1 top section
+   Brackenvale Character Sheet — v0.3.7
+   Complete Page 1 visual structure
    ========================================================= */
 
 .brackenvale-character-sheet {
@@ -32,17 +32,9 @@
   width: min(100%, 980px);
   min-height: 1180px;
   margin: 0 auto;
-  padding: 30px 34px 42px;
+  padding: 28px 30px 44px;
   border: 2px solid #25231e;
-  background:
-    linear-gradient(rgba(251, 249, 242, 0.98), rgba(251, 249, 242, 0.98)),
-    repeating-linear-gradient(
-      0deg,
-      rgba(40, 36, 28, 0.025) 0,
-      rgba(40, 36, 28, 0.025) 1px,
-      transparent 1px,
-      transparent 5px
-    );
+  background: #fbfaf5;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
 }
 
@@ -52,31 +44,20 @@
   position: absolute;
   top: 7px;
   color: #25231e;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.brackenvale-paper::before {
-  left: 9px;
-}
-
-.brackenvale-paper::after {
-  right: 9px;
-}
+.brackenvale-paper::before { left: 9px; }
+.brackenvale-paper::after { right: 9px; }
 
 .brackenvale-top-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
-  gap: 32px;
+  gap: 28px;
   align-items: start;
 }
 
-.brackenvale-character-summary {
-  min-width: 0;
-}
-
-.brackenvale-wordmark {
-  margin: 0 0 18px;
-}
+.brackenvale-wordmark { margin: 0 0 15px; }
 
 .brackenvale-wordmark h1 {
   margin: 0;
@@ -92,7 +73,7 @@
 .brackenvale-title-rule {
   position: relative;
   width: 245px;
-  height: 15px;
+  height: 13px;
   margin: 5px 0 0 56px;
   border-top: 1px solid #25231e;
 }
@@ -103,7 +84,7 @@
   top: -9px;
   left: 50%;
   padding: 0 8px;
-  background: #fbf9f2;
+  background: #fbfaf5;
   font-size: 9px;
   transform: translateX(-50%);
 }
@@ -111,7 +92,7 @@
 .brackenvale-summary-fields {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
 }
 
 .brackenvale-line-field {
@@ -119,34 +100,29 @@
   grid-template-columns: 132px minmax(0, 1fr);
   gap: 8px;
   align-items: end;
-  min-height: 25px;
+  min-height: 22px;
 }
 
-.brackenvale-line-field > span {
-  color: #171612;
-  font-size: 14px;
+.brackenvale-line-field > span,
+.brackenvale-equipment-name > span {
+  font-size: 13px;
   font-variant: small-caps;
   font-weight: 700;
   letter-spacing: 0.015em;
   line-height: 1;
 }
 
-.brackenvale-line-field input {
+.brackenvale-line-field input,
+.brackenvale-equipment-name input {
   box-sizing: border-box;
   width: 100%;
-  height: 24px;
+  height: 22px;
   padding: 0 3px 2px;
   border: 0;
   border-bottom: 1px solid #4b4942;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  font-size: 15px;
-}
-
-.brackenvale-line-field input:focus {
-  outline: 1px solid rgba(37, 35, 30, 0.35);
-  outline-offset: 1px;
 }
 
 .brackenvale-framed-panel {
@@ -164,17 +140,12 @@
   border: 1px solid #777267;
 }
 
-.brackenvale-combat-panel {
-  min-height: 264px;
-  padding: 16px 18px 18px;
-}
-
-.brackenvale-combat-panel h2 {
+.brackenvale-framed-panel h2 {
   position: relative;
   z-index: 1;
-  margin: 0 0 18px;
+  margin: 0;
   color: #171612;
-  font-size: 24px;
+  font-size: 22px;
   font-variant: small-caps;
   font-weight: 700;
   letter-spacing: 0.025em;
@@ -183,24 +154,31 @@
   text-transform: uppercase;
 }
 
-.brackenvale-combat-primary {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  align-items: end;
+.brackenvale-combat-panel {
+  min-height: 250px;
+  padding: 14px 16px 16px;
 }
 
+.brackenvale-combat-panel h2 { margin-bottom: 16px; }
+
+.brackenvale-combat-primary,
 .brackenvale-combat-secondary {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 36px;
   align-items: end;
-  margin-top: 23px;
-  padding: 0 30px;
+}
+
+.brackenvale-combat-primary {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.brackenvale-combat-secondary {
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 21px;
+  padding: 0 28px;
 }
 
 .brackenvale-combat-stat,
@@ -208,15 +186,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .brackenvale-combat-stat > span,
 .brackenvale-inspiration-stat > span {
-  font-size: 12px;
+  font-size: 11px;
   font-variant: small-caps;
   font-weight: 700;
-  letter-spacing: 0.025em;
   line-height: 1.1;
   text-align: center;
   text-transform: uppercase;
@@ -224,55 +201,392 @@
 
 .brackenvale-combat-stat input {
   box-sizing: border-box;
-  width: 80px;
-  height: 57px;
+  width: 76px;
+  height: 54px;
   padding: 4px;
   border: 2px solid #25231e;
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   box-shadow: none;
-  font-size: 25px;
+  font-size: 24px;
   font-weight: 700;
   text-align: center;
 }
 
-.armor-class-stat input {
-  border-radius: 5px 5px 28px 28px;
-}
-
-.proficiency-stat input {
-  width: 84px;
-  height: 54px;
-}
+.armor-class-stat input { border-radius: 5px 5px 27px 27px; }
+.proficiency-stat input { width: 80px; height: 52px; }
 
 .brackenvale-inspiration-stat input[type="checkbox"] {
   appearance: none;
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   margin: 0;
   border: 2px solid #25231e;
   border-radius: 50%;
   background: transparent;
-  cursor: pointer;
 }
 
 .brackenvale-inspiration-stat input[type="checkbox"]:checked {
-  background:
-    radial-gradient(circle, #25231e 0 42%, transparent 44%);
+  background: radial-gradient(circle, #25231e 0 42%, transparent 44%);
 }
 
-.brackenvale-next-area {
-  min-height: 760px;
-  margin-top: 24px;
-  border-top: 1px solid rgba(37, 35, 30, 0.18);
+.brackenvale-middle-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(360px, 0.78fr);
+  gap: 22px;
+  align-items: stretch;
+  margin-top: 18px;
 }
 
-.brackenvale-next-area p {
-  margin: 18px 0 0;
-  color: #8a857a;
-  font-size: 13px;
-  font-style: italic;
+.brackenvale-abilities-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "strength intelligence"
+    "dexterity wisdom"
+    "constitution charisma";
+  gap: 10px 12px;
+}
+
+.brackenvale-strength { grid-area: strength; }
+.brackenvale-intelligence { grid-area: intelligence; }
+.brackenvale-dexterity { grid-area: dexterity; }
+.brackenvale-wisdom { grid-area: wisdom; }
+.brackenvale-constitution { grid-area: constitution; }
+.brackenvale-charisma { grid-area: charisma; }
+
+.brackenvale-ability-card {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 176px;
+  padding: 12px 12px 10px;
+  border: 2px solid #25231e;
+  background: transparent;
+}
+
+.brackenvale-ability-card::before,
+.brackenvale-ability-card::after {
+  content: "◆";
+  position: absolute;
+  top: -8px;
+  padding: 0 2px;
+  background: #fbfaf5;
+  font-size: 10px;
+}
+
+.brackenvale-ability-card::before { left: -5px; }
+.brackenvale-ability-card::after { right: -5px; }
+
+.brackenvale-ability-card h3 {
+  margin: -2px 0 8px;
+  font-size: 18px;
+  font-variant: small-caps;
+  line-height: 1;
   text-align: center;
+  text-transform: uppercase;
+}
+
+.brackenvale-ability-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.brackenvale-ability-values label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.brackenvale-ability-values span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.brackenvale-ability-values input {
+  box-sizing: border-box;
+  width: 62px;
+  height: 43px;
+  border: 2px solid #25231e;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 20px;
+  text-align: center;
+}
+
+.brackenvale-modifier-field input {
+  width: 45px;
+  border-radius: 50%;
+}
+
+.brackenvale-skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brackenvale-skill-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 15px;
+  font-size: 11px;
+  line-height: 1.05;
+}
+
+.brackenvale-skill-line input,
+.brackenvale-condition-line input,
+.brackenvale-death-row input,
+.brackenvale-condition-checks input {
+  appearance: none;
+  box-sizing: border-box;
+  width: 11px;
+  height: 11px;
+  margin: 0;
+  border: 1px solid #25231e;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.brackenvale-condition-line input,
+.brackenvale-condition-checks input {
+  border-radius: 0;
+}
+
+.brackenvale-skill-line input:checked,
+.brackenvale-death-row input:checked {
+  background: radial-gradient(circle, #25231e 0 43%, transparent 47%);
+}
+
+.brackenvale-condition-line input:checked,
+.brackenvale-condition-checks input:checked {
+  background: #25231e;
+}
+
+.brackenvale-right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.brackenvale-armor-panel {
+  min-height: 226px;
+  padding: 14px 18px 16px;
+}
+
+.brackenvale-armor-panel h2,
+.brackenvale-hp-panel h2,
+.brackenvale-death-panel h2 {
+  margin-bottom: 14px;
+}
+
+.brackenvale-equipment-condition {
+  position: relative;
+  z-index: 1;
+}
+
+.brackenvale-equipment-name {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 8px;
+  align-items: end;
+}
+
+.brackenvale-condition-line {
+  display: grid;
+  grid-template-columns: 1fr repeat(4, 16px);
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.brackenvale-condition-line > span {
+  font-size: 12px;
+  font-variant: small-caps;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.brackenvale-panel-divider {
+  position: relative;
+  z-index: 1;
+  height: 1px;
+  margin: 15px 0;
+  background: #777267;
+}
+
+.brackenvale-hp-panel {
+  min-height: 178px;
+  padding: 14px 16px 14px;
+}
+
+.brackenvale-hp-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.brackenvale-hp-grid label,
+.brackenvale-hit-dice-row label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.brackenvale-hp-grid span,
+.brackenvale-hit-dice-row span {
+  font-size: 10px;
+  font-variant: small-caps;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.brackenvale-hp-grid input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 70px;
+  border: 2px solid #25231e;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 20px;
+  text-align: center;
+}
+
+.brackenvale-hit-dice-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 9px;
+}
+
+.brackenvale-hit-dice-row label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px;
+  align-items: end;
+}
+
+.brackenvale-hit-dice-row input {
+  width: 100%;
+  height: 18px;
+  border: 0;
+  border-bottom: 1px solid #4b4942;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.brackenvale-death-panel {
+  min-height: 108px;
+  padding: 13px 18px;
+}
+
+.brackenvale-death-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 16px);
+  gap: 10px;
+  align-items: center;
+  max-width: 220px;
+  margin: 7px auto 0;
+}
+
+.brackenvale-death-row > span {
+  font-size: 12px;
+  font-variant: small-caps;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.brackenvale-attacks-section {
+  margin-top: 16px;
+}
+
+.brackenvale-attacks-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+  font-size: 19px;
+  font-variant: small-caps;
+  text-transform: uppercase;
+}
+
+.brackenvale-attacks-section h2::before,
+.brackenvale-attacks-section h2::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #25231e;
+}
+
+.brackenvale-attacks-table {
+  border: 2px solid #25231e;
+}
+
+.brackenvale-attack-header,
+.brackenvale-attack-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.9fr 0.9fr 1fr;
+}
+
+.brackenvale-attack-header {
+  min-height: 26px;
+  border-bottom: 1px solid #25231e;
+}
+
+.brackenvale-attack-header span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-right: 1px solid #777267;
+  font-size: 10px;
+  font-variant: small-caps;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.brackenvale-attack-header span:last-child { border-right: 0; }
+
+.brackenvale-attack-row {
+  min-height: 35px;
+  border-bottom: 1px solid #777267;
+}
+
+.brackenvale-attack-row:last-child { border-bottom: 0; }
+
+.brackenvale-attack-row > input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 3px 5px;
+  border: 0;
+  border-right: 1px solid #777267;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.brackenvale-condition-checks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
 }
 
 .brackenvale-page-number {
@@ -295,11 +609,8 @@
 }
 
 @media (max-width: 980px) {
-  .brackenvale-top-grid {
+  .brackenvale-top-grid,
+  .brackenvale-middle-grid {
     grid-template-columns: 1fr;
-  }
-
-  .brackenvale-combat-panel {
-    max-width: 480px;
   }
 }

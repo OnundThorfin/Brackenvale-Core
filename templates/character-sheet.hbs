@@ -2,7 +2,6 @@
   <div class="brackenvale-paper">
 
     <section class="brackenvale-top-grid">
-
       <div class="brackenvale-character-summary">
         <header class="brackenvale-wordmark">
           <h1>Brackenvale</h1>
@@ -10,153 +9,349 @@
         </header>
 
         <div class="brackenvale-summary-fields">
-          <label class="brackenvale-line-field">
-            <span>Character Name</span>
-            <input type="text" name="name" value="{{actor.name}}">
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Class &amp; Level</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.classLevel"
-              value="{{actor.flags.brackenvale-core.classLevel}}"
-            >
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Background</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.background"
-              value="{{actor.flags.brackenvale-core.background}}"
-            >
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Species</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.species"
-              value="{{actor.flags.brackenvale-core.species}}"
-            >
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Cultural Feature</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.culturalFeature"
-              value="{{actor.flags.brackenvale-core.culturalFeature}}"
-            >
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Faith</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.faith"
-              value="{{actor.flags.brackenvale-core.faith}}"
-            >
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Homeland</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.homeland"
-              value="{{actor.flags.brackenvale-core.homeland}}"
-            >
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Experience Points</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.experiencePoints"
-              value="{{actor.flags.brackenvale-core.experiencePoints}}"
-            >
-          </label>
-
-          <label class="brackenvale-line-field">
-            <span>Next Level</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.nextLevel"
-              value="{{actor.flags.brackenvale-core.nextLevel}}"
-            >
-          </label>
+          <label class="brackenvale-line-field"><span>Character Name</span><input type="text" name="name" value="{{actor.name}}"></label>
+          <label class="brackenvale-line-field"><span>Class &amp; Level</span><input type="text" name="flags.brackenvale-core.classLevel" value="{{actor.flags.brackenvale-core.classLevel}}"></label>
+          <label class="brackenvale-line-field"><span>Background</span><input type="text" name="flags.brackenvale-core.background" value="{{actor.flags.brackenvale-core.background}}"></label>
+          <label class="brackenvale-line-field"><span>Species</span><input type="text" name="flags.brackenvale-core.species" value="{{actor.flags.brackenvale-core.species}}"></label>
+          <label class="brackenvale-line-field"><span>Cultural Feature</span><input type="text" name="flags.brackenvale-core.culturalFeature" value="{{actor.flags.brackenvale-core.culturalFeature}}"></label>
+          <label class="brackenvale-line-field"><span>Faith</span><input type="text" name="flags.brackenvale-core.faith" value="{{actor.flags.brackenvale-core.faith}}"></label>
+          <label class="brackenvale-line-field"><span>Homeland</span><input type="text" name="flags.brackenvale-core.homeland" value="{{actor.flags.brackenvale-core.homeland}}"></label>
+          <label class="brackenvale-line-field"><span>Experience Points</span><input type="text" name="flags.brackenvale-core.experiencePoints" value="{{actor.flags.brackenvale-core.experiencePoints}}"></label>
+          <label class="brackenvale-line-field"><span>Next Level</span><input type="text" name="flags.brackenvale-core.nextLevel" value="{{actor.flags.brackenvale-core.nextLevel}}"></label>
         </div>
       </div>
 
       <section class="brackenvale-framed-panel brackenvale-combat-panel">
         <h2>Combat</h2>
-
         <div class="brackenvale-combat-primary">
-          <label class="brackenvale-combat-stat armor-class-stat">
-            <span>Armor Class</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.previewArmorClass"
-              value="{{actor.flags.brackenvale-core.previewArmorClass}}"
-              aria-label="Armor Class"
-            >
-          </label>
-
-          <label class="brackenvale-combat-stat">
-            <span>Initiative</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.previewInitiative"
-              value="{{actor.flags.brackenvale-core.previewInitiative}}"
-              aria-label="Initiative"
-            >
-          </label>
-
-          <label class="brackenvale-combat-stat">
-            <span>Speed</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.previewSpeed"
-              value="{{actor.flags.brackenvale-core.previewSpeed}}"
-              aria-label="Speed"
-            >
-          </label>
+          <label class="brackenvale-combat-stat armor-class-stat"><span>Armor Class</span><input type="text" name="flags.brackenvale-core.previewArmorClass" value="{{actor.flags.brackenvale-core.previewArmorClass}}"></label>
+          <label class="brackenvale-combat-stat"><span>Initiative</span><input type="text" name="flags.brackenvale-core.previewInitiative" value="{{actor.flags.brackenvale-core.previewInitiative}}"></label>
+          <label class="brackenvale-combat-stat"><span>Speed</span><input type="text" name="flags.brackenvale-core.previewSpeed" value="{{actor.flags.brackenvale-core.previewSpeed}}"></label>
         </div>
-
         <div class="brackenvale-combat-secondary">
-          <label class="brackenvale-combat-stat proficiency-stat">
-            <span>Proficiency Bonus</span>
-            <input
-              type="text"
-              name="flags.brackenvale-core.previewProficiency"
-              value="{{actor.flags.brackenvale-core.previewProficiency}}"
-              aria-label="Proficiency Bonus"
-            >
-          </label>
-
-          <label class="brackenvale-inspiration-stat">
-            <span>Inspiration</span>
-            <input
-              type="checkbox"
-              name="flags.brackenvale-core.previewInspiration"
-              {{checked actor.flags.brackenvale-core.previewInspiration}}
-            >
-          </label>
+          <label class="brackenvale-combat-stat proficiency-stat"><span>Proficiency Bonus</span><input type="text" name="flags.brackenvale-core.previewProficiency" value="{{actor.flags.brackenvale-core.previewProficiency}}"></label>
+          <label class="brackenvale-inspiration-stat"><span>Inspiration</span><input type="checkbox" name="flags.brackenvale-core.previewInspiration" {{checked actor.flags.brackenvale-core.previewInspiration}}></label>
         </div>
       </section>
-
     </section>
 
-    <section class="brackenvale-next-area" aria-label="Page 1 construction area">
-      <p>Page 1 layout continues here in the next milestone.</p>
+    <section class="brackenvale-middle-grid">
+      <div class="brackenvale-abilities-grid">
+        <section class="brackenvale-ability-card brackenvale-strength">
+          <h3>Strength</h3>
+          <div class="brackenvale-ability-values">
+            <label>
+              <span>STR</span>
+              <input type="text" name="flags.brackenvale-core.strengthScore" value="{{actor.flags.brackenvale-core.strengthScore}}">
+            </label>
+            <label class="brackenvale-modifier-field">
+              <span>Mod</span>
+              <input type="text" name="flags.brackenvale-core.strengthModifier" value="{{actor.flags.brackenvale-core.strengthModifier}}">
+            </label>
+          </div>
+          <div class="brackenvale-skill-list">
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.strengthProficiency0" {{checked actor.flags.brackenvale-core.strengthProficiency0}}>
+              <span>Saving Throw</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.strengthProficiency1" {{checked actor.flags.brackenvale-core.strengthProficiency1}}>
+              <span>Athletics (Str)</span>
+            </label>
+          </div>
+        </section>
+        <section class="brackenvale-ability-card brackenvale-intelligence">
+          <h3>Intelligence</h3>
+          <div class="brackenvale-ability-values">
+            <label>
+              <span>INT</span>
+              <input type="text" name="flags.brackenvale-core.intelligenceScore" value="{{actor.flags.brackenvale-core.intelligenceScore}}">
+            </label>
+            <label class="brackenvale-modifier-field">
+              <span>Mod</span>
+              <input type="text" name="flags.brackenvale-core.intelligenceModifier" value="{{actor.flags.brackenvale-core.intelligenceModifier}}">
+            </label>
+          </div>
+          <div class="brackenvale-skill-list">
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.intelligenceProficiency0" {{checked actor.flags.brackenvale-core.intelligenceProficiency0}}>
+              <span>Saving Throw</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.intelligenceProficiency1" {{checked actor.flags.brackenvale-core.intelligenceProficiency1}}>
+              <span>Arcana (Int)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.intelligenceProficiency2" {{checked actor.flags.brackenvale-core.intelligenceProficiency2}}>
+              <span>History (Int)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.intelligenceProficiency3" {{checked actor.flags.brackenvale-core.intelligenceProficiency3}}>
+              <span>Investigation (Int)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.intelligenceProficiency4" {{checked actor.flags.brackenvale-core.intelligenceProficiency4}}>
+              <span>Nature (Int)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.intelligenceProficiency5" {{checked actor.flags.brackenvale-core.intelligenceProficiency5}}>
+              <span>Religion (Int)</span>
+            </label>
+          </div>
+        </section>
+        <section class="brackenvale-ability-card brackenvale-dexterity">
+          <h3>Dexterity</h3>
+          <div class="brackenvale-ability-values">
+            <label>
+              <span>DEX</span>
+              <input type="text" name="flags.brackenvale-core.dexterityScore" value="{{actor.flags.brackenvale-core.dexterityScore}}">
+            </label>
+            <label class="brackenvale-modifier-field">
+              <span>Mod</span>
+              <input type="text" name="flags.brackenvale-core.dexterityModifier" value="{{actor.flags.brackenvale-core.dexterityModifier}}">
+            </label>
+          </div>
+          <div class="brackenvale-skill-list">
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.dexterityProficiency0" {{checked actor.flags.brackenvale-core.dexterityProficiency0}}>
+              <span>Saving Throw</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.dexterityProficiency1" {{checked actor.flags.brackenvale-core.dexterityProficiency1}}>
+              <span>Acrobatics (Dex)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.dexterityProficiency2" {{checked actor.flags.brackenvale-core.dexterityProficiency2}}>
+              <span>Sleight of Hand (Dex)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.dexterityProficiency3" {{checked actor.flags.brackenvale-core.dexterityProficiency3}}>
+              <span>Stealth (Dex)</span>
+            </label>
+          </div>
+        </section>
+        <section class="brackenvale-ability-card brackenvale-wisdom">
+          <h3>Wisdom</h3>
+          <div class="brackenvale-ability-values">
+            <label>
+              <span>WIS</span>
+              <input type="text" name="flags.brackenvale-core.wisdomScore" value="{{actor.flags.brackenvale-core.wisdomScore}}">
+            </label>
+            <label class="brackenvale-modifier-field">
+              <span>Mod</span>
+              <input type="text" name="flags.brackenvale-core.wisdomModifier" value="{{actor.flags.brackenvale-core.wisdomModifier}}">
+            </label>
+          </div>
+          <div class="brackenvale-skill-list">
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.wisdomProficiency0" {{checked actor.flags.brackenvale-core.wisdomProficiency0}}>
+              <span>Saving Throw</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.wisdomProficiency1" {{checked actor.flags.brackenvale-core.wisdomProficiency1}}>
+              <span>Animal Handling (Wis)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.wisdomProficiency2" {{checked actor.flags.brackenvale-core.wisdomProficiency2}}>
+              <span>Insight (Wis)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.wisdomProficiency3" {{checked actor.flags.brackenvale-core.wisdomProficiency3}}>
+              <span>Medicine (Wis)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.wisdomProficiency4" {{checked actor.flags.brackenvale-core.wisdomProficiency4}}>
+              <span>Perception (Wis)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.wisdomProficiency5" {{checked actor.flags.brackenvale-core.wisdomProficiency5}}>
+              <span>Survival (Wis)</span>
+            </label>
+          </div>
+        </section>
+        <section class="brackenvale-ability-card brackenvale-constitution">
+          <h3>Constitution</h3>
+          <div class="brackenvale-ability-values">
+            <label>
+              <span>CON</span>
+              <input type="text" name="flags.brackenvale-core.constitutionScore" value="{{actor.flags.brackenvale-core.constitutionScore}}">
+            </label>
+            <label class="brackenvale-modifier-field">
+              <span>Mod</span>
+              <input type="text" name="flags.brackenvale-core.constitutionModifier" value="{{actor.flags.brackenvale-core.constitutionModifier}}">
+            </label>
+          </div>
+          <div class="brackenvale-skill-list">
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.constitutionProficiency0" {{checked actor.flags.brackenvale-core.constitutionProficiency0}}>
+              <span>Saving Throw</span>
+            </label>
+          </div>
+        </section>
+        <section class="brackenvale-ability-card brackenvale-charisma">
+          <h3>Charisma</h3>
+          <div class="brackenvale-ability-values">
+            <label>
+              <span>CHA</span>
+              <input type="text" name="flags.brackenvale-core.charismaScore" value="{{actor.flags.brackenvale-core.charismaScore}}">
+            </label>
+            <label class="brackenvale-modifier-field">
+              <span>Mod</span>
+              <input type="text" name="flags.brackenvale-core.charismaModifier" value="{{actor.flags.brackenvale-core.charismaModifier}}">
+            </label>
+          </div>
+          <div class="brackenvale-skill-list">
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.charismaProficiency0" {{checked actor.flags.brackenvale-core.charismaProficiency0}}>
+              <span>Saving Throw</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.charismaProficiency1" {{checked actor.flags.brackenvale-core.charismaProficiency1}}>
+              <span>Deception (Cha)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.charismaProficiency2" {{checked actor.flags.brackenvale-core.charismaProficiency2}}>
+              <span>Intimidation (Cha)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.charismaProficiency3" {{checked actor.flags.brackenvale-core.charismaProficiency3}}>
+              <span>Performance (Cha)</span>
+            </label>
+            <label class="brackenvale-skill-line">
+              <input type="checkbox" name="flags.brackenvale-core.charismaProficiency4" {{checked actor.flags.brackenvale-core.charismaProficiency4}}>
+              <span>Persuasion (Cha)</span>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <div class="brackenvale-right-stack">
+        <section class="brackenvale-framed-panel brackenvale-armor-panel">
+          <h2>Armor &amp; Shield</h2>
+          <div class="brackenvale-equipment-condition">
+            <label class="brackenvale-equipment-name"><span>Armor</span><input type="text" name="flags.brackenvale-core.armorName" value="{{actor.flags.brackenvale-core.armorName}}"></label>
+            <div class="brackenvale-condition-line">
+              <span>Condition</span>
+              <input type="checkbox" name="flags.brackenvale-core.armorCondition1" {{checked actor.flags.brackenvale-core.armorCondition1}}>
+              <input type="checkbox" name="flags.brackenvale-core.armorCondition2" {{checked actor.flags.brackenvale-core.armorCondition2}}>
+              <input type="checkbox" name="flags.brackenvale-core.armorCondition3" {{checked actor.flags.brackenvale-core.armorCondition3}}>
+              <input type="checkbox" name="flags.brackenvale-core.armorCondition4" {{checked actor.flags.brackenvale-core.armorCondition4}}>
+            </div>
+          </div>
+          <div class="brackenvale-panel-divider"></div>
+          <div class="brackenvale-equipment-condition">
+            <label class="brackenvale-equipment-name"><span>Shield</span><input type="text" name="flags.brackenvale-core.shieldName" value="{{actor.flags.brackenvale-core.shieldName}}"></label>
+            <div class="brackenvale-condition-line">
+              <span>Condition</span>
+              <input type="checkbox" name="flags.brackenvale-core.shieldCondition1" {{checked actor.flags.brackenvale-core.shieldCondition1}}>
+              <input type="checkbox" name="flags.brackenvale-core.shieldCondition2" {{checked actor.flags.brackenvale-core.shieldCondition2}}>
+              <input type="checkbox" name="flags.brackenvale-core.shieldCondition3" {{checked actor.flags.brackenvale-core.shieldCondition3}}>
+              <input type="checkbox" name="flags.brackenvale-core.shieldCondition4" {{checked actor.flags.brackenvale-core.shieldCondition4}}>
+            </div>
+          </div>
+        </section>
+
+        <section class="brackenvale-framed-panel brackenvale-hp-panel">
+          <h2>Hit Points</h2>
+          <div class="brackenvale-hp-grid">
+            <label><span>Current HP</span><input type="text" name="flags.brackenvale-core.currentHp" value="{{actor.flags.brackenvale-core.currentHp}}"></label>
+            <label><span>Maximum HP</span><input type="text" name="flags.brackenvale-core.maximumHp" value="{{actor.flags.brackenvale-core.maximumHp}}"></label>
+            <label><span>Temporary HP</span><input type="text" name="flags.brackenvale-core.temporaryHp" value="{{actor.flags.brackenvale-core.temporaryHp}}"></label>
+          </div>
+          <div class="brackenvale-hit-dice-row">
+            <label><span>Hit Dice</span><input type="text" name="flags.brackenvale-core.hitDiceType" value="{{actor.flags.brackenvale-core.hitDiceType}}"></label>
+            <label><span>Total</span><input type="text" name="flags.brackenvale-core.hitDiceTotal" value="{{actor.flags.brackenvale-core.hitDiceTotal}}"></label>
+            <label><span>Used</span><input type="text" name="flags.brackenvale-core.hitDiceUsed" value="{{actor.flags.brackenvale-core.hitDiceUsed}}"></label>
+          </div>
+        </section>
+
+        <section class="brackenvale-framed-panel brackenvale-death-panel">
+          <h2>Death Saves</h2>
+          <div class="brackenvale-death-row">
+            <span>Successes</span>
+            <input type="checkbox" name="flags.brackenvale-core.deathSuccess1" {{checked actor.flags.brackenvale-core.deathSuccess1}}>
+            <input type="checkbox" name="flags.brackenvale-core.deathSuccess2" {{checked actor.flags.brackenvale-core.deathSuccess2}}>
+            <input type="checkbox" name="flags.brackenvale-core.deathSuccess3" {{checked actor.flags.brackenvale-core.deathSuccess3}}>
+          </div>
+          <div class="brackenvale-death-row">
+            <span>Failures</span>
+            <input type="checkbox" name="flags.brackenvale-core.deathFailure1" {{checked actor.flags.brackenvale-core.deathFailure1}}>
+            <input type="checkbox" name="flags.brackenvale-core.deathFailure2" {{checked actor.flags.brackenvale-core.deathFailure2}}>
+            <input type="checkbox" name="flags.brackenvale-core.deathFailure3" {{checked actor.flags.brackenvale-core.deathFailure3}}>
+          </div>
+        </section>
+      </div>
     </section>
 
-    <footer class="brackenvale-page-number">
-      <span>1</span>
-      <small>of</small>
-      <span>4</span>
-    </footer>
+    <section class="brackenvale-attacks-section">
+      <h2><span>Attacks</span></h2>
+      <div class="brackenvale-attacks-table">
+        <div class="brackenvale-attack-header">
+          <span>Weapon</span><span>Attack</span><span>Damage</span><span>Mastery</span><span>Condition</span>
+        </div>
+            <div class="brackenvale-attack-row">
+              <input type="text" name="flags.brackenvale-core.weapon1Name" value="{{actor.flags.brackenvale-core.weapon1Name}}">
+              <input type="text" name="flags.brackenvale-core.weapon1Attack" value="{{actor.flags.brackenvale-core.weapon1Attack}}">
+              <input type="text" name="flags.brackenvale-core.weapon1Damage" value="{{actor.flags.brackenvale-core.weapon1Damage}}">
+              <input type="text" name="flags.brackenvale-core.weapon1Mastery" value="{{actor.flags.brackenvale-core.weapon1Mastery}}">
+              <div class="brackenvale-condition-checks">
+                <input type="checkbox" name="flags.brackenvale-core.weapon1Condition1" {{checked actor.flags.brackenvale-core.weapon1Condition1}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon1Condition2" {{checked actor.flags.brackenvale-core.weapon1Condition2}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon1Condition3" {{checked actor.flags.brackenvale-core.weapon1Condition3}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon1Condition4" {{checked actor.flags.brackenvale-core.weapon1Condition4}}>
+              </div>
+            </div>
+            <div class="brackenvale-attack-row">
+              <input type="text" name="flags.brackenvale-core.weapon2Name" value="{{actor.flags.brackenvale-core.weapon2Name}}">
+              <input type="text" name="flags.brackenvale-core.weapon2Attack" value="{{actor.flags.brackenvale-core.weapon2Attack}}">
+              <input type="text" name="flags.brackenvale-core.weapon2Damage" value="{{actor.flags.brackenvale-core.weapon2Damage}}">
+              <input type="text" name="flags.brackenvale-core.weapon2Mastery" value="{{actor.flags.brackenvale-core.weapon2Mastery}}">
+              <div class="brackenvale-condition-checks">
+                <input type="checkbox" name="flags.brackenvale-core.weapon2Condition1" {{checked actor.flags.brackenvale-core.weapon2Condition1}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon2Condition2" {{checked actor.flags.brackenvale-core.weapon2Condition2}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon2Condition3" {{checked actor.flags.brackenvale-core.weapon2Condition3}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon2Condition4" {{checked actor.flags.brackenvale-core.weapon2Condition4}}>
+              </div>
+            </div>
+            <div class="brackenvale-attack-row">
+              <input type="text" name="flags.brackenvale-core.weapon3Name" value="{{actor.flags.brackenvale-core.weapon3Name}}">
+              <input type="text" name="flags.brackenvale-core.weapon3Attack" value="{{actor.flags.brackenvale-core.weapon3Attack}}">
+              <input type="text" name="flags.brackenvale-core.weapon3Damage" value="{{actor.flags.brackenvale-core.weapon3Damage}}">
+              <input type="text" name="flags.brackenvale-core.weapon3Mastery" value="{{actor.flags.brackenvale-core.weapon3Mastery}}">
+              <div class="brackenvale-condition-checks">
+                <input type="checkbox" name="flags.brackenvale-core.weapon3Condition1" {{checked actor.flags.brackenvale-core.weapon3Condition1}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon3Condition2" {{checked actor.flags.brackenvale-core.weapon3Condition2}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon3Condition3" {{checked actor.flags.brackenvale-core.weapon3Condition3}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon3Condition4" {{checked actor.flags.brackenvale-core.weapon3Condition4}}>
+              </div>
+            </div>
+            <div class="brackenvale-attack-row">
+              <input type="text" name="flags.brackenvale-core.weapon4Name" value="{{actor.flags.brackenvale-core.weapon4Name}}">
+              <input type="text" name="flags.brackenvale-core.weapon4Attack" value="{{actor.flags.brackenvale-core.weapon4Attack}}">
+              <input type="text" name="flags.brackenvale-core.weapon4Damage" value="{{actor.flags.brackenvale-core.weapon4Damage}}">
+              <input type="text" name="flags.brackenvale-core.weapon4Mastery" value="{{actor.flags.brackenvale-core.weapon4Mastery}}">
+              <div class="brackenvale-condition-checks">
+                <input type="checkbox" name="flags.brackenvale-core.weapon4Condition1" {{checked actor.flags.brackenvale-core.weapon4Condition1}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon4Condition2" {{checked actor.flags.brackenvale-core.weapon4Condition2}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon4Condition3" {{checked actor.flags.brackenvale-core.weapon4Condition3}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon4Condition4" {{checked actor.flags.brackenvale-core.weapon4Condition4}}>
+              </div>
+            </div>
+            <div class="brackenvale-attack-row">
+              <input type="text" name="flags.brackenvale-core.weapon5Name" value="{{actor.flags.brackenvale-core.weapon5Name}}">
+              <input type="text" name="flags.brackenvale-core.weapon5Attack" value="{{actor.flags.brackenvale-core.weapon5Attack}}">
+              <input type="text" name="flags.brackenvale-core.weapon5Damage" value="{{actor.flags.brackenvale-core.weapon5Damage}}">
+              <input type="text" name="flags.brackenvale-core.weapon5Mastery" value="{{actor.flags.brackenvale-core.weapon5Mastery}}">
+              <div class="brackenvale-condition-checks">
+                <input type="checkbox" name="flags.brackenvale-core.weapon5Condition1" {{checked actor.flags.brackenvale-core.weapon5Condition1}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon5Condition2" {{checked actor.flags.brackenvale-core.weapon5Condition2}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon5Condition3" {{checked actor.flags.brackenvale-core.weapon5Condition3}}>
+                <input type="checkbox" name="flags.brackenvale-core.weapon5Condition4" {{checked actor.flags.brackenvale-core.weapon5Condition4}}>
+              </div>
+            </div>
+      </div>
+    </section>
 
+    <footer class="brackenvale-page-number"><span>1</span><small>of</small><span>4</span></footer>
   </div>
 </form>
