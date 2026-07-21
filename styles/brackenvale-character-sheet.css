@@ -403,20 +403,40 @@
 }
 
 .hit-dice-summary {
-  pointer-events: none;
+  pointer-events: auto;
   font-size: clamp(10px, 1.2vw, 14px);
   font-weight: 700;
 }
 
-.hit-dice-summary span {
+.hit-dice-summary button,
+.hit-dice-summary input {
   position: absolute;
   top: 50%;
+  height: 100%;
+  padding: 0;
+  color: #111;
+  font: inherit;
+  text-align: center;
+  background: transparent;
+  border: 0;
   transform: translateY(-50%);
 }
 
-.hit-dice-denomination { left: 2%; width: 25%; }
-.hit-dice-total { left: 40%; width: 20%; }
-.hit-dice-used { right: 1%; width: 20%; }
+.hit-dice-summary button {
+  cursor: pointer;
+}
+
+.hit-dice-summary button:hover:not(:disabled),
+.hit-dice-summary button:focus-visible:not(:disabled),
+.hit-dice-summary input:hover:not(:disabled),
+.hit-dice-summary input:focus-visible:not(:disabled) {
+  background: rgba(142, 114, 45, 0.14);
+  outline: 1px solid rgba(95, 69, 22, 0.55);
+}
+
+.hit-dice-denomination { left: 0; width: 31%; }
+.hit-dice-total { left: 34%; width: 28%; }
+.hit-dice-used { right: 0; width: 31%; }
 
 .death-saves-component {
   pointer-events: auto;
@@ -426,21 +446,27 @@
   position: absolute;
   left: 49%;
   display: flex;
-  gap: 4.4%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6%;
   width: 42%;
-  height: 24%;
+  height: 20%;
 }
 
-.death-save-row.successes { top: 34%; }
+.death-save-row.successes { top: 35%; }
 .death-save-row.failures { top: 66%; }
 
 .death-save-dot {
-  width: 18%;
-  aspect-ratio: 1;
+  flex: 0 0 auto;
+  width: min(1.15em, 22%);
+  height: min(1.15em, 100%);
+  min-width: 9px;
+  min-height: 9px;
   padding: 0;
+  box-sizing: border-box;
   background: transparent;
   border: 1px solid #171717;
-  border-radius: 50%;
+  border-radius: 999px;
   cursor: pointer;
 }
 
@@ -458,43 +484,64 @@
   position: relative;
   display: grid;
   grid-template-columns: 23% 20% 20% 19% 18%;
-  align-items: center;
+  align-items: stretch;
   width: 100%;
   min-height: 0;
-  padding: 0;
   color: #111;
   font: inherit;
+  background: transparent;
+}
+
+.weapon-table-row.empty {
+  pointer-events: none;
+}
+
+.weapon-cell,
+.weapon-edit-button {
+  min-width: 0;
+  min-height: 0;
+  padding: 0 4%;
+  overflow: hidden;
+  color: #111;
+  font: inherit;
+  font-size: clamp(9px, 1.05vw, 13px);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   background: transparent;
   border: 0;
   cursor: pointer;
 }
 
-.weapon-table-row:hover:not(:disabled),
-.weapon-table-row:focus-visible:not(:disabled) {
+.weapon-cell:hover:not(:disabled),
+.weapon-cell:focus-visible:not(:disabled),
+.weapon-edit-button:hover:not(:disabled),
+.weapon-edit-button:focus-visible:not(:disabled) {
   background: rgba(142, 114, 45, 0.16);
   outline: 1px solid rgba(95, 69, 22, 0.65);
 }
 
-.weapon-table-row.empty {
-  cursor: default;
-}
-
-.weapon-table-row span {
-  overflow: hidden;
-  padding: 0 4%;
-  font-size: clamp(9px, 1.05vw, 13px);
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .weapon-name {
-  text-align: left !important;
+  text-align: left;
 }
 
-.brackenvale-art-sheet.calibration-mode .weapon-table-row,
+.weapon-edit-button {
+  font-size: clamp(11px, 1.25vw, 16px);
+  opacity: 0.65;
+}
+
+.weapon-edit-button:hover:not(:disabled),
+.weapon-edit-button:focus-visible:not(:disabled) {
+  opacity: 1;
+}
+
+.brackenvale-art-sheet.calibration-mode .weapon-cell,
+.brackenvale-art-sheet.calibration-mode .weapon-edit-button,
 .brackenvale-art-sheet.calibration-mode .death-save-dot,
+.brackenvale-art-sheet.calibration-mode .hit-dice-summary button,
+.brackenvale-art-sheet.calibration-mode .hit-dice-summary input,
 .brackenvale-art-sheet.calibration-mode .ability-roll-button,
 .brackenvale-art-sheet.calibration-mode .ability-roll-proficiency {
   pointer-events: none;
 }
+

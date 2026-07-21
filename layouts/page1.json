@@ -463,8 +463,8 @@
       "rollKey": "prc",
       "label": "Perception",
       "className": "ability-roll-row",
-      "left": 31.0302734375,
-      "top": 63.541666666666664,
+      "left": 30.769856770833332,
+      "top": 63.71527777777778,
       "width": 20.3,
       "height": 1.42
     },
@@ -507,7 +507,7 @@
       "rollKey": "dec",
       "label": "Deception",
       "className": "ability-roll-row",
-      "left": 30.900065104166668,
+      "left": 30.769856770833332,
       "top": 76.02403428819444,
       "width": 20.3,
       "height": 1.42
@@ -518,8 +518,8 @@
       "rollKey": "itm",
       "label": "Intimidation",
       "className": "ability-roll-row",
-      "left": 30.900065104166668,
-      "top": 77.06027560763889,
+      "left": 30.769856770833332,
+      "top": 77.14708116319444,
       "width": 20.3,
       "height": 1.42
     },
@@ -554,7 +554,7 @@
       "label": "Current Hit Points",
       "inputType": "number",
       "left": 57.45,
-      "top": 56.05,
+      "top": 53.793194444444445,
       "width": 11.35,
       "height": 10.15
     },
@@ -567,7 +567,7 @@
       "label": "Maximum Hit Points",
       "inputType": "number",
       "left": 70.25,
-      "top": 56.05,
+      "top": 53.793194444444445,
       "width": 11.35,
       "height": 10.15
     },
@@ -580,7 +580,7 @@
       "label": "Temporary Hit Points",
       "inputType": "number",
       "left": 83.1,
-      "top": 56.05,
+      "top": 53.793194444444445,
       "width": 11.35,
       "height": 10.15
     },
@@ -597,8 +597,8 @@
       "component": "deathSaves",
       "key": "deathSaves",
       "label": "Death Saves",
-      "left": 56.55,
-      "top": 69.95,
+      "left": 57.330322265625,
+      "top": 67.95247395833334,
       "width": 39.15,
       "height": 10.75
     },
