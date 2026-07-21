@@ -134,3 +134,141 @@
     min-width: 720px;
   }
 }
+
+
+/* Keep Foundry's native sheet header and controls above the artwork layer. */
+.brackenvale-character-sheet > .window-header {
+  position: relative;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.brackenvale-character-sheet > .window-header button,
+.brackenvale-character-sheet > .window-header .window-control,
+.brackenvale-character-sheet > .window-header .header-control {
+  position: relative;
+  z-index: 1001;
+  pointer-events: auto;
+}
+
+.brackenvale-character-sheet > .window-content {
+  position: relative;
+  z-index: 1;
+}
+
+.brackenvale-art-sheet {
+  z-index: 0;
+}
+
+
+/* =========================================================
+   GM Layout Calibration
+   ========================================================= */
+
+.brackenvale-page-tabs {
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.brackenvale-page-buttons,
+.brackenvale-layout-tools {
+  display: flex;
+  gap: 6px;
+}
+
+.brackenvale-layout-tools button {
+  width: auto;
+  min-width: 86px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.brackenvale-layout-tools button.active {
+  color: #fff;
+  background: #7b2e2e;
+}
+
+.brackenvale-art-sheet.calibration-mode .overlay-field {
+  outline: 1px dashed rgba(179, 43, 43, 0.92);
+  outline-offset: -1px;
+  background: rgba(255, 228, 120, 0.18);
+  cursor: move;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+}
+
+.brackenvale-art-sheet.calibration-mode .overlay-field.calibration-selected {
+  z-index: 50;
+  outline: 2px solid #d22c2c;
+  background: rgba(255, 214, 70, 0.34);
+}
+
+.brackenvale-art-sheet.calibration-mode .circle-field {
+  appearance: none;
+}
+
+
+/* =========================================================
+   Calibration toolbar and selection visibility polish
+   ========================================================= */
+
+.brackenvale-art-sheet .brackenvale-page-tabs {
+  position: relative;
+  z-index: 200;
+  min-height: 34px;
+  margin-top: 8px;
+  padding: 2px 10px 4px;
+  overflow: visible;
+  background: rgba(247, 244, 233, 0.98);
+  border-bottom: 1px solid rgba(45, 45, 38, 0.28);
+  pointer-events: auto;
+}
+
+.brackenvale-art-sheet .brackenvale-page-tabs button,
+.brackenvale-art-sheet .brackenvale-layout-tools,
+.brackenvale-art-sheet .brackenvale-layout-tools * {
+  position: relative;
+  z-index: 201;
+  pointer-events: auto;
+}
+
+.brackenvale-layout-tools {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.brackenvale-calibration-status {
+  display: none;
+  max-width: 330px;
+  padding: 2px 7px;
+  overflow: hidden;
+  color: #241f18;
+  font-size: 11px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: rgba(255, 243, 184, 0.96);
+  border: 1px solid rgba(115, 78, 17, 0.55);
+  border-radius: 3px;
+}
+
+.brackenvale-art-sheet.calibration-mode .brackenvale-calibration-status {
+  display: inline-block;
+}
+
+.brackenvale-art-sheet.calibration-mode .overlay-field.calibration-selected {
+  z-index: 80 !important;
+  outline: 3px solid #e31b1b !important;
+  outline-offset: 1px;
+  background: rgba(255, 222, 64, 0.5) !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.95),
+    0 0 0 5px rgba(227, 27, 27, 0.95),
+    0 0 14px 6px rgba(227, 27, 27, 0.38) !important;
+}
+
+.brackenvale-art-sheet.calibration-mode .overlay-field.calibration-selected:focus {
+  outline: 3px solid #e31b1b !important;
+}

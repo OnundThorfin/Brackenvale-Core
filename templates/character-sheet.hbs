@@ -1,14 +1,30 @@
 <form class="brackenvale-art-sheet {{cssClass}}" autocomplete="off">
   <nav class="brackenvale-page-tabs" aria-label="Character sheet pages">
-    {{#each pages}}
-      <button
-        type="button"
-        class="{{#if active}}active{{/if}}"
-        data-page="{{page}}"
-      >
-        {{page}}
-      </button>
-    {{/each}}
+    <div class="brackenvale-page-buttons">
+      {{#each pages}}
+        <button
+          type="button"
+          class="{{#if active}}active{{/if}}"
+          data-page="{{page}}"
+        >
+          {{page}}
+        </button>
+      {{/each}}
+    </div>
+
+    {{#if isGM}}
+      <div class="brackenvale-layout-tools">
+        <button type="button" data-action="toggle-calibration">
+          Calibrate
+        </button>
+        <button type="button" data-action="export-layout">
+          Export Page JSON
+        </button>
+        <span class="brackenvale-calibration-status" aria-live="polite">
+          No field selected
+        </span>
+      </div>
+    {{/if}}
   </nav>
 
   {{#each pages}}
@@ -33,6 +49,8 @@
               value="{{value}}"
               style="{{style}}"
               aria-label="{{label}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
               {{#if readonly}}readonly{{/if}}
               {{#if disabled}}disabled{{/if}}
             >
@@ -47,6 +65,8 @@
               aria-label="{{label}}"
               title="Double-click to open the native D&D item"
               data-item-id="{{itemId}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
               readonly
             >
           {{/if}}
@@ -58,6 +78,8 @@
               name="{{name}}"
               style="{{style}}"
               aria-label="{{label}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
               {{checked checked}}
               {{#if disabled}}disabled{{/if}}
             >
@@ -71,6 +93,8 @@
               value="{{scoreValue}}"
               style="{{scoreStyle}}"
               aria-label="{{label}} score"
+              data-component-key="{{key}}"
+              data-layout-part="score"
               {{#if scoreDisabled}}disabled{{/if}}
             >
 
@@ -80,6 +104,8 @@
               value="{{modifierValue}}"
               style="{{modifierStyle}}"
               aria-label="{{label}} modifier"
+              data-component-key="{{key}}"
+              data-layout-part="modifier"
               readonly
               disabled
             >
