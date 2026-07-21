@@ -14,35 +14,55 @@
       draggable="false"
     >
 
-    <div class="brackenvale-page-fields page-one-fields">
-      <input class="field character-name" type="text" name="name" value="{{actor.name}}" aria-label="Character Name">
-
-      <input class="field class-level" type="text" name="flags.brackenvale-core.classLevel" value="{{actor.flags.brackenvale-core.classLevel}}" aria-label="Class and Level">
-      <input class="field background" type="text" name="flags.brackenvale-core.background" value="{{actor.flags.brackenvale-core.background}}" aria-label="Background">
-      <input class="field species" type="text" name="flags.brackenvale-core.species" value="{{actor.flags.brackenvale-core.species}}" aria-label="Species">
-      <input class="field cultural-feature" type="text" name="flags.brackenvale-core.culturalFeature" value="{{actor.flags.brackenvale-core.culturalFeature}}" aria-label="Cultural Feature">
-      <input class="field faith" type="text" name="flags.brackenvale-core.faith" value="{{actor.flags.brackenvale-core.faith}}" aria-label="Faith">
-      <input class="field homeland" type="text" name="flags.brackenvale-core.homeland" value="{{actor.flags.brackenvale-core.homeland}}" aria-label="Homeland">
-      <input class="field experience-points" type="text" name="flags.brackenvale-core.experiencePoints" value="{{actor.flags.brackenvale-core.experiencePoints}}" aria-label="Experience Points">
-      <input class="field next-level" type="text" name="flags.brackenvale-core.nextLevel" value="{{actor.flags.brackenvale-core.nextLevel}}" aria-label="Next Level">
-
-      <input class="box-field armor-class" type="text" name="flags.brackenvale-core.previewArmorClass" value="{{actor.flags.brackenvale-core.previewArmorClass}}" aria-label="Armor Class">
-      <input class="box-field initiative" type="text" name="flags.brackenvale-core.previewInitiative" value="{{actor.flags.brackenvale-core.previewInitiative}}" aria-label="Initiative">
-      <input class="box-field speed" type="text" name="flags.brackenvale-core.previewSpeed" value="{{actor.flags.brackenvale-core.previewSpeed}}" aria-label="Speed">
-      <input class="box-field proficiency" type="text" name="flags.brackenvale-core.previewProficiency" value="{{actor.flags.brackenvale-core.previewProficiency}}" aria-label="Proficiency Bonus">
-      <input class="circle-field inspiration" type="checkbox" name="flags.brackenvale-core.previewInspiration" {{checked actor.flags.brackenvale-core.previewInspiration}} aria-label="Inspiration">
+    <div class="brackenvale-page-fields">
+      {{#each pageOneFields}}
+        {{#if (eq type "checkbox")}}
+          <input
+            class="overlay-field {{className}}"
+            type="checkbox"
+            name="{{name}}"
+            style="{{style}}"
+            aria-label="{{label}}"
+            {{checked checked}}
+          >
+        {{else}}
+          <input
+            class="overlay-field {{className}}"
+            type="text"
+            name="{{name}}"
+            value="{{value}}"
+            style="{{style}}"
+            aria-label="{{label}}"
+          >
+        {{/if}}
+      {{/each}}
     </div>
   </div>
 
   <div class="brackenvale-art-page" data-page="2">
-    <img class="brackenvale-page-art" src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-2.webp" alt="" draggable="false">
+    <img
+      class="brackenvale-page-art"
+      src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-2.webp"
+      alt=""
+      draggable="false"
+    >
   </div>
 
   <div class="brackenvale-art-page" data-page="3">
-    <img class="brackenvale-page-art" src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-3.webp" alt="" draggable="false">
+    <img
+      class="brackenvale-page-art"
+      src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-3.webp"
+      alt=""
+      draggable="false"
+    >
   </div>
 
   <div class="brackenvale-art-page" data-page="4">
-    <img class="brackenvale-page-art" src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-4.webp" alt="" draggable="false">
+    <img
+      class="brackenvale-page-art"
+      src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-4.webp"
+      alt=""
+      draggable="false"
+    >
   </div>
 </form>

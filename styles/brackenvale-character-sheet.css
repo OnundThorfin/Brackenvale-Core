@@ -1,6 +1,6 @@
 /* =========================================================
-   Brackenvale Character Sheet — v0.4.0
-   Canonical PDF artwork background prototype
+   Brackenvale Character Sheet — v0.4.2
+   Data-driven artwork overlay architecture
    ========================================================= */
 
 .brackenvale-character-sheet {
@@ -83,7 +83,7 @@
   inset: 0;
 }
 
-.brackenvale-page-fields input {
+.brackenvale-page-fields .overlay-field {
   position: absolute;
   box-sizing: border-box;
   margin: 0;
@@ -91,88 +91,40 @@
   border: 0;
   border-radius: 0;
   color: #171612;
-  background: rgba(255, 255, 255, 0.02);
+  background: transparent;
   box-shadow: none;
   font-family: Georgia, "Times New Roman", serif;
 }
 
-.brackenvale-page-fields input:hover {
+.brackenvale-page-fields .overlay-field:hover {
   background: rgba(206, 191, 142, 0.16);
 }
 
-.brackenvale-page-fields input:focus {
+.brackenvale-page-fields .overlay-field:focus {
   outline: 1px solid rgba(112, 89, 34, 0.72);
   outline-offset: 0;
   background: rgba(255, 252, 225, 0.42);
 }
 
-/* Page 1 identity lines, measured against the canonical 2560×3840 artwork. */
-
-.page-one-fields .field {
-  left: 17.1%;
-  width: 33.2%;
-  height: 2.1%;
+.brackenvale-page-fields .line-field {
   font-size: clamp(10px, 1.25vw, 15px);
 }
 
-.page-one-fields .character-name      { top: 8.55%; }
-.page-one-fields .class-level         { top: 10.75%; }
-.page-one-fields .background          { top: 12.93%; }
-.page-one-fields .species             { top: 15.12%; }
-.page-one-fields .cultural-feature    { top: 17.29%; }
-.page-one-fields .faith               { top: 19.48%; }
-.page-one-fields .homeland            { top: 21.66%; }
-.page-one-fields .experience-points   { top: 23.84%; }
-.page-one-fields .next-level          { top: 26.03%; }
-
-/* Page 1 combat fields. */
-
-.page-one-fields .box-field {
-  width: 8.1%;
-  height: 5.25%;
+.brackenvale-page-fields .box-field {
   padding: 0;
   font-size: clamp(18px, 2.4vw, 29px);
   font-weight: 700;
   text-align: center;
 }
 
-.page-one-fields .armor-class {
-  top: 11.95%;
-  left: 59.12%;
-}
-
-.page-one-fields .initiative {
-  top: 11.95%;
-  left: 71.20%;
-}
-
-.page-one-fields .speed {
-  top: 11.95%;
-  left: 83.52%;
-}
-
-.page-one-fields .proficiency {
-  top: 20.80%;
-  left: 60.55%;
-}
-
-.page-one-fields .circle-field {
+.brackenvale-page-fields .circle-field {
   appearance: none;
-  width: 5.15%;
-  aspect-ratio: 1 / 1;
   padding: 0;
-  border: 0;
   border-radius: 50%;
-  background: transparent;
   cursor: pointer;
 }
 
-.page-one-fields .inspiration {
-  top: 21.02%;
-  left: 82.15%;
-}
-
-.page-one-fields .inspiration:checked {
+.brackenvale-page-fields .circle-field:checked {
   background:
     radial-gradient(circle, #27241f 0 43%, transparent 46%);
 }
