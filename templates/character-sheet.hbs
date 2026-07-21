@@ -44,7 +44,7 @@
           {{#if isTextField}}
             <input
               class="overlay-field {{className}}"
-              type="text"
+              type="{{inputType}}"
               name="{{name}}"
               value="{{value}}"
               style="{{style}}"
@@ -86,20 +86,111 @@
           {{/if}}
 
           {{#if isRollRow}}
-            <button
-              type="button"
+            <div
               class="overlay-field {{className}} proficiency-rank-{{proficiencyRank}}"
               style="{{style}}"
-              aria-label="{{label}}"
-              title="Roll {{label}}"
               data-component-key="{{key}}"
               data-layout-part="root"
-              data-roll-type="{{rollType}}"
-              data-roll-key="{{rollKey}}"
             >
-              <span class="ability-roll-proficiency" aria-hidden="true"></span>
-              <span class="ability-roll-modifier">{{modifierValue}}</span>
-            </button>
+              <button
+                type="button"
+                class="ability-roll-proficiency"
+                aria-label="Change {{label}} proficiency"
+                title="{{#if proficiencyEditable}}Click to cycle proficiency{{else}}Unlock the sheet to change proficiency{{/if}}"
+                data-action="cycle-proficiency"
+                data-path="{{proficiencyPath}}"
+                data-rank="{{proficiencyRank}}"
+                data-maximum-rank="{{maximumRank}}"
+                {{#unless proficiencyEditable}}disabled{{/unless}}
+              ></button>
+
+              <button
+                type="button"
+                class="ability-roll-button"
+                aria-label="{{label}}"
+                title="Roll {{label}}"
+                data-roll-type="{{rollType}}"
+                data-roll-key="{{rollKey}}"
+              >
+                <span class="ability-roll-modifier">{{modifierValue}}</span>
+              </button>
+            </div>
+          {{/if}}
+
+          {{#if isHitDiceSummary}}
+            <div
+              class="overlay-field hit-dice-summary"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              aria-label="{{label}}"
+            >
+              <span class="hit-dice-denomination">{{denomination}}</span>
+              <span class="hit-dice-total">{{total}}</span>
+              <span class="hit-dice-used">{{used}}</span>
+            </div>
+          {{/if}}
+
+          {{#if isDeathSaves}}
+            <div
+              class="overlay-field death-saves-component"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              aria-label="{{label}}"
+            >
+              <div class="death-save-row successes">
+                {{#each (range 1 4)}}
+                  <button
+                    type="button"
+                    class="death-save-dot {{#if (lte this ../successes)}}filled{{/if}}"
+                    data-action="set-death-save"
+                    data-path="system.attributes.death.success"
+                    data-value="{{this}}"
+                    aria-label="Set death save successes to {{this}}"
+                    {{#unless ../editable}}disabled{{/unless}}
+                  ></button>
+                {{/each}}
+              </div>
+              <div class="death-save-row failures">
+                {{#each (range 1 4)}}
+                  <button
+                    type="button"
+                    class="death-save-dot {{#if (lte this ../failures)}}filled{{/if}}"
+                    data-action="set-death-save"
+                    data-path="system.attributes.death.failure"
+                    data-value="{{this}}"
+                    aria-label="Set death save failures to {{this}}"
+                    {{#unless ../editable}}disabled{{/unless}}
+                  ></button>
+                {{/each}}
+              </div>
+            </div>
+          {{/if}}
+
+          {{#if isWeaponTable}}
+            <div
+              class="overlay-field weapon-table-component"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              aria-label="{{label}}"
+            >
+              {{#each weapons}}
+                <button
+                  type="button"
+                  class="weapon-table-row {{#unless id}}empty{{/unless}}"
+                  data-item-id="{{id}}"
+                  title="{{#if id}}Click to use; right-click to edit{{/if}}"
+                  {{#unless id}}disabled{{/unless}}
+                >
+                  <span class="weapon-name">{{name}}</span>
+                  <span class="weapon-attack">{{attack}}</span>
+                  <span class="weapon-damage">{{damage}}</span>
+                  <span class="weapon-mastery">{{mastery}}</span>
+                </button>
+              {{/each}}
+            </div>
           {{/if}}
 
           {{#if isAbilityScore}}
