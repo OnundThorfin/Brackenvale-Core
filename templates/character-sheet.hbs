@@ -85,6 +85,23 @@
             >
           {{/if}}
 
+          {{#if isRollRow}}
+            <button
+              type="button"
+              class="overlay-field {{className}} proficiency-rank-{{proficiencyRank}}"
+              style="{{style}}"
+              aria-label="{{label}}"
+              title="Roll {{label}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              data-roll-type="{{rollType}}"
+              data-roll-key="{{rollKey}}"
+            >
+              <span class="ability-roll-proficiency" aria-hidden="true"></span>
+              <span class="ability-roll-modifier">{{modifierValue}}</span>
+            </button>
+          {{/if}}
+
           {{#if isAbilityScore}}
             <input
               class="overlay-field ability-score-field"

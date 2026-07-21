@@ -9,8 +9,8 @@
       "path": "name",
       "className": "line-field",
       "label": "Character Name",
-      "left": 17.1,
-      "top": 8.55,
+      "left": 18.92279166666667,
+      "top": 7.94233,
       "width": 33.2,
       "height": 2.1
     },
@@ -24,8 +24,8 @@
       "emptyLabel": "Add a class",
       "className": "line-field",
       "label": "Class and Level",
-      "left": 17.1,
-      "top": 10.75,
+      "left": 17.098,
+      "top": 10.228105555555555,
       "width": 33.2,
       "height": 2.1
     },
@@ -38,8 +38,8 @@
       "emptyLabel": "Add a background",
       "className": "line-field",
       "label": "Background",
-      "left": 17.1,
-      "top": 12.93,
+      "left": 17.22820833333333,
+      "top": 12.3223,
       "width": 33.2,
       "height": 2.1
     },
@@ -53,8 +53,8 @@
       "emptyLabel": "Add a species",
       "className": "line-field",
       "label": "Species",
-      "left": 17.1,
-      "top": 15.12,
+      "left": 17.2302,
+      "top": 14.772805555555555,
       "width": 33.2,
       "height": 2.1
     },
@@ -63,10 +63,10 @@
       "key": "culturalFeature",
       "name": "flags.brackenvale-core.culturalFeature",
       "flag": "culturalFeature",
-      "className": "line-field",
+      "className": "line-field brackenvale-reference-placeholder",
       "label": "Cultural Feature",
-      "left": 17.1,
-      "top": 17.29,
+      "left": 18.9208984375,
+      "top": 16.942003038194446,
       "width": 33.2,
       "height": 2.1
     },
@@ -75,10 +75,10 @@
       "key": "faith",
       "name": "flags.brackenvale-core.faith",
       "flag": "faith",
-      "className": "line-field",
+      "className": "line-field brackenvale-reference-placeholder",
       "label": "Faith",
-      "left": 17.1,
-      "top": 19.48,
+      "left": 18.5302734375,
+      "top": 19.132486979166664,
       "width": 33.2,
       "height": 2.1
     },
@@ -87,10 +87,10 @@
       "key": "homeland",
       "name": "flags.brackenvale-core.homeland",
       "flag": "homeland",
-      "className": "line-field",
+      "className": "line-field brackenvale-reference-placeholder",
       "label": "Homeland",
-      "left": 17.1,
-      "top": 21.66,
+      "left": 18.009440104166664,
+      "top": 21.485731336805554,
       "width": 33.2,
       "height": 2.1
     },
@@ -101,8 +101,8 @@
       "path": "system.details.xp.value",
       "className": "line-field",
       "label": "Experience Points",
-      "left": 17.1,
-      "top": 23.84,
+      "left": 20.223,
+      "top": 23.925805555555556,
       "width": 33.2,
       "height": 2.1
     },
@@ -112,8 +112,8 @@
       "derive": "nextLevel",
       "className": "line-field",
       "label": "Next Level",
-      "left": 17.1,
-      "top": 26.03,
+      "left": 20.09280833333333,
+      "top": 26.2031,
       "width": 33.2,
       "height": 2.1
     },
@@ -123,8 +123,8 @@
       "path": "system.attributes.ac.value",
       "className": "box-field",
       "label": "Armor Class",
-      "left": 59.12,
-      "top": 11.95,
+      "left": 58.20859166666666,
+      "top": 11.6896,
       "width": 8.1,
       "height": 5.25
     },
@@ -134,8 +134,8 @@
       "derive": "initiative",
       "className": "box-field",
       "label": "Initiative",
-      "left": 71.2,
-      "top": 11.95,
+      "left": 71.59059166666667,
+      "top": 11.3424,
       "width": 8.1,
       "height": 5.25
     },
@@ -145,8 +145,8 @@
       "derive": "speed",
       "className": "box-field",
       "label": "Speed",
-      "left": 83.52,
-      "top": 11.95,
+      "left": 84.43140833333332,
+      "top": 11.6028,
       "width": 8.1,
       "height": 5.25
     },
@@ -156,8 +156,8 @@
       "derive": "proficiency",
       "className": "box-field",
       "label": "Proficiency Bonus",
-      "left": 60.55,
-      "top": 20.8,
+      "left": 61.33119166666666,
+      "top": 20.366,
       "width": 8.1,
       "height": 5.25
     },
@@ -179,14 +179,14 @@
       "label": "Strength",
       "ability": "str",
       "score": {
-        "left": 6.15,
-        "top": 34.55,
+        "left": 6.01807,
+        "top": 33.68190555555556,
         "width": 8.1,
         "height": 4.45
       },
       "modifier": {
-        "left": 18.65,
-        "top": 34.1,
+        "left": 18.387808333333332,
+        "top": 32.9712,
         "width": 6.2,
         "height": 4.95
       }
@@ -197,14 +197,14 @@
       "label": "Intelligence",
       "ability": "int",
       "score": {
-        "left": 30.55,
-        "top": 34.55,
+        "left": 31.850191666666667,
+        "top": 33.5951,
         "width": 8.1,
         "height": 4.45
       },
       "modifier": {
-        "left": 43.05,
-        "top": 34.1,
+        "left": 45.1314,
+        "top": 33.14480555555556,
         "width": 6.2,
         "height": 4.95
       }
@@ -215,14 +215,14 @@
       "label": "Dexterity",
       "ability": "dex",
       "score": {
-        "left": 6.15,
-        "top": 50.35,
+        "left": 5.887858072916666,
+        "top": 49.39507378472222,
         "width": 8.1,
         "height": 4.45
       },
       "modifier": {
-        "left": 18.65,
-        "top": 49.9,
+        "left": 18.387858072916664,
+        "top": 48.94476996527778,
         "width": 6.2,
         "height": 4.95
       }
@@ -233,14 +233,14 @@
       "label": "Wisdom",
       "ability": "wis",
       "score": {
-        "left": 30.55,
-        "top": 50.35,
+        "left": 31.72,
+        "top": 52.60689444444444,
         "width": 8.1,
         "height": 4.45
       },
       "modifier": {
-        "left": 43.05,
-        "top": 49.9,
+        "left": 44.871,
+        "top": 52.156594444444444,
         "width": 6.2,
         "height": 4.95
       }
@@ -251,14 +251,14 @@
       "label": "Constitution",
       "ability": "con",
       "score": {
-        "left": 6.15,
-        "top": 66.1,
+        "left": 6.018058333333333,
+        "top": 69.6588,
         "width": 8.1,
         "height": 4.45
       },
       "modifier": {
-        "left": 18.65,
-        "top": 65.65,
+        "left": 18.3878,
+        "top": 68.94799444444445,
         "width": 6.2,
         "height": 4.95
       }
@@ -269,17 +269,281 @@
       "label": "Charisma",
       "ability": "cha",
       "score": {
-        "left": 30.55,
-        "top": 66.1,
+        "left": 31.4596,
+        "top": 70.70039444444444,
         "width": 8.1,
         "height": 4.45
       },
       "modifier": {
-        "left": 43.05,
-        "top": 65.65,
+        "left": 43.4387,
+        "top": 70.42369444444444,
         "width": 6.2,
         "height": 4.95
       }
+    },
+    {
+      "component": "savingThrow",
+      "key": "saveStr",
+      "rollKey": "str",
+      "label": "Strength saving throw",
+      "className": "ability-roll-row",
+      "left": 5.15,
+      "top": 38.35,
+      "width": 20.3,
+      "height": 1.65
+    },
+    {
+      "component": "skill",
+      "key": "skillAth",
+      "rollKey": "ath",
+      "label": "Athletics",
+      "className": "ability-roll-row",
+      "left": 5.15,
+      "top": 40.52,
+      "width": 20.3,
+      "height": 1.65
+    },
+    {
+      "component": "savingThrow",
+      "key": "saveInt",
+      "rollKey": "int",
+      "label": "Intelligence saving throw",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 38.35,
+      "width": 20.3,
+      "height": 1.65
+    },
+    {
+      "component": "skill",
+      "key": "skillArc",
+      "rollKey": "arc",
+      "label": "Arcana",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 40.15,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "skill",
+      "key": "skillHis",
+      "rollKey": "his",
+      "label": "History",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 41.72,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "skill",
+      "key": "skillInv",
+      "rollKey": "inv",
+      "label": "Investigation",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 43.28,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "skill",
+      "key": "skillNat",
+      "rollKey": "nat",
+      "label": "Nature",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 44.85,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "skill",
+      "key": "skillRel",
+      "rollKey": "rel",
+      "label": "Religion",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 46.42,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "savingThrow",
+      "key": "saveDex",
+      "rollKey": "dex",
+      "label": "Dexterity saving throw",
+      "className": "ability-roll-row",
+      "left": 5.15,
+      "top": 54.35,
+      "width": 20.3,
+      "height": 1.55
+    },
+    {
+      "component": "skill",
+      "key": "skillAcr",
+      "rollKey": "acr",
+      "label": "Acrobatics",
+      "className": "ability-roll-row",
+      "left": 5.15,
+      "top": 56.1,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "skill",
+      "key": "skillSlt",
+      "rollKey": "slt",
+      "label": "Sleight of Hand",
+      "className": "ability-roll-row",
+      "left": 5.15,
+      "top": 57.68,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "skill",
+      "key": "skillSte",
+      "rollKey": "ste",
+      "label": "Stealth",
+      "className": "ability-roll-row",
+      "left": 5.15,
+      "top": 59.25,
+      "width": 20.3,
+      "height": 1.45
+    },
+    {
+      "component": "savingThrow",
+      "key": "saveWis",
+      "rollKey": "wis",
+      "label": "Wisdom saving throw",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 57.85,
+      "width": 20.3,
+      "height": 1.5
+    },
+    {
+      "component": "skill",
+      "key": "skillAni",
+      "rollKey": "ani",
+      "label": "Animal Handling",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 59.48,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "skill",
+      "key": "skillIns",
+      "rollKey": "ins",
+      "label": "Insight",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 60.95,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "skill",
+      "key": "skillMed",
+      "rollKey": "med",
+      "label": "Medicine",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 62.42,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "skill",
+      "key": "skillPrc",
+      "rollKey": "prc",
+      "label": "Perception",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 63.89,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "skill",
+      "key": "skillSur",
+      "rollKey": "sur",
+      "label": "Survival",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 65.36,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "savingThrow",
+      "key": "saveCon",
+      "rollKey": "con",
+      "label": "Constitution saving throw",
+      "className": "ability-roll-row",
+      "left": 5.15,
+      "top": 74.35,
+      "width": 20.3,
+      "height": 1.55
+    },
+    {
+      "component": "savingThrow",
+      "key": "saveCha",
+      "rollKey": "cha",
+      "label": "Charisma saving throw",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 75.35,
+      "width": 20.3,
+      "height": 1.5
+    },
+    {
+      "component": "skill",
+      "key": "skillDec",
+      "rollKey": "dec",
+      "label": "Deception",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 76.98,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "skill",
+      "key": "skillItm",
+      "rollKey": "itm",
+      "label": "Intimidation",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 78.45,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "skill",
+      "key": "skillPer",
+      "rollKey": "per",
+      "label": "Performance",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 79.92,
+      "width": 20.3,
+      "height": 1.42
+    },
+    {
+      "component": "skill",
+      "key": "skillPrs",
+      "rollKey": "prs",
+      "label": "Persuasion",
+      "className": "ability-roll-row",
+      "left": 29.6,
+      "top": 81.39,
+      "width": 20.3,
+      "height": 1.42
     }
   ]
 }
