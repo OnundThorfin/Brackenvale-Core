@@ -3,9 +3,12 @@
   "title": "Brackenvale Core",
   "description": "A movable and minimizable Brackenvale campaign overlay with a custom calendar, seasonal weather, Travel Points, location, and campaign notes.",
   "version": "0.3.7",
+
   "url": "https://github.com/OnundThorfin/Brackenvale-Core",
   "manifest": "https://github.com/OnundThorfin/Brackenvale-Core/releases/latest/download/module.json",
-"download": "https://github.com/OnundThorfin/Brackenvale-Core/releases/download/v0.3.7/brackenvale-core.zip",    {
+"download": "https://github.com/OnundThorfin/Brackenvale-Core/releases/download/v0.3.7/brackenvale-core.zip",
+  "authors": [
+    {
       "name": "Joe Acone"
     }
   ],
