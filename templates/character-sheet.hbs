@@ -1,29 +1,162 @@
-<form class="brackenvale-minimal-sheet {{cssClass}}" autocomplete="off">
-  <header class="brackenvale-minimal-header">
-    <h1>Brackenvale</h1>
-  </header>
+<form class="brackenvale-page-one {{cssClass}}" autocomplete="off">
+  <div class="brackenvale-paper">
 
-  <main class="brackenvale-minimal-body">
-    <div class="brackenvale-minimal-portrait">
-      <img
-        src="{{actor.img}}"
-        data-edit="img"
-        alt="{{actor.name}}"
-      >
-    </div>
+    <section class="brackenvale-top-grid">
 
-    <section class="brackenvale-minimal-identity">
-      <label for="brackenvale-character-name">Character Name</label>
-      <input
-        id="brackenvale-character-name"
-        type="text"
-        name="name"
-        value="{{actor.name}}"
-      >
+      <div class="brackenvale-character-summary">
+        <header class="brackenvale-wordmark">
+          <h1>Brackenvale</h1>
+          <div class="brackenvale-title-rule" aria-hidden="true"></div>
+        </header>
 
-      <div class="brackenvale-render-success">
-        The Brackenvale character sheet is rendering successfully.
+        <div class="brackenvale-summary-fields">
+          <label class="brackenvale-line-field">
+            <span>Character Name</span>
+            <input type="text" name="name" value="{{actor.name}}">
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Class &amp; Level</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.classLevel"
+              value="{{actor.flags.brackenvale-core.classLevel}}"
+            >
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Background</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.background"
+              value="{{actor.flags.brackenvale-core.background}}"
+            >
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Species</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.species"
+              value="{{actor.flags.brackenvale-core.species}}"
+            >
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Cultural Feature</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.culturalFeature"
+              value="{{actor.flags.brackenvale-core.culturalFeature}}"
+            >
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Faith</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.faith"
+              value="{{actor.flags.brackenvale-core.faith}}"
+            >
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Homeland</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.homeland"
+              value="{{actor.flags.brackenvale-core.homeland}}"
+            >
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Experience Points</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.experiencePoints"
+              value="{{actor.flags.brackenvale-core.experiencePoints}}"
+            >
+          </label>
+
+          <label class="brackenvale-line-field">
+            <span>Next Level</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.nextLevel"
+              value="{{actor.flags.brackenvale-core.nextLevel}}"
+            >
+          </label>
+        </div>
       </div>
+
+      <section class="brackenvale-framed-panel brackenvale-combat-panel">
+        <h2>Combat</h2>
+
+        <div class="brackenvale-combat-primary">
+          <label class="brackenvale-combat-stat armor-class-stat">
+            <span>Armor Class</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.previewArmorClass"
+              value="{{actor.flags.brackenvale-core.previewArmorClass}}"
+              aria-label="Armor Class"
+            >
+          </label>
+
+          <label class="brackenvale-combat-stat">
+            <span>Initiative</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.previewInitiative"
+              value="{{actor.flags.brackenvale-core.previewInitiative}}"
+              aria-label="Initiative"
+            >
+          </label>
+
+          <label class="brackenvale-combat-stat">
+            <span>Speed</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.previewSpeed"
+              value="{{actor.flags.brackenvale-core.previewSpeed}}"
+              aria-label="Speed"
+            >
+          </label>
+        </div>
+
+        <div class="brackenvale-combat-secondary">
+          <label class="brackenvale-combat-stat proficiency-stat">
+            <span>Proficiency Bonus</span>
+            <input
+              type="text"
+              name="flags.brackenvale-core.previewProficiency"
+              value="{{actor.flags.brackenvale-core.previewProficiency}}"
+              aria-label="Proficiency Bonus"
+            >
+          </label>
+
+          <label class="brackenvale-inspiration-stat">
+            <span>Inspiration</span>
+            <input
+              type="checkbox"
+              name="flags.brackenvale-core.previewInspiration"
+              {{checked actor.flags.brackenvale-core.previewInspiration}}
+            >
+          </label>
+        </div>
+      </section>
+
     </section>
-  </main>
+
+    <section class="brackenvale-next-area" aria-label="Page 1 construction area">
+      <p>Page 1 layout continues here in the next milestone.</p>
+    </section>
+
+    <footer class="brackenvale-page-number">
+      <span>1</span>
+      <small>of</small>
+      <span>4</span>
+    </footer>
+
+  </div>
 </form>
