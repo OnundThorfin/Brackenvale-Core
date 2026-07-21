@@ -31,8 +31,8 @@ Hooks.once("init", () => {
 
       position: {
         ...super.DEFAULT_OPTIONS?.position,
-        width: 820,
-        height: 680
+        width: 1080,
+        height: 900
       },
 
       window: {

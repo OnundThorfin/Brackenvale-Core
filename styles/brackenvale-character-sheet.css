@@ -4,8 +4,8 @@
    ========================================================= */
 
 .brackenvale-character-sheet {
-  min-width: 900px;
-  min-height: 760px;
+  min-width: 1020px;
+  min-height: 860px;
   color: #171612;
 }
 
@@ -29,10 +29,10 @@
 .brackenvale-paper {
   position: relative;
   box-sizing: border-box;
-  width: min(100%, 980px);
-  min-height: 1180px;
+  width: min(100%, 1040px);
+  min-height: 1280px;
   margin: 0 auto;
-  padding: 28px 30px 44px;
+  padding: 34px 38px 48px;
   border: 2px solid #25231e;
   background: #fbfaf5;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
@@ -44,7 +44,7 @@
   position: absolute;
   top: 7px;
   color: #25231e;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .brackenvale-paper::before { left: 9px; }
@@ -52,8 +52,8 @@
 
 .brackenvale-top-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(390px, 0.92fr);
+  gap: 34px;
   align-items: start;
 }
 
@@ -62,7 +62,7 @@
 .brackenvale-wordmark h1 {
   margin: 0;
   color: #171612;
-  font-size: 49px;
+  font-size: 54px;
   font-variant: small-caps;
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -72,7 +72,7 @@
 
 .brackenvale-title-rule {
   position: relative;
-  width: 245px;
+  width: 272px;
   height: 13px;
   margin: 5px 0 0 56px;
   border-top: 1px solid #25231e;
@@ -97,15 +97,15 @@
 
 .brackenvale-line-field {
   display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
+  grid-template-columns: 145px minmax(0, 1fr);
   gap: 8px;
   align-items: end;
-  min-height: 22px;
+  min-height: 25px;
 }
 
 .brackenvale-line-field > span,
 .brackenvale-equipment-name > span {
-  font-size: 13px;
+  font-size: 14px;
   font-variant: small-caps;
   font-weight: 700;
   letter-spacing: 0.015em;
@@ -116,7 +116,7 @@
 .brackenvale-equipment-name input {
   box-sizing: border-box;
   width: 100%;
-  height: 22px;
+  height: 25px;
   padding: 0 3px 2px;
   border: 0;
   border-bottom: 1px solid #4b4942;
@@ -145,7 +145,7 @@
   z-index: 1;
   margin: 0;
   color: #171612;
-  font-size: 22px;
+  font-size: 26px;
   font-variant: small-caps;
   font-weight: 700;
   letter-spacing: 0.025em;
@@ -155,7 +155,7 @@
 }
 
 .brackenvale-combat-panel {
-  min-height: 250px;
+  min-height: 274px;
   padding: 14px 16px 16px;
 }
 
@@ -191,7 +191,7 @@
 
 .brackenvale-combat-stat > span,
 .brackenvale-inspiration-stat > span {
-  font-size: 11px;
+  font-size: 12px;
   font-variant: small-caps;
   font-weight: 700;
   line-height: 1.1;
@@ -201,14 +201,14 @@
 
 .brackenvale-combat-stat input {
   box-sizing: border-box;
-  width: 76px;
-  height: 54px;
+  width: 82px;
+  height: 59px;
   padding: 4px;
   border: 2px solid #25231e;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   text-align: center;
 }
@@ -218,8 +218,8 @@
 
 .brackenvale-inspiration-stat input[type="checkbox"] {
   appearance: none;
-  width: 46px;
-  height: 46px;
+  width: 50px;
+  height: 50px;
   margin: 0;
   border: 2px solid #25231e;
   border-radius: 50%;
@@ -232,8 +232,8 @@
 
 .brackenvale-middle-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.22fr) minmax(360px, 0.78fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 1.18fr) minmax(390px, 0.82fr);
+  gap: 24px;
   align-items: stretch;
   margin-top: 18px;
 }
@@ -258,7 +258,7 @@
 .brackenvale-ability-card {
   position: relative;
   box-sizing: border-box;
-  min-height: 176px;
+  min-height: 198px;
   padding: 12px 12px 10px;
   border: 2px solid #25231e;
   background: transparent;
@@ -279,7 +279,7 @@
 
 .brackenvale-ability-card h3 {
   margin: -2px 0 8px;
-  font-size: 18px;
+  font-size: 22px;
   font-variant: small-caps;
   line-height: 1;
   text-align: center;
@@ -309,18 +309,18 @@
 
 .brackenvale-ability-values input {
   box-sizing: border-box;
-  width: 62px;
-  height: 43px;
+  width: 68px;
+  height: 47px;
   border: 2px solid #25231e;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  font-size: 20px;
+  font-size: 22px;
   text-align: center;
 }
 
 .brackenvale-modifier-field input {
-  width: 45px;
+  width: 49px;
   border-radius: 50%;
 }
 
@@ -334,8 +334,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  min-height: 15px;
-  font-size: 11px;
+  min-height: 17px;
+  font-size: 12px;
   line-height: 1.05;
 }
 
@@ -345,8 +345,8 @@
 .brackenvale-condition-checks input {
   appearance: none;
   box-sizing: border-box;
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   margin: 0;
   border: 1px solid #25231e;
   border-radius: 50%;
@@ -375,7 +375,7 @@
 }
 
 .brackenvale-armor-panel {
-  min-height: 226px;
+  min-height: 246px;
   padding: 14px 18px 16px;
 }
 
@@ -421,7 +421,7 @@
 }
 
 .brackenvale-hp-panel {
-  min-height: 178px;
+  min-height: 192px;
   padding: 14px 16px 14px;
 }
 
@@ -452,12 +452,12 @@
 .brackenvale-hp-grid input {
   box-sizing: border-box;
   width: 100%;
-  height: 70px;
+  height: 78px;
   border: 2px solid #25231e;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  font-size: 20px;
+  font-size: 22px;
   text-align: center;
 }
 
@@ -489,7 +489,7 @@
 }
 
 .brackenvale-death-panel {
-  min-height: 108px;
+  min-height: 118px;
   padding: 13px 18px;
 }
 
@@ -563,7 +563,7 @@
 .brackenvale-attack-header span:last-child { border-right: 0; }
 
 .brackenvale-attack-row {
-  min-height: 35px;
+  min-height: 39px;
   border-bottom: 1px solid #777267;
 }
 
@@ -603,7 +603,7 @@
 }
 
 .brackenvale-page-number small {
-  font-size: 11px;
+  font-size: 12px;
   font-variant: small-caps;
   text-transform: uppercase;
 }
@@ -613,4 +613,50 @@
   .brackenvale-middle-grid {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* v0.3.8 refinement overrides */
+
+.brackenvale-page-one input[type="checkbox"] {
+  opacity: 1;
+  filter: none;
+  box-shadow: none !important;
+}
+
+.brackenvale-skill-line input[type="checkbox"],
+.brackenvale-condition-line input[type="checkbox"],
+.brackenvale-death-row input[type="checkbox"],
+.brackenvale-condition-checks input[type="checkbox"],
+.brackenvale-inspiration-stat input[type="checkbox"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.brackenvale-skill-line input[type="checkbox"]:checked,
+.brackenvale-death-row input[type="checkbox"]:checked {
+  background-image: radial-gradient(circle, #25231e 0 43%, transparent 47%) !important;
+}
+
+.brackenvale-condition-line input[type="checkbox"]:checked,
+.brackenvale-condition-checks input[type="checkbox"]:checked {
+  background-color: #25231e !important;
+}
+
+.brackenvale-inspiration-stat input[type="checkbox"]:checked {
+  background-image: radial-gradient(circle, #25231e 0 42%, transparent 44%) !important;
+}
+
+.brackenvale-paper {
+  background: #fffefa;
+}
+
+.brackenvale-line-field input:focus,
+.brackenvale-ability-values input:focus,
+.brackenvale-combat-stat input:focus,
+.brackenvale-hp-grid input:focus,
+.brackenvale-hit-dice-row input:focus,
+.brackenvale-attack-row > input:focus {
+  outline: 1px solid rgba(37, 35, 30, 0.55);
+  outline-offset: -1px;
 }
