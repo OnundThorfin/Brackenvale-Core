@@ -120,6 +120,7 @@ Hooks.once("init", () => {
       this._activateAbilityRolls(root);
       this._activateProficiencyControls(root);
       this._activateDeathSaveControls(root);
+      this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
     }
 
@@ -298,15 +299,64 @@ Hooks.once("init", () => {
       }
     }
 
-    _activateWeaponControls(root) {
-      for (const row of root.querySelectorAll(".weapon-table-row[data-item-id]")) {
-        row.addEventListener("click", async (event) => {
+    _activateHitDiceControls(root) {
+      for (const button of root.querySelectorAll("[data-action='edit-hit-dice-class']")) {
+        button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
 
           event.preventDefault();
           event.stopPropagation();
 
-          const item = this.actor.items.get(row.dataset.itemId);
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+          this.actor.items.get(itemId)?.sheet?.render(true);
+        });
+      }
+
+      for (const input of root.querySelectorAll("[data-action='update-hit-dice-used']")) {
+        input.addEventListener("change", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = input.dataset.itemId;
+          const path = input.dataset.itemPath;
+          const item = this.actor.items.get(itemId);
+          if (!item || !path) return;
+
+          const maximum = Number(input.max || 0);
+          const requested = Number(input.value || 0);
+          const value = Math.max(0, maximum ? Math.min(maximum, requested) : requested);
+
+          await item.update({[path]: value});
+        });
+      }
+    }
+
+    _activateWeaponControls(root) {
+      for (const button of root.querySelectorAll("[data-action='edit-weapon']")) {
+        button.addEventListener("click", (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+          this.actor.items.get(itemId)?.sheet?.render(true);
+        });
+      }
+
+      for (const button of root.querySelectorAll("[data-action='use-weapon']")) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          const item = this.actor.items.get(itemId);
           if (!item) return;
 
           if (typeof item.use === "function") {
@@ -314,15 +364,6 @@ Hooks.once("init", () => {
           } else {
             item.sheet?.render(true);
           }
-        });
-
-        row.addEventListener("contextmenu", (event) => {
-          if (this._calibrationMode) return;
-
-          event.preventDefault();
-          event.stopPropagation();
-
-          this.actor.items.get(row.dataset.itemId)?.sheet?.render(true);
         });
       }
     }

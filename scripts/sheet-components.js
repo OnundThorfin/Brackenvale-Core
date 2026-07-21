@@ -26,7 +26,7 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
     case "skill":
       return prepareSkill(component, actor, editable);
     case "hitDiceSummary":
-      return prepareHitDiceSummary(component, actor);
+      return prepareHitDiceSummary(component, actor, editable);
     case "deathSaves":
       return prepareDeathSaves(component, actor, editable);
     case "weaponTable":
@@ -171,42 +171,73 @@ function prepareSkill(component, actor, editable) {
   };
 }
 
-function prepareHitDiceSummary(component, actor) {
+function prepareHitDiceSummary(component, actor, editable) {
   const classes = actor.items?.filter((item) => item.type === "class") ?? [];
-  const entries = classes.map((item) => {
-    const denomination =
-      foundry.utils.getProperty(item, "system.hitDice")
-      ?? foundry.utils.getProperty(item, "system.hd.denomination")
-      ?? "";
-    const total =
-      foundry.utils.getProperty(item, "system.levels")
-      ?? foundry.utils.getProperty(item, "system.level")
-      ?? 0;
-    const used =
-      foundry.utils.getProperty(item, "system.hitDiceUsed")
-      ?? foundry.utils.getProperty(item, "system.hd.spent")
-      ?? 0;
-    return {denomination, total, used};
-  });
+  const firstClass = classes[0] ?? null;
 
-  const first = entries[0] ?? {denomination: "", total: "", used: ""};
+  if (!firstClass) {
+    return {
+      ...component,
+      isHitDiceSummary: true,
+      itemId: "",
+      denomination: "",
+      total: "",
+      used: "",
+      usedPath: "",
+      editable: false,
+      style: createPositionStyle(component)
+    };
+  }
+
+  const denomination =
+    foundry.utils.getProperty(firstClass, "system.hitDice")
+    ?? foundry.utils.getProperty(firstClass, "system.hd.denomination")
+    ?? "";
+
+  const total =
+    foundry.utils.getProperty(firstClass, "system.levels")
+    ?? foundry.utils.getProperty(firstClass, "system.level")
+    ?? 0;
+
+  const modernUsed = foundry.utils.getProperty(firstClass, "system.hd.spent");
+  const legacyUsed = foundry.utils.getProperty(firstClass, "system.hitDiceUsed");
+  const usedPath = modernUsed !== undefined ? "system.hd.spent" : "system.hitDiceUsed";
+  const used = modernUsed ?? legacyUsed ?? 0;
 
   return {
     ...component,
     isHitDiceSummary: true,
-    denomination: first.denomination,
-    total: first.total,
-    used: first.used,
+    itemId: firstClass.id,
+    denomination,
+    total,
+    used,
+    usedPath,
+    editable,
     style: createPositionStyle(component)
   };
 }
 
 function prepareDeathSaves(component, actor, editable) {
+  const successes = Number(
+    foundry.utils.getProperty(actor, "system.attributes.death.success") ?? 0
+  );
+  const failures = Number(
+    foundry.utils.getProperty(actor, "system.attributes.death.failure") ?? 0
+  );
+
   return {
     ...component,
     isDeathSaves: true,
-    successes: Number(foundry.utils.getProperty(actor, "system.attributes.death.success") ?? 0),
-    failures: Number(foundry.utils.getProperty(actor, "system.attributes.death.failure") ?? 0),
+    successes,
+    failures,
+    successDots: [1, 2, 3].map((value) => ({
+      value,
+      filled: value <= successes
+    })),
+    failureDots: [1, 2, 3].map((value) => ({
+      value,
+      filled: value <= failures
+    })),
     editable,
     style: createPositionStyle(component)
   };

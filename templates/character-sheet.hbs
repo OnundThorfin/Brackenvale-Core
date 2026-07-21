@@ -125,9 +125,37 @@
               data-layout-part="root"
               aria-label="{{label}}"
             >
-              <span class="hit-dice-denomination">{{denomination}}</span>
-              <span class="hit-dice-total">{{total}}</span>
-              <span class="hit-dice-used">{{used}}</span>
+              <button
+                type="button"
+                class="hit-dice-denomination"
+                data-action="edit-hit-dice-class"
+                data-item-id="{{itemId}}"
+                title="Open class and Hit Dice settings"
+                {{#unless itemId}}disabled{{/unless}}
+              >{{denomination}}</button>
+
+              <button
+                type="button"
+                class="hit-dice-total"
+                data-action="edit-hit-dice-class"
+                data-item-id="{{itemId}}"
+                title="Total Hit Dice comes from class level"
+                {{#unless itemId}}disabled{{/unless}}
+              >{{total}}</button>
+
+              <input
+                class="hit-dice-used"
+                type="number"
+                min="0"
+                max="{{total}}"
+                value="{{used}}"
+                data-action="update-hit-dice-used"
+                data-item-id="{{itemId}}"
+                data-item-path="{{usedPath}}"
+                aria-label="Used Hit Dice"
+                title="Used Hit Dice"
+                {{#unless editable}}disabled{{/unless}}
+              >
             </div>
           {{/if}}
 
@@ -140,27 +168,27 @@
               aria-label="{{label}}"
             >
               <div class="death-save-row successes">
-                {{#each (range 1 4)}}
+                {{#each successDots}}
                   <button
                     type="button"
-                    class="death-save-dot {{#if (lte this ../successes)}}filled{{/if}}"
+                    class="death-save-dot {{#if filled}}filled{{/if}}"
                     data-action="set-death-save"
                     data-path="system.attributes.death.success"
-                    data-value="{{this}}"
-                    aria-label="Set death save successes to {{this}}"
+                    data-value="{{value}}"
+                    aria-label="Set death save successes to {{value}}"
                     {{#unless ../editable}}disabled{{/unless}}
                   ></button>
                 {{/each}}
               </div>
               <div class="death-save-row failures">
-                {{#each (range 1 4)}}
+                {{#each failureDots}}
                   <button
                     type="button"
-                    class="death-save-dot {{#if (lte this ../failures)}}filled{{/if}}"
+                    class="death-save-dot {{#if filled}}filled{{/if}}"
                     data-action="set-death-save"
                     data-path="system.attributes.death.failure"
-                    data-value="{{this}}"
-                    aria-label="Set death save failures to {{this}}"
+                    data-value="{{value}}"
+                    aria-label="Set death save failures to {{value}}"
                     {{#unless ../editable}}disabled{{/unless}}
                   ></button>
                 {{/each}}
@@ -177,18 +205,56 @@
               aria-label="{{label}}"
             >
               {{#each weapons}}
-                <button
-                  type="button"
+                <div
                   class="weapon-table-row {{#unless id}}empty{{/unless}}"
                   data-item-id="{{id}}"
-                  title="{{#if id}}Click to use; right-click to edit{{/if}}"
-                  {{#unless id}}disabled{{/unless}}
                 >
-                  <span class="weapon-name">{{name}}</span>
-                  <span class="weapon-attack">{{attack}}</span>
-                  <span class="weapon-damage">{{damage}}</span>
-                  <span class="weapon-mastery">{{mastery}}</span>
-                </button>
+                  <button
+                    type="button"
+                    class="weapon-cell weapon-name"
+                    data-action="edit-weapon"
+                    data-item-id="{{id}}"
+                    title="{{#if id}}Open weapon item to edit{{/if}}"
+                    {{#unless id}}disabled{{/unless}}
+                  >{{name}}</button>
+
+                  <button
+                    type="button"
+                    class="weapon-cell weapon-attack"
+                    data-action="use-weapon"
+                    data-item-id="{{id}}"
+                    title="{{#if id}}Use this weapon{{/if}}"
+                    {{#unless id}}disabled{{/unless}}
+                  >{{attack}}</button>
+
+                  <button
+                    type="button"
+                    class="weapon-cell weapon-damage"
+                    data-action="use-weapon"
+                    data-item-id="{{id}}"
+                    title="{{#if id}}Use this weapon{{/if}}"
+                    {{#unless id}}disabled{{/unless}}
+                  >{{damage}}</button>
+
+                  <button
+                    type="button"
+                    class="weapon-cell weapon-mastery"
+                    data-action="edit-weapon"
+                    data-item-id="{{id}}"
+                    title="{{#if id}}Open weapon item to edit mastery and properties{{/if}}"
+                    {{#unless id}}disabled{{/unless}}
+                  >{{mastery}}</button>
+
+                  <button
+                    type="button"
+                    class="weapon-edit-button"
+                    data-action="edit-weapon"
+                    data-item-id="{{id}}"
+                    aria-label="{{#if id}}Edit {{name}}{{/if}}"
+                    title="{{#if id}}Edit weapon{{/if}}"
+                    {{#unless id}}disabled{{/unless}}
+                  >✎</button>
+                </div>
               {{/each}}
             </div>
           {{/if}}
