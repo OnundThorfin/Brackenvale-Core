@@ -38,6 +38,7 @@ jobs:
           zip -r brackenvale-core.zip \
             assets \
             lang \
+            layouts \
             scripts \
             styles \
             templates \

@@ -1,68 +1,51 @@
 <form class="brackenvale-art-sheet {{cssClass}}" autocomplete="off">
   <nav class="brackenvale-page-tabs" aria-label="Character sheet pages">
-    <button type="button" class="active" data-page="1">1</button>
-    <button type="button" data-page="2">2</button>
-    <button type="button" data-page="3">3</button>
-    <button type="button" data-page="4">4</button>
+    {{#each pages}}
+      <button
+        type="button"
+        class="{{#if active}}active{{/if}}"
+        data-page="{{page}}"
+      >
+        {{page}}
+      </button>
+    {{/each}}
   </nav>
 
-  <div class="brackenvale-art-page active" data-page="1">
-    <img
-      class="brackenvale-page-art"
-      src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-1.webp"
-      alt=""
-      draggable="false"
+  {{#each pages}}
+    <div
+      class="brackenvale-art-page {{#if active}}active{{/if}}"
+      data-page="{{page}}"
     >
+      <img
+        class="brackenvale-page-art"
+        src="{{art}}"
+        alt=""
+        draggable="false"
+      >
 
-    <div class="brackenvale-page-fields">
-      {{#each pageOneFields}}
-        {{#if (eq type "checkbox")}}
-          <input
-            class="overlay-field {{className}}"
-            type="checkbox"
-            name="{{name}}"
-            style="{{style}}"
-            aria-label="{{label}}"
-            {{checked checked}}
-          >
-        {{else}}
-          <input
-            class="overlay-field {{className}}"
-            type="text"
-            name="{{name}}"
-            value="{{value}}"
-            style="{{style}}"
-            aria-label="{{label}}"
-          >
-        {{/if}}
-      {{/each}}
+      <div class="brackenvale-page-fields">
+        {{#each fields}}
+          {{#if isCheckbox}}
+            <input
+              class="overlay-field {{className}}"
+              type="checkbox"
+              name="{{name}}"
+              style="{{style}}"
+              aria-label="{{label}}"
+              {{checked checked}}
+            >
+          {{else}}
+            <input
+              class="overlay-field {{className}}"
+              type="text"
+              name="{{name}}"
+              value="{{value}}"
+              style="{{style}}"
+              aria-label="{{label}}"
+            >
+          {{/if}}
+        {{/each}}
+      </div>
     </div>
-  </div>
-
-  <div class="brackenvale-art-page" data-page="2">
-    <img
-      class="brackenvale-page-art"
-      src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-2.webp"
-      alt=""
-      draggable="false"
-    >
-  </div>
-
-  <div class="brackenvale-art-page" data-page="3">
-    <img
-      class="brackenvale-page-art"
-      src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-3.webp"
-      alt=""
-      draggable="false"
-    >
-  </div>
-
-  <div class="brackenvale-art-page" data-page="4">
-    <img
-      class="brackenvale-page-art"
-      src="modules/brackenvale-core/assets/character-sheet/character-sheet-page-4.webp"
-      alt=""
-      draggable="false"
-    >
-  </div>
+  {{/each}}
 </form>
