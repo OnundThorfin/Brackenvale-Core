@@ -55,7 +55,7 @@ function prepareNativeField(component, actor, editable) {
   return {
     ...component,
     isTextField: true,
-    value: getProperty(actor, component.path) ?? "",
+    value: foundry.utils.getProperty(actor, component.path) ?? "",
     disabled: !editable || component.readonly === true,
     readonly: component.readonly === true,
     style: createPositionStyle(component)
@@ -67,13 +67,13 @@ function prepareDerivedField(component, actor) {
 
   switch (component.derive) {
     case "nextLevel":
-      value = getProperty(actor, "system.details.xp.max") ?? "";
+      value = foundry.utils.getProperty(actor, "system.details.xp.max") ?? "";
       break;
 
     case "initiative":
       value = formatSignedNumber(
-        getProperty(actor, "system.attributes.init.total")
-        ?? getProperty(actor, "system.attributes.init.mod")
+        foundry.utils.getProperty(actor, "system.attributes.init.total")
+        ?? foundry.utils.getProperty(actor, "system.attributes.init.mod")
         ?? 0
       );
       break;
@@ -84,12 +84,12 @@ function prepareDerivedField(component, actor) {
 
     case "proficiency":
       value = formatSignedNumber(
-        getProperty(actor, "system.attributes.prof") ?? 0
+        foundry.utils.getProperty(actor, "system.attributes.prof") ?? 0
       );
       break;
 
     default:
-      value = getProperty(actor, component.path) ?? "";
+      value = foundry.utils.getProperty(actor, component.path) ?? "";
   }
 
   return {
@@ -115,8 +115,8 @@ function prepareItemSummary(component, actor, editable) {
 
     if (component.includeLevel) {
       value = items.map((item) => {
-        const levels = getProperty(item, "system.levels")
-          ?? getProperty(item, "system.level")
+        const levels = foundry.utils.getProperty(item, "system.levels")
+          ?? foundry.utils.getProperty(item, "system.level")
           ?? "";
         return levels ? `${item.name} ${levels}` : item.name;
       }).join(" / ");
@@ -149,14 +149,14 @@ function prepareNativeCheckbox(component, actor, editable) {
   return {
     ...component,
     isCheckboxField: true,
-    checked: Boolean(getProperty(actor, component.path)),
+    checked: Boolean(foundry.utils.getProperty(actor, component.path)),
     disabled: !editable,
     style: createPositionStyle(component)
   };
 }
 
 function prepareAbilityScore(component, actor, editable) {
-  const ability = getProperty(actor, `system.abilities.${component.ability}`) ?? {};
+  const ability = foundry.utils.getProperty(actor, `system.abilities.${component.ability}`) ?? {};
   const modifier = Number(ability.mod ?? 0);
 
   return {
@@ -172,7 +172,7 @@ function prepareAbilityScore(component, actor, editable) {
 }
 
 function formatSpeed(actor) {
-  const movement = getProperty(actor, "system.attributes.movement") ?? {};
+  const movement = foundry.utils.getProperty(actor, "system.attributes.movement") ?? {};
   const walk = movement.walk ?? 0;
   const units = movement.units ?? "ft";
   return `${walk} ${units}`.trim();
