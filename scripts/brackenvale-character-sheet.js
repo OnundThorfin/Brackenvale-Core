@@ -118,6 +118,9 @@ Hooks.once("init", () => {
       this._activateNativeDataBindings(root);
       this._activateCalibrationControls(root);
       this._activateAbilityRolls(root);
+      this._activateProficiencyControls(root);
+      this._activateDeathSaveControls(root);
+      this._activateWeaponControls(root);
     }
 
     _activateArtworkPageTabs(root) {
@@ -257,6 +260,71 @@ Hooks.once("init", () => {
         speaker: ChatMessage.getSpeaker({actor: this.actor}),
         content: command
       });
+    }
+
+    _activateProficiencyControls(root) {
+      for (const button of root.querySelectorAll("[data-action='cycle-proficiency']")) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const path = button.dataset.path;
+          const current = Number(button.dataset.rank ?? 0);
+          const maximum = Number(button.dataset.maximumRank ?? 1);
+          const next = current >= maximum ? 0 : current + 1;
+
+          await this.actor.update({[path]: next});
+        });
+      }
+    }
+
+    _activateDeathSaveControls(root) {
+      for (const button of root.querySelectorAll("[data-action='set-death-save']")) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const path = button.dataset.path;
+          const clicked = Number(button.dataset.value ?? 0);
+          const current = Number(foundry.utils.getProperty(this.actor, path) ?? 0);
+          const next = current === clicked ? clicked - 1 : clicked;
+
+          await this.actor.update({[path]: Math.max(0, next)});
+        });
+      }
+    }
+
+    _activateWeaponControls(root) {
+      for (const row of root.querySelectorAll(".weapon-table-row[data-item-id]")) {
+        row.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const item = this.actor.items.get(row.dataset.itemId);
+          if (!item) return;
+
+          if (typeof item.use === "function") {
+            await item.use();
+          } else {
+            item.sheet?.render(true);
+          }
+        });
+
+        row.addEventListener("contextmenu", (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          this.actor.items.get(row.dataset.itemId)?.sheet?.render(true);
+        });
+      }
     }
 
     _activateCalibrationControls(root) {

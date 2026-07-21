@@ -22,9 +22,15 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
     case "abilityScore":
       return prepareAbilityScore(component, actor, editable);
     case "savingThrow":
-      return prepareSavingThrow(component, actor);
+      return prepareSavingThrow(component, actor, editable);
     case "skill":
-      return prepareSkill(component, actor);
+      return prepareSkill(component, actor, editable);
+    case "hitDiceSummary":
+      return prepareHitDiceSummary(component, actor);
+    case "deathSaves":
+      return prepareDeathSaves(component, actor, editable);
+    case "weaponTable":
+      return prepareWeaponTable(component, actor);
     default:
       console.warn(`${moduleId} | Unknown sheet component: ${component.component}`, component);
       return {...component, unsupported: true};
@@ -45,6 +51,7 @@ function prepareNativeField(component, actor, editable) {
   return {
     ...component,
     isTextField: true,
+    inputType: component.inputType ?? "text",
     value: foundry.utils.getProperty(actor, component.path) ?? "",
     disabled: !editable || component.readonly === true,
     readonly: component.readonly === true,
@@ -119,14 +126,15 @@ function prepareAbilityScore(component, actor, editable) {
   };
 }
 
-function prepareSavingThrow(component, actor) {
+function prepareSavingThrow(component, actor, editable) {
   const ability = foundry.utils.getProperty(actor, `system.abilities.${component.rollKey}`) ?? {};
   const rank = Number(ability.proficient ?? ability.proficiency ?? 0);
   const total = firstFinite(
     ability.save,
     ability.save?.value,
     ability.savingThrow,
-    Number(ability.mod ?? 0) + (rank ? Number(foundry.utils.getProperty(actor, "system.attributes.prof") ?? 0) : 0)
+    Number(ability.mod ?? 0)
+      + (rank ? Number(foundry.utils.getProperty(actor, "system.attributes.prof") ?? 0) : 0)
   );
 
   return {
@@ -134,12 +142,15 @@ function prepareSavingThrow(component, actor) {
     isRollRow: true,
     rollType: "savingThrow",
     modifierValue: formatSignedNumber(total),
-    proficiencyRank: Math.max(0, Math.min(2, rank)),
+    proficiencyRank: rank > 0 ? 1 : 0,
+    proficiencyEditable: editable,
+    proficiencyPath: `system.abilities.${component.rollKey}.proficient`,
+    maximumRank: 1,
     style: createPositionStyle(component)
   };
 }
 
-function prepareSkill(component, actor) {
+function prepareSkill(component, actor, editable) {
   const skill = foundry.utils.getProperty(actor, `system.skills.${component.rollKey}`) ?? {};
   const rank = Number(skill.value ?? skill.proficient ?? skill.proficiency ?? 0);
   const abilityKey = skill.ability ?? CONFIG.DND5E?.skills?.[component.rollKey]?.ability;
@@ -153,8 +164,136 @@ function prepareSkill(component, actor) {
     rollType: "skill",
     modifierValue: formatSignedNumber(firstFinite(skill.total, skill.mod, skill.bonus, fallback)),
     proficiencyRank: Math.max(0, Math.min(2, rank)),
+    proficiencyEditable: editable,
+    proficiencyPath: `system.skills.${component.rollKey}.value`,
+    maximumRank: 2,
     style: createPositionStyle(component)
   };
+}
+
+function prepareHitDiceSummary(component, actor) {
+  const classes = actor.items?.filter((item) => item.type === "class") ?? [];
+  const entries = classes.map((item) => {
+    const denomination =
+      foundry.utils.getProperty(item, "system.hitDice")
+      ?? foundry.utils.getProperty(item, "system.hd.denomination")
+      ?? "";
+    const total =
+      foundry.utils.getProperty(item, "system.levels")
+      ?? foundry.utils.getProperty(item, "system.level")
+      ?? 0;
+    const used =
+      foundry.utils.getProperty(item, "system.hitDiceUsed")
+      ?? foundry.utils.getProperty(item, "system.hd.spent")
+      ?? 0;
+    return {denomination, total, used};
+  });
+
+  const first = entries[0] ?? {denomination: "", total: "", used: ""};
+
+  return {
+    ...component,
+    isHitDiceSummary: true,
+    denomination: first.denomination,
+    total: first.total,
+    used: first.used,
+    style: createPositionStyle(component)
+  };
+}
+
+function prepareDeathSaves(component, actor, editable) {
+  return {
+    ...component,
+    isDeathSaves: true,
+    successes: Number(foundry.utils.getProperty(actor, "system.attributes.death.success") ?? 0),
+    failures: Number(foundry.utils.getProperty(actor, "system.attributes.death.failure") ?? 0),
+    editable,
+    style: createPositionStyle(component)
+  };
+}
+
+function prepareWeaponTable(component, actor) {
+  const weapons = actor.items
+    ?.filter((item) => item.type === "weapon" && Boolean(foundry.utils.getProperty(item, "system.equipped")))
+    .slice(0, component.maxRows ?? 4)
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+      attack: getWeaponAttackLabel(item),
+      damage: getWeaponDamageLabel(item),
+      mastery:
+        foundry.utils.getProperty(item, "system.mastery")
+        ?? foundry.utils.getProperty(item, "system.properties.mastery")
+        ?? ""
+    })) ?? [];
+
+  while (weapons.length < (component.maxRows ?? 4)) {
+    weapons.push({id: "", name: "", attack: "", damage: "", mastery: ""});
+  }
+
+  return {
+    ...component,
+    isWeaponTable: true,
+    weapons,
+    style: createPositionStyle(component)
+  };
+}
+
+function getWeaponAttackLabel(item) {
+  const labels = item.labels ?? {};
+  const direct =
+    labels.toHit
+    ?? labels.attack
+    ?? foundry.utils.getProperty(item, "system.attack.bonus");
+
+  if (direct !== undefined && direct !== null && direct !== "") {
+    const numeric = Number(direct);
+    return Number.isFinite(numeric) ? formatSignedNumber(numeric) : String(direct);
+  }
+
+  const activity = getFirstActivity(item);
+  const activityBonus =
+    foundry.utils.getProperty(activity, "attack.bonus")
+    ?? foundry.utils.getProperty(activity, "attack.flat");
+
+  if (activityBonus !== undefined && activityBonus !== null && activityBonus !== "") {
+    const numeric = Number(activityBonus);
+    return Number.isFinite(numeric) ? formatSignedNumber(numeric) : String(activityBonus);
+  }
+
+  return "";
+}
+
+function getWeaponDamageLabel(item) {
+  const labels = item.labels ?? {};
+  if (labels.damage) return String(labels.damage);
+
+  const activity = getFirstActivity(item);
+  const parts =
+    foundry.utils.getProperty(activity, "damage.parts")
+    ?? foundry.utils.getProperty(activity, "damage.include")
+    ?? [];
+
+  if (Array.isArray(parts)) {
+    return parts
+      .map((part) => {
+        if (typeof part === "string") return part;
+        return part?.formula ?? part?.number ?? part?.custom?.formula ?? "";
+      })
+      .filter(Boolean)
+      .join(" + ");
+  }
+
+  return "";
+}
+
+function getFirstActivity(item) {
+  const activities = foundry.utils.getProperty(item, "system.activities");
+  if (!activities) return null;
+  if (typeof activities.values === "function") return activities.values().next().value ?? null;
+  if (Array.isArray(activities)) return activities[0] ?? null;
+  if (typeof activities === "object") return Object.values(activities)[0] ?? null;
+  return null;
 }
 
 function firstFinite(...values) {
