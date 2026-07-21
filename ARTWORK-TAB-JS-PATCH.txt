@@ -1,0 +1,35 @@
+
+    /**
+     * Switch between the four artwork-backed pages.
+     */
+    _activateArtworkPageTabs(root) {
+      const buttons = root.querySelectorAll(
+        ".brackenvale-page-tabs [data-page]"
+      );
+
+      const pages = root.querySelectorAll(
+        ".brackenvale-art-page[data-page]"
+      );
+
+      for (const button of buttons) {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+
+          const selectedPage = button.dataset.page;
+
+          for (const tabButton of buttons) {
+            tabButton.classList.toggle(
+              "active",
+              tabButton === button
+            );
+          }
+
+          for (const page of pages) {
+            page.classList.toggle(
+              "active",
+              page.dataset.page === selectedPage
+            );
+          }
+        });
+      }
+    }
