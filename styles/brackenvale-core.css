@@ -241,4 +241,194 @@
   content: "BRACKENVALE • ";
   font-weight: 700;
   letter-spacing: 0.05em;
+}/* =========================================================
+   v0.3.9 — Print design refinement
+   Wordmark, identity fields, and ability cards
+   ========================================================= */
+
+.brackenvale-page-one {
+  font-family:
+    Baskerville,
+    "Palatino Linotype",
+    "Book Antiqua",
+    Georgia,
+    serif;
+}
+
+/* ---------- Brackenvale wordmark ---------- */
+
+.brackenvale-wordmark {
+  margin: 0 0 18px;
+}
+
+.brackenvale-wordmark h1 {
+  margin: 0;
+  font-family:
+    Baskerville,
+    "Palatino Linotype",
+    "Book Antiqua",
+    Georgia,
+    serif;
+  font-size: 55px;
+  font-variant: normal;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.brackenvale-title-rule {
+  width: 260px;
+  height: 14px;
+  margin: 8px 0 0 54px;
+  border-top: 1px solid #171612;
+}
+
+.brackenvale-title-rule::before {
+  content: "◆  ◆";
+  top: -8px;
+  padding: 0 7px;
+  background: #fffefa;
+  font-size: 7px;
+  letter-spacing: 2px;
+}
+
+/* ---------- Identity block ---------- */
+
+.brackenvale-summary-fields {
+  gap: 1px;
+}
+
+.brackenvale-line-field {
+  grid-template-columns: 151px minmax(0, 1fr);
+  gap: 8px;
+  min-height: 27px;
+}
+
+.brackenvale-line-field > span {
+  padding-bottom: 4px;
+  font-size: 13px;
+  font-variant: small-caps;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.brackenvale-line-field input {
+  height: 27px;
+  padding: 1px 4px 3px;
+  border-bottom: 1px solid #6b675e;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.brackenvale-line-field input:hover {
+  background: rgba(60, 54, 43, 0.035);
+}
+
+/* ---------- Ability card frame ---------- */
+
+.brackenvale-abilities-grid {
+  gap: 12px 14px;
+}
+
+.brackenvale-ability-card {
+  min-height: 205px;
+  padding: 13px 13px 11px;
+  border: 1.5px solid #171612;
+}
+
+.brackenvale-ability-card::before,
+.brackenvale-ability-card::after {
+  content: "◇";
+  top: -9px;
+  padding: 0 3px;
+  background: #fffefa;
+  font-size: 12px;
+}
+
+.brackenvale-ability-card::before {
+  left: -6px;
+}
+
+.brackenvale-ability-card::after {
+  right: -6px;
+}
+
+.brackenvale-ability-card h3 {
+  margin: -2px 0 9px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #8c877d;
+  font-size: 20px;
+  font-variant: small-caps;
+  font-weight: 700;
+  letter-spacing: 0.015em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* ---------- Score and modifier ---------- */
+
+.brackenvale-ability-values {
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 9px;
+}
+
+.brackenvale-ability-values label {
+  gap: 4px;
+}
+
+.brackenvale-ability-values span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.brackenvale-ability-values input {
+  width: 67px;
+  height: 47px;
+  border: 1.5px solid #171612;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.brackenvale-modifier-field input {
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+}
+
+/* ---------- Saving throws and skills ---------- */
+
+.brackenvale-skill-list {
+  gap: 1px;
+}
+
+.brackenvale-skill-line {
+  min-height: 16px;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.brackenvale-skill-line input[type="checkbox"] {
+  flex: 0 0 11px;
+  width: 11px;
+  height: 11px;
+  border: 1px solid #171612;
+  border-radius: 50%;
+}
+
+.brackenvale-skill-line:first-child {
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+/* Keep the taller skill lists contained cleanly. */
+
+.brackenvale-intelligence,
+.brackenvale-wisdom,
+.brackenvale-charisma {
+  min-height: 218px;
 }
