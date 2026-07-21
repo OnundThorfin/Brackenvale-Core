@@ -1,8 +1,10 @@
 /**
  * Brackenvale Character Sheet
- * JSON-driven artwork renderer
+ * Component-driven artwork renderer
  * Foundry VTT 14 / D&D 5e 5.3.3
  */
+
+import { prepareSheetComponent } from "./sheet-components.js";
 
 const MODULE_ID = "brackenvale-core";
 const TEMPLATE_PATH =
@@ -54,7 +56,6 @@ Hooks.once("init", () => {
 
     async _prepareContext(options) {
       const context = await super._prepareContext(options);
-      const flags = this.actor.flags?.[MODULE_ID] ?? {};
       const layouts = await this._loadLayouts();
 
       context.actor = this.actor;
@@ -63,8 +64,12 @@ Hooks.once("init", () => {
       context.pages = layouts.map((layout, index) => ({
         ...layout,
         active: index === 0,
-        fields: layout.fields.map((field) =>
-          this._prepareField(field, flags)
+        components: layout.components.map((component) =>
+          prepareSheetComponent(
+            component,
+            this.actor,
+            MODULE_ID
+          )
         )
       }));
 
@@ -96,25 +101,6 @@ Hooks.once("init", () => {
 
       BrackenvaleCharacterSheet.#layoutCache = layouts;
       return layouts;
-    }
-
-    _prepareField(field, flags) {
-      const value =
-        field.source === "actorName"
-          ? this.actor.name
-          : flags[field.flag] ?? "";
-
-      return {
-        ...field,
-        value,
-        checked: Boolean(value),
-        isCheckbox: field.type === "checkbox",
-        style:
-          `left:${field.left}%;` +
-          `top:${field.top}%;` +
-          `width:${field.width}%;` +
-          `height:${field.height}%;`
-      };
     }
 
     _onRender(context, options) {

@@ -24,17 +24,8 @@
       >
 
       <div class="brackenvale-page-fields">
-        {{#each fields}}
-          {{#if isCheckbox}}
-            <input
-              class="overlay-field {{className}}"
-              type="checkbox"
-              name="{{name}}"
-              style="{{style}}"
-              aria-label="{{label}}"
-              {{checked checked}}
-            >
-          {{else}}
+        {{#each components}}
+          {{#if isTextField}}
             <input
               class="overlay-field {{className}}"
               type="text"
@@ -42,6 +33,17 @@
               value="{{value}}"
               style="{{style}}"
               aria-label="{{label}}"
+            >
+          {{/if}}
+
+          {{#if isCheckboxField}}
+            <input
+              class="overlay-field {{className}}"
+              type="checkbox"
+              name="{{name}}"
+              style="{{style}}"
+              aria-label="{{label}}"
+              {{checked checked}}
             >
           {{/if}}
         {{/each}}
