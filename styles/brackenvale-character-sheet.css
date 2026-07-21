@@ -1,857 +1,97 @@
-/* =========================================================
-   Brackenvale Character Sheet
-   Four-page Foundry VTT layout
-   ========================================================= */
+/* Brackenvale Character Sheet — minimal rendering test */
 
 .brackenvale-character-sheet {
-  --bv-paper: #f4efdf;
-  --bv-paper-dark: #e4dbc3;
-  --bv-ink: #25231f;
-  --bv-muted: #6f685b;
-  --bv-line: #7d7463;
-  --bv-accent: #2f5b45;
-  --bv-accent-dark: #1f3e2f;
-  --bv-panel: rgba(255, 255, 255, 0.38);
-  --bv-shadow: rgba(0, 0, 0, 0.18);
-
-  min-width: 980px;
-  min-height: 760px;
-  color: var(--bv-ink);
+  min-width: 720px;
+  min-height: 560px;
 }
 
 .brackenvale-character-sheet .window-content {
   padding: 0;
   overflow: hidden;
+  color: #211f1a;
   background:
-    linear-gradient(rgba(244, 239, 223, 0.96), rgba(244, 239, 223, 0.96)),
+    linear-gradient(rgba(247, 243, 231, 0.97), rgba(247, 243, 231, 0.97)),
     repeating-linear-gradient(
       0deg,
-      rgba(80, 70, 50, 0.025) 0,
-      rgba(80, 70, 50, 0.025) 1px,
+      rgba(60, 52, 40, 0.025) 0,
+      rgba(60, 52, 40, 0.025) 1px,
       transparent 1px,
       transparent 4px
     );
 }
 
-.brackenvale-sheet-form {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 720px;
-  overflow: hidden;
+.brackenvale-minimal-sheet {
+  min-height: 520px;
+  padding: 24px;
   font-family: Georgia, "Times New Roman", serif;
 }
 
-/* =========================================================
-   Shared form controls
-   ========================================================= */
-
-.brackenvale-sheet-form input,
-.brackenvale-sheet-form textarea,
-.brackenvale-sheet-form select,
-.brackenvale-sheet-form button {
-  font: inherit;
-  color: var(--bv-ink);
+.brackenvale-minimal-header {
+  padding: 8px 12px 16px;
+  border-bottom: 3px double #302d27;
 }
 
-.brackenvale-sheet-form input,
-.brackenvale-sheet-form textarea,
-.brackenvale-sheet-form select {
+.brackenvale-minimal-header h1 {
+  margin: 0;
+  font-size: 48px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.brackenvale-minimal-body {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 28px;
+  align-items: start;
+  padding: 28px 12px;
+}
+
+.brackenvale-minimal-portrait {
+  width: 180px;
+  height: 220px;
+  border: 2px solid #302d27;
+  background: #e4decf;
+}
+
+.brackenvale-minimal-portrait img {
+  width: 100%;
+  height: 100%;
   border: 0;
-  border-bottom: 1px solid var(--bv-line);
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: none;
+  object-fit: cover;
 }
 
-.brackenvale-sheet-form input:focus,
-.brackenvale-sheet-form textarea:focus,
-.brackenvale-sheet-form select:focus {
-  outline: 1px solid var(--bv-accent);
-  outline-offset: 1px;
-  box-shadow: none;
+.brackenvale-minimal-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.brackenvale-sheet-form textarea {
-  resize: vertical;
-  min-height: 60px;
-  padding: 6px;
-  line-height: 1.35;
-}
-
-.brackenvale-sheet-form button {
-  border: 0;
-  background: none;
-  box-shadow: none;
-  cursor: pointer;
-}
-
-.brackenvale-sheet-form button:hover {
-  color: var(--bv-accent-dark);
-  text-shadow: none;
-}
-
-.brackenvale-sheet-form label {
-  font-size: 11px;
+.brackenvale-minimal-identity label {
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--bv-muted);
 }
 
-.brackenvale-sheet-form h2,
-.brackenvale-sheet-form h3 {
-  margin: 0;
-  color: var(--bv-accent-dark);
-  font-weight: 700;
-}
-
-.brackenvale-sheet-form h2 {
-  padding-bottom: 4px;
-  border-bottom: 2px solid var(--bv-accent);
-  font-size: 17px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.brackenvale-sheet-form h3 {
-  margin-top: 6px;
-  font-size: 13px;
-}
-
-/* =========================================================
-   Header
-   ========================================================= */
-
-.brackenvale-sheet-header {
-  display: grid;
-  grid-template-columns: 118px 1fr;
-  gap: 14px;
-  padding: 14px 16px;
-  border-bottom: 3px double var(--bv-accent-dark);
-  background:
-    linear-gradient(
-      90deg,
-      rgba(47, 91, 69, 0.12),
-      rgba(255, 255, 255, 0.1)
-    );
-}
-
-.brackenvale-portrait {
-  width: 118px;
-  height: 118px;
-  border: 2px solid var(--bv-accent-dark);
-  background: var(--bv-paper-dark);
-  box-shadow: 0 2px 5px var(--bv-shadow);
-}
-
-.brackenvale-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.brackenvale-minimal-identity input {
+  height: 42px;
+  padding: 4px 8px;
   border: 0;
-}
-
-.brackenvale-identity {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.brackenvale-character-name {
-  height: 40px;
-  padding: 0 4px;
-  border-bottom: 2px solid var(--bv-accent-dark) !important;
-  background: transparent !important;
-  font-size: 30px !important;
-  font-weight: 700;
-}
-
-.brackenvale-identity-grid {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr 1fr 1fr;
-  gap: 12px;
-}
-
-.brackenvale-identity-grid > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* =========================================================
-   Navigation
-   ========================================================= */
-
-.brackenvale-sheet-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-bottom: 2px solid var(--bv-accent-dark);
-  background: var(--bv-paper-dark);
-}
-
-.brackenvale-sheet-tabs button {
-  min-height: 38px;
-  border-right: 1px solid var(--bv-line);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.brackenvale-sheet-tabs button:last-child {
-  border-right: 0;
-}
-
-.brackenvale-sheet-tabs button.active {
-  color: #fff;
-  background: var(--bv-accent);
-}
-
-/* =========================================================
-   Page framework
-   ========================================================= */
-
-.brackenvale-sheet-pages {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.brackenvale-page {
-  display: none;
-  height: 100%;
-  padding: 12px;
-  overflow-y: auto;
-}
-
-.brackenvale-page.active {
-  display: block;
-}
-
-.sheet-panel {
-  padding: 10px;
-  border: 1px solid var(--bv-line);
-  background: var(--bv-panel);
-  box-shadow: 0 1px 3px var(--bv-shadow);
-}
-
-.empty-row {
-  padding: 10px;
-  font-style: italic;
-  color: var(--bv-muted);
-  text-align: center;
-}
-
-/* =========================================================
-   Page One
-   ========================================================= */
-
-.page-one-grid {
-  display: grid;
-  grid-template-columns: 190px 240px minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
-}
-
-.abilities-column,
-.combat-column {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ability-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ability-block {
-  display: grid;
-  grid-template-columns: 1fr 44px 46px;
-  grid-template-areas:
-    "name score mod"
-    "save save save";
-  gap: 4px 6px;
-  padding: 7px;
-  border: 1px solid rgba(125, 116, 99, 0.65);
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.ability-roll {
-  grid-area: name;
-  padding: 0;
-  text-align: left;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.ability-score {
-  grid-area: score;
-  height: 30px;
-  text-align: center;
-  font-size: 18px !important;
-  font-weight: 700;
-}
-
-.ability-modifier {
-  grid-area: mod;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--bv-line);
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.saving-throw {
-  grid-area: save;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  text-transform: none !important;
-}
-
-.saving-throw input,
-.checkbox-row input,
-.skill-row input,
-.death-save-row input,
-.condition-boxes input,
-.spell-markers input {
-  width: 14px;
-  height: 14px;
-  margin: 0;
-}
-
-.lined-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 8px;
-}
-
-.lined-fields input {
-  width: 100%;
-}
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.skills-column {
-  min-height: 100%;
-}
-
-.skill-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 8px;
-}
-
-.skill-row {
-  display: grid;
-  grid-template-columns: 18px 1fr 34px;
-  align-items: center;
-  min-height: 27px;
-  border-bottom: 1px dotted rgba(125, 116, 99, 0.7);
-}
-
-.skill-roll {
-  padding: 0;
-  text-align: left;
-}
-
-.skill-row span {
-  text-align: right;
-  font-weight: 700;
-}
-
-.passive-scores {
-  display: grid;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.passive-scores > div {
-  display: grid;
-  grid-template-columns: 1fr 56px;
-  align-items: center;
-  gap: 6px;
-}
-
-.passive-scores input {
-  text-align: center;
-}
-
-.combat-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-.stat-box {
-  display: flex;
-  min-height: 76px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 7px;
-  border: 1px solid var(--bv-line);
-  background: rgba(255, 255, 255, 0.26);
-}
-
-.stat-box input,
-.stat-display {
-  width: 100%;
-  margin-top: 4px;
-  text-align: center;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.hit-points-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.hit-point-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.hit-point-grid > div,
-.recovery-grid > div {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.hit-point-grid input {
-  height: 36px;
-  text-align: center;
-  font-size: 22px !important;
-  font-weight: 700;
-}
-
-.recovery-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 10px;
-}
-
-.death-save-row {
-  display: grid;
-  grid-template-columns: 1fr repeat(3, 18px);
-  align-items: center;
-  gap: 4px;
-}
-
-.weapon-table {
-  margin-top: 8px;
-}
-
-.weapon-heading,
-.weapon-row {
-  display: grid;
-  grid-template-columns: minmax(140px, 1.8fr) 70px 110px 90px;
-  align-items: center;
-  gap: 6px;
-}
-
-.weapon-heading {
-  padding: 4px 6px;
-  border-bottom: 1px solid var(--bv-line);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--bv-muted);
-}
-
-.weapon-row {
-  min-height: 32px;
-  padding: 4px 6px;
-  border-bottom: 1px dotted var(--bv-line);
-}
-
-.item-name {
-  padding: 0;
-  overflow: hidden;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 700;
-}
-
-.condition-boxes {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-.armor-supply-grid {
-  display: grid;
-  grid-template-columns: 1.25fr 1fr;
-  gap: 12px;
-}
-
-.condition-entry {
-  display: grid;
-  grid-template-columns: 52px 1fr auto;
-  align-items: center;
-  gap: 7px;
-  margin-top: 8px;
-}
-
-.supply-die {
-  display: grid;
-  grid-template-columns: 1fr 90px;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.compact-lines {
-  gap: 3px;
-}
-
-.experience-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.experience-grid > div {
-  display: grid;
-  grid-template-columns: 1fr 90px;
-  align-items: center;
-  gap: 8px;
-}
-
-/* =========================================================
-   Page Two
-   ========================================================= */
-
-.page-two-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr 1.2fr;
-  gap: 12px;
-  align-items: start;
-}
-
-.proficiencies-panel,
-.features-panel,
-.character-drives {
-  min-height: 100%;
-}
-
-.proficiency-section {
-  margin-top: 10px;
-}
-
-.proficiency-section textarea {
-  width: 100%;
-  min-height: 78px;
-}
-
-.character-drives {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.drive-panel textarea {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.three-line-textarea {
-  min-height: 86px !important;
-}
-
-.two-line-textarea {
-  min-height: 64px !important;
-}
-
-.large-notes {
-  width: 100%;
-  min-height: 210px !important;
-  margin-top: 8px;
-}
-
-.feature-list {
-  display: flex;
-  flex-direction: column;
-  margin-top: 8px;
-}
-
-.feature-row {
-  display: grid;
-  grid-template-columns: 1fr 110px;
-  gap: 8px;
-  min-height: 32px;
-  align-items: center;
-  border-bottom: 1px dotted var(--bv-line);
-}
-
-/* =========================================================
-   Page Three
-   ========================================================= */
-
-.page-three-grid {
-  display: grid;
-  grid-template-columns: 0.95fr 1.45fr;
-  gap: 12px;
-  align-items: start;
-}
-
-.equipment-left,
-.equipment-right {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.equipment-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.equipment-line {
-  display: grid;
-  grid-template-columns: 1fr 44px;
-  gap: 7px;
-}
-
-.equipment-line input {
-  width: 100%;
-}
-
-.slot-box {
-  text-align: center;
-}
-
-.currency-supply-row {
-  display: grid;
-  grid-template-columns: 1.35fr 1fr;
-  gap: 12px;
-}
-
-.currency-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.currency-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: center;
-}
-
-.currency-grid input {
-  text-align: center;
-}
-
-.pack-supplies-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.pack-supplies-panel select,
-.pack-supplies-panel input {
-  width: 100%;
-}
-
-.packed-gear-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 8px;
-}
-
-.packed-gear-column {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.encumbrance-summary {
-  display: flex;
-  justify-content: flex-end;
-  gap: 18px;
-  margin-top: 12px;
-  padding-top: 8px;
-  border-top: 1px solid var(--bv-line);
-}
-
-.encumbrance-summary label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.encumbrance-summary input {
-  width: 48px;
-  text-align: center;
-}
-
-/* =========================================================
-   Page Four
-   ========================================================= */
-
-.spellcasting-header {
-  margin-bottom: 12px;
-}
-
-.spellcasting-stat-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 0.8fr 0.8fr;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.spellcasting-stat-grid > div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.spellcasting-stat-grid input {
-  width: 100%;
-  text-align: center;
-}
-
-.page-four-grid {
-  display: grid;
-  grid-template-columns: 0.85fr 2fr;
-  gap: 12px;
-  align-items: start;
-}
-
-.spell-column {
-  display: flex;
-  flex-direction: column;
-  margin-top: 8px;
-}
-
-.spell-row {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) auto;
-  align-items: center;
-  min-height: 31px;
-  gap: 8px;
-  border-bottom: 1px dotted var(--bv-line);
-}
-
-.prepared-spells-panel .spell-row {
-  grid-template-columns: 28px minmax(120px, 1fr) auto;
-}
-
-.spell-level {
-  text-align: center;
-  font-weight: 700;
-}
-
-.spell-name {
-  padding: 0;
-  text-align: left;
-  font-weight: 700;
-}
-
-.spell-markers {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.spell-markers label {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 10px;
-}
-
-.blank-spell-row input {
-  width: 100%;
-}
-
-.prepared-spell-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.spell-slots-panel {
-  margin-top: 12px;
-}
-
-.spell-slot-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.spell-slot-level {
-  padding: 7px;
-  border: 1px solid var(--bv-line);
-  text-align: center;
-}
-
-.spell-slot-level > div {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 4px;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.spell-slot-level input {
-  width: 100%;
-  text-align: center;
-}
-
-/* =========================================================
-   Scrollbars
-   ========================================================= */
-
-.brackenvale-page::-webkit-scrollbar {
-  width: 10px;
-}
-
-.brackenvale-page::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-.brackenvale-page::-webkit-scrollbar-thumb {
-  border-radius: 6px;
-  background: rgba(47, 91, 69, 0.55);
-}
-
-/* =========================================================
-   Responsive fallback
-   ========================================================= */
-
-@media (max-width: 1100px) {
-  .page-one-grid {
-    grid-template-columns: 180px 220px minmax(420px, 1fr);
-  }
-
-  .spell-slot-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  border-bottom: 2px solid #302d27;
+  border-radius: 0;
+  color: #211f1a;
+  background: transparent;
+  box-shadow: none;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+}
+
+.brackenvale-render-success {
+  margin-top: 28px;
+  padding: 18px;
+  border: 1px solid #6d675c;
+  background: rgba(255, 255, 255, 0.35);
+  font-size: 16px;
+  line-height: 1.45;
 }
