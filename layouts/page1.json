@@ -3,52 +3,60 @@
   "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-1.webp",
   "components": [
     {
-      "component": "textField",
+      "component": "nativeField",
       "key": "characterName",
       "name": "name",
-      "source": "actorName",
+      "path": "name",
       "className": "line-field",
+      "label": "Character Name",
       "left": 17.1,
       "top": 8.55,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Character Name"
+      "height": 2.1
     },
     {
-      "component": "textField",
+      "component": "itemSummary",
       "key": "classLevel",
-      "name": "flags.brackenvale-core.classLevel",
-      "flag": "classLevel",
+      "itemTypes": [
+        "class"
+      ],
+      "includeLevel": true,
+      "emptyLabel": "Add a class",
       "className": "line-field",
+      "label": "Class and Level",
       "left": 17.1,
       "top": 10.75,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Class and Level"
+      "height": 2.1
     },
     {
-      "component": "textField",
+      "component": "itemSummary",
       "key": "background",
-      "name": "flags.brackenvale-core.background",
-      "flag": "background",
+      "itemTypes": [
+        "background"
+      ],
+      "emptyLabel": "Add a background",
       "className": "line-field",
+      "label": "Background",
       "left": 17.1,
       "top": 12.93,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Background"
+      "height": 2.1
     },
     {
-      "component": "textField",
+      "component": "itemSummary",
       "key": "species",
-      "name": "flags.brackenvale-core.species",
-      "flag": "species",
+      "itemTypes": [
+        "race",
+        "species"
+      ],
+      "emptyLabel": "Add a species",
       "className": "line-field",
+      "label": "Species",
       "left": 17.1,
       "top": 15.12,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Species"
+      "height": 2.1
     },
     {
       "component": "textField",
@@ -56,11 +64,11 @@
       "name": "flags.brackenvale-core.culturalFeature",
       "flag": "culturalFeature",
       "className": "line-field",
+      "label": "Cultural Feature",
       "left": 17.1,
       "top": 17.29,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Cultural Feature"
+      "height": 2.1
     },
     {
       "component": "textField",
@@ -68,11 +76,11 @@
       "name": "flags.brackenvale-core.faith",
       "flag": "faith",
       "className": "line-field",
+      "label": "Faith",
       "left": 17.1,
       "top": 19.48,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Faith"
+      "height": 2.1
     },
     {
       "component": "textField",
@@ -80,104 +88,96 @@
       "name": "flags.brackenvale-core.homeland",
       "flag": "homeland",
       "className": "line-field",
+      "label": "Homeland",
       "left": 17.1,
       "top": 21.66,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Homeland"
+      "height": 2.1
     },
     {
-      "component": "textField",
+      "component": "nativeField",
       "key": "experiencePoints",
-      "name": "flags.brackenvale-core.experiencePoints",
-      "flag": "experiencePoints",
+      "name": "system.details.xp.value",
+      "path": "system.details.xp.value",
       "className": "line-field",
+      "label": "Experience Points",
       "left": 17.1,
       "top": 23.84,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Experience Points"
+      "height": 2.1
     },
     {
-      "component": "textField",
+      "component": "derivedField",
       "key": "nextLevel",
-      "name": "flags.brackenvale-core.nextLevel",
-      "flag": "nextLevel",
+      "derive": "nextLevel",
       "className": "line-field",
+      "label": "Next Level",
       "left": 17.1,
       "top": 26.03,
       "width": 33.2,
-      "height": 2.1,
-      "label": "Next Level"
+      "height": 2.1
     },
     {
-      "component": "textField",
+      "component": "derivedField",
       "key": "armorClass",
-      "name": "flags.brackenvale-core.previewArmorClass",
-      "flag": "previewArmorClass",
+      "path": "system.attributes.ac.value",
       "className": "box-field",
+      "label": "Armor Class",
       "left": 59.12,
       "top": 11.95,
       "width": 8.1,
-      "height": 5.25,
-      "label": "Armor Class"
+      "height": 5.25
     },
     {
-      "component": "textField",
+      "component": "derivedField",
       "key": "initiative",
-      "name": "flags.brackenvale-core.previewInitiative",
-      "flag": "previewInitiative",
+      "derive": "initiative",
       "className": "box-field",
+      "label": "Initiative",
       "left": 71.2,
       "top": 11.95,
       "width": 8.1,
-      "height": 5.25,
-      "label": "Initiative"
+      "height": 5.25
     },
     {
-      "component": "textField",
+      "component": "derivedField",
       "key": "speed",
-      "name": "flags.brackenvale-core.previewSpeed",
-      "flag": "previewSpeed",
+      "derive": "speed",
       "className": "box-field",
+      "label": "Speed",
       "left": 83.52,
       "top": 11.95,
       "width": 8.1,
-      "height": 5.25,
-      "label": "Speed"
+      "height": 5.25
     },
     {
-      "component": "textField",
+      "component": "derivedField",
       "key": "proficiency",
-      "name": "flags.brackenvale-core.previewProficiency",
-      "flag": "previewProficiency",
+      "derive": "proficiency",
       "className": "box-field",
+      "label": "Proficiency Bonus",
       "left": 60.55,
       "top": 20.8,
       "width": 8.1,
-      "height": 5.25,
-      "label": "Proficiency Bonus"
+      "height": 5.25
     },
     {
-      "component": "checkboxField",
+      "component": "nativeCheckbox",
       "key": "inspiration",
-      "name": "flags.brackenvale-core.previewInspiration",
-      "flag": "previewInspiration",
+      "name": "system.attributes.inspiration",
+      "path": "system.attributes.inspiration",
       "className": "circle-field",
+      "label": "Inspiration",
       "left": 82.15,
       "top": 21.02,
       "width": 5.15,
-      "height": 5.15,
-      "label": "Inspiration"
+      "height": 5.15
     },
     {
       "component": "abilityScore",
       "key": "strength",
       "label": "Strength",
-      "scoreName": "flags.brackenvale-core.strengthScore",
-      "modifierName": "flags.brackenvale-core.strengthModifier",
-      "scoreFlag": "strengthScore",
-      "modifierFlag": "strengthModifier",
+      "ability": "str",
       "score": {
         "left": 6.15,
         "top": 34.55,
@@ -195,10 +195,7 @@
       "component": "abilityScore",
       "key": "intelligence",
       "label": "Intelligence",
-      "scoreName": "flags.brackenvale-core.intelligenceScore",
-      "modifierName": "flags.brackenvale-core.intelligenceModifier",
-      "scoreFlag": "intelligenceScore",
-      "modifierFlag": "intelligenceModifier",
+      "ability": "int",
       "score": {
         "left": 30.55,
         "top": 34.55,
@@ -216,10 +213,7 @@
       "component": "abilityScore",
       "key": "dexterity",
       "label": "Dexterity",
-      "scoreName": "flags.brackenvale-core.dexterityScore",
-      "modifierName": "flags.brackenvale-core.dexterityModifier",
-      "scoreFlag": "dexterityScore",
-      "modifierFlag": "dexterityModifier",
+      "ability": "dex",
       "score": {
         "left": 6.15,
         "top": 50.35,
@@ -237,10 +231,7 @@
       "component": "abilityScore",
       "key": "wisdom",
       "label": "Wisdom",
-      "scoreName": "flags.brackenvale-core.wisdomScore",
-      "modifierName": "flags.brackenvale-core.wisdomModifier",
-      "scoreFlag": "wisdomScore",
-      "modifierFlag": "wisdomModifier",
+      "ability": "wis",
       "score": {
         "left": 30.55,
         "top": 50.35,
@@ -258,10 +249,7 @@
       "component": "abilityScore",
       "key": "constitution",
       "label": "Constitution",
-      "scoreName": "flags.brackenvale-core.constitutionScore",
-      "modifierName": "flags.brackenvale-core.constitutionModifier",
-      "scoreFlag": "constitutionScore",
-      "modifierFlag": "constitutionModifier",
+      "ability": "con",
       "score": {
         "left": 6.15,
         "top": 66.1,
@@ -279,10 +267,7 @@
       "component": "abilityScore",
       "key": "charisma",
       "label": "Charisma",
-      "scoreName": "flags.brackenvale-core.charismaScore",
-      "modifierName": "flags.brackenvale-core.charismaModifier",
-      "scoreFlag": "charismaScore",
-      "modifierFlag": "charismaModifier",
+      "ability": "cha",
       "score": {
         "left": 30.55,
         "top": 66.1,

@@ -33,6 +33,21 @@
               value="{{value}}"
               style="{{style}}"
               aria-label="{{label}}"
+              {{#if readonly}}readonly{{/if}}
+              {{#if disabled}}disabled{{/if}}
+            >
+          {{/if}}
+
+          {{#if isItemSummary}}
+            <input
+              class="overlay-field {{className}} item-summary-field"
+              type="text"
+              value="{{value}}"
+              style="{{style}}"
+              aria-label="{{label}}"
+              title="Double-click to open the native D&D item"
+              data-item-id="{{itemId}}"
+              readonly
             >
           {{/if}}
 
@@ -44,26 +59,29 @@
               style="{{style}}"
               aria-label="{{label}}"
               {{checked checked}}
+              {{#if disabled}}disabled{{/if}}
             >
           {{/if}}
 
           {{#if isAbilityScore}}
             <input
               class="overlay-field ability-score-field"
-              type="text"
+              type="number"
               name="{{scoreName}}"
               value="{{scoreValue}}"
               style="{{scoreStyle}}"
               aria-label="{{label}} score"
+              {{#if scoreDisabled}}disabled{{/if}}
             >
 
             <input
               class="overlay-field ability-modifier-field"
               type="text"
-              name="{{modifierName}}"
               value="{{modifierValue}}"
               style="{{modifierStyle}}"
               aria-label="{{label}} modifier"
+              readonly
+              disabled
             >
           {{/if}}
         {{/each}}

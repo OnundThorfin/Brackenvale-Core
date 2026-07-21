@@ -1,6 +1,6 @@
 /**
  * Brackenvale Character Sheet
- * Component-driven artwork renderer
+ * Native D&D data binding milestone
  * Foundry VTT 14 / D&D 5e 5.3.3
  */
 
@@ -28,18 +28,15 @@ Hooks.once("init", () => {
   class BrackenvaleCharacterSheet extends CharacterActorSheet {
     static DEFAULT_OPTIONS = {
       ...super.DEFAULT_OPTIONS,
-
       classes: [
         ...(super.DEFAULT_OPTIONS?.classes ?? []),
         "brackenvale-character-sheet"
       ],
-
       position: {
         ...super.DEFAULT_OPTIONS?.position,
         width: 1080,
         height: 900
       },
-
       window: {
         ...super.DEFAULT_OPTIONS?.window,
         title: "Brackenvale Character Sheet"
@@ -47,9 +44,7 @@ Hooks.once("init", () => {
     };
 
     static PARTS = {
-      form: {
-        template: TEMPLATE_PATH
-      }
+      form: {template: TEMPLATE_PATH}
     };
 
     static #layoutCache = null;
@@ -57,10 +52,12 @@ Hooks.once("init", () => {
     async _prepareContext(options) {
       const context = await super._prepareContext(options);
       const layouts = await this._loadLayouts();
+      const editable = Boolean(this.isEditable);
 
       context.actor = this.actor;
       context.system = this.actor.system ?? {};
       context.cssClass = "brackenvale-character-sheet";
+      context.editable = editable;
       context.pages = layouts.map((layout, index) => ({
         ...layout,
         active: index === 0,
@@ -68,7 +65,8 @@ Hooks.once("init", () => {
           prepareSheetComponent(
             component,
             this.actor,
-            MODULE_ID
+            MODULE_ID,
+            editable
           )
         )
       }));
@@ -82,19 +80,14 @@ Hooks.once("init", () => {
       }
 
       const pageNumbers = [1, 2, 3, 4];
-
       const layouts = await Promise.all(
         pageNumbers.map(async (pageNumber) => {
-          const response = await fetch(
-            `${LAYOUT_ROOT}/page${pageNumber}.json`
-          );
-
+          const response = await fetch(`${LAYOUT_ROOT}/page${pageNumber}.json`);
           if (!response.ok) {
             throw new Error(
               `${MODULE_ID} | Could not load page ${pageNumber} layout.`
             );
           }
-
           return response.json();
         })
       );
@@ -110,13 +103,13 @@ Hooks.once("init", () => {
       if (!root) return;
 
       this._activateArtworkPageTabs(root);
+      this._activateItemEditors(root);
     }
 
     _activateArtworkPageTabs(root) {
       const buttons = root.querySelectorAll(
         ".brackenvale-page-tabs [data-page]"
       );
-
       const pages = root.querySelectorAll(
         ".brackenvale-art-page[data-page]"
       );
@@ -124,14 +117,10 @@ Hooks.once("init", () => {
       for (const button of buttons) {
         button.addEventListener("click", (event) => {
           event.preventDefault();
-
           const selectedPage = button.dataset.page;
 
           for (const tabButton of buttons) {
-            tabButton.classList.toggle(
-              "active",
-              tabButton === button
-            );
+            tabButton.classList.toggle("active", tabButton === button);
           }
 
           for (const page of pages) {
@@ -140,6 +129,17 @@ Hooks.once("init", () => {
               page.dataset.page === selectedPage
             );
           }
+        });
+      }
+    }
+
+    _activateItemEditors(root) {
+      for (const field of root.querySelectorAll("[data-item-id]")) {
+        field.addEventListener("dblclick", (event) => {
+          event.preventDefault();
+          const itemId = field.dataset.itemId;
+          if (!itemId) return;
+          this.actor.items.get(itemId)?.sheet?.render(true);
         });
       }
     }
