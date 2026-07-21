@@ -104,6 +104,7 @@ Hooks.once("init", () => {
 
       this._activateArtworkPageTabs(root);
       this._activateItemEditors(root);
+      this._activateNativeDataBindings(root);
     }
 
     _activateArtworkPageTabs(root) {
@@ -127,6 +128,43 @@ Hooks.once("init", () => {
             page.classList.toggle(
               "active",
               page.dataset.page === selectedPage
+            );
+          }
+        });
+      }
+    }
+
+    _activateNativeDataBindings(root) {
+      const fields = root.querySelectorAll(
+        ".brackenvale-page-fields input[name]"
+      );
+
+      for (const field of fields) {
+        field.addEventListener("change", async (event) => {
+          const input = event.currentTarget;
+          const path = input.name;
+
+          if (!path || input.disabled || input.readOnly) return;
+
+          let value;
+
+          if (input.type === "checkbox") {
+            value = input.checked;
+          } else if (input.type === "number") {
+            value = input.value === "" ? null : Number(input.value);
+          } else {
+            value = input.value;
+          }
+
+          try {
+            await this.actor.update({[path]: value});
+          } catch (error) {
+            console.error(
+              `${MODULE_ID} | Could not update actor field ${path}`,
+              error
+            );
+            ui.notifications.error(
+              `Brackenvale could not save ${input.getAttribute("aria-label") ?? path}.`
             );
           }
         });

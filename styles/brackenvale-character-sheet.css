@@ -134,3 +134,28 @@
     min-width: 720px;
   }
 }
+
+
+/* Keep Foundry's native sheet header and controls above the artwork layer. */
+.brackenvale-character-sheet > .window-header {
+  position: relative;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.brackenvale-character-sheet > .window-header button,
+.brackenvale-character-sheet > .window-header .window-control,
+.brackenvale-character-sheet > .window-header .header-control {
+  position: relative;
+  z-index: 1001;
+  pointer-events: auto;
+}
+
+.brackenvale-character-sheet > .window-content {
+  position: relative;
+  z-index: 1;
+}
+
+.brackenvale-art-sheet {
+  z-index: 0;
+}
