@@ -36,6 +36,7 @@ jobs:
         shell: bash
         run: |
           zip -r brackenvale-core.zip \
+            assets \
             lang \
             scripts \
             styles \
