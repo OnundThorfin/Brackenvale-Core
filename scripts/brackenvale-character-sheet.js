@@ -117,6 +117,7 @@ Hooks.once("init", () => {
       this._activateItemEditors(root);
       this._activateNativeDataBindings(root);
       this._activateCalibrationControls(root);
+      this._activateAbilityRolls(root);
     }
 
     _activateArtworkPageTabs(root) {
@@ -195,6 +196,67 @@ Hooks.once("init", () => {
           this.actor.items.get(itemId)?.sheet?.render(true);
         });
       }
+    }
+
+    _activateAbilityRolls(root) {
+      for (const row of root.querySelectorAll("[data-roll-type][data-roll-key]")) {
+        row.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const rollType = row.dataset.rollType;
+          const rollKey = row.dataset.rollKey;
+
+          try {
+            if (rollType === "skill") {
+              await this._rollSkill(rollKey);
+            } else if (rollType === "savingThrow") {
+              await this._rollSavingThrow(rollKey);
+            }
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not roll ${rollType} ${rollKey}`, error);
+            ui.notifications.error(`Brackenvale could not roll ${row.getAttribute("aria-label") ?? rollKey}.`);
+          }
+        });
+      }
+    }
+
+    async _rollSkill(skill) {
+      if (typeof this.actor.rollSkill === "function") {
+        try {
+          return await this.actor.rollSkill({skill});
+        } catch (error) {
+          return this.actor.rollSkill(skill);
+        }
+      }
+
+      const command = `[[/rollSkill ${skill}]]`;
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({actor: this.actor}),
+        content: command
+      });
+    }
+
+    async _rollSavingThrow(ability) {
+      if (typeof this.actor.rollSavingThrow === "function") {
+        try {
+          return await this.actor.rollSavingThrow({ability});
+        } catch (error) {
+          return this.actor.rollSavingThrow(ability);
+        }
+      }
+
+      if (typeof this.actor.rollAbilitySave === "function") {
+        return this.actor.rollAbilitySave(ability);
+      }
+
+      const command = `[[/rollSave ${ability}]]`;
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({actor: this.actor}),
+        content: command
+      });
     }
 
     _activateCalibrationControls(root) {

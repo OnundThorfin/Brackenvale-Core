@@ -272,3 +272,75 @@
 .brackenvale-art-sheet.calibration-mode .overlay-field.calibration-selected:focus {
   outline: 3px solid #e31b1b !important;
 }
+
+
+/* =========================================================
+   Interactive ability-card saves and skills
+   ========================================================= */
+
+.brackenvale-page-fields .ability-roll-row {
+  display: block;
+  padding: 0;
+  color: #111;
+  font-family: inherit;
+  font-size: clamp(9px, 1.05vw, 13px);
+  line-height: 1;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.brackenvale-page-fields .ability-roll-row:hover,
+.brackenvale-page-fields .ability-roll-row:focus-visible {
+  background: rgba(142, 114, 45, 0.18);
+  outline: 1px solid rgba(95, 69, 22, 0.7);
+}
+
+.ability-roll-proficiency {
+  position: absolute;
+  top: 50%;
+  left: 1%;
+  width: 0.72em;
+  height: 0.72em;
+  box-sizing: border-box;
+  border: 1px solid #171717;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.proficiency-rank-1 .ability-roll-proficiency {
+  background: #171717;
+}
+
+.proficiency-rank-2 .ability-roll-proficiency {
+  background: #171717;
+  box-shadow:
+    0 0 0 1.5px #f8f4e8,
+    0 0 0 2.5px #171717;
+}
+
+.ability-roll-modifier {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  min-width: 2.4em;
+  font-weight: 700;
+  text-align: center;
+  transform: translateY(-50%);
+}
+
+.brackenvale-reference-placeholder:not(:disabled):not([readonly]) {
+  pointer-events: auto;
+}
+
+/* Roll rows participate in the same GM calibration system. */
+.brackenvale-art-sheet.calibration-mode .ability-roll-row {
+  color: transparent;
+}
+
+.brackenvale-art-sheet.calibration-mode .ability-roll-row .ability-roll-proficiency,
+.brackenvale-art-sheet.calibration-mode .ability-roll-row .ability-roll-modifier {
+  visibility: hidden;
+}
