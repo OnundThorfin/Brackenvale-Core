@@ -159,3 +159,52 @@
 .brackenvale-art-sheet {
   z-index: 0;
 }
+
+
+/* =========================================================
+   GM Layout Calibration
+   ========================================================= */
+
+.brackenvale-page-tabs {
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.brackenvale-page-buttons,
+.brackenvale-layout-tools {
+  display: flex;
+  gap: 6px;
+}
+
+.brackenvale-layout-tools button {
+  width: auto;
+  min-width: 86px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.brackenvale-layout-tools button.active {
+  color: #fff;
+  background: #7b2e2e;
+}
+
+.brackenvale-art-sheet.calibration-mode .overlay-field {
+  outline: 1px dashed rgba(179, 43, 43, 0.92);
+  outline-offset: -1px;
+  background: rgba(255, 228, 120, 0.18);
+  cursor: move;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+}
+
+.brackenvale-art-sheet.calibration-mode .overlay-field.calibration-selected {
+  z-index: 50;
+  outline: 2px solid #d22c2c;
+  background: rgba(255, 214, 70, 0.34);
+}
+
+.brackenvale-art-sheet.calibration-mode .circle-field {
+  appearance: none;
+}
