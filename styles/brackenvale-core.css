@@ -431,4 +431,16 @@
 .brackenvale-wisdom,
 .brackenvale-charisma {
   min-height: 218px;
+}/* Add this block to the bottom of styles/brackenvale-character-sheet.css */
+
+.brackenvale-page-fields .ability-score-field,
+.brackenvale-page-fields .ability-modifier-field {
+  padding: 0;
+  font-size: clamp(18px, 2.2vw, 28px);
+  font-weight: 700;
+  text-align: center;
+}
+
+.brackenvale-page-fields .ability-modifier-field {
+  border-radius: 50%;
 }

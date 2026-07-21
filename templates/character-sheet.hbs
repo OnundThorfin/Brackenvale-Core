@@ -46,6 +46,26 @@
               {{checked checked}}
             >
           {{/if}}
+
+          {{#if isAbilityScore}}
+            <input
+              class="overlay-field ability-score-field"
+              type="text"
+              name="{{scoreName}}"
+              value="{{scoreValue}}"
+              style="{{scoreStyle}}"
+              aria-label="{{label}} score"
+            >
+
+            <input
+              class="overlay-field ability-modifier-field"
+              type="text"
+              name="{{modifierName}}"
+              value="{{modifierValue}}"
+              style="{{modifierStyle}}"
+              aria-label="{{label}} modifier"
+            >
+          {{/if}}
         {{/each}}
       </div>
     </div>

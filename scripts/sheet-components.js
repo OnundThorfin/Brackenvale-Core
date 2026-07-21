@@ -1,9 +1,5 @@
 /**
  * Reusable Brackenvale sheet components.
- *
- * Each layout entry declares a component type. This module converts that
- * declaration into template-ready data without coupling the main sheet class
- * to individual fields or page layouts.
  */
 
 export function prepareSheetComponent(component, actor, moduleId) {
@@ -15,6 +11,9 @@ export function prepareSheetComponent(component, actor, moduleId) {
 
     case "checkboxField":
       return prepareCheckboxField(component, flags);
+
+    case "abilityScore":
+      return prepareAbilityScore(component, flags);
 
     default:
       console.warn(
@@ -51,6 +50,17 @@ function prepareCheckboxField(component, flags) {
     isCheckboxField: true,
     checked: value,
     style: createPositionStyle(component)
+  };
+}
+
+function prepareAbilityScore(component, flags) {
+  return {
+    ...component,
+    isAbilityScore: true,
+    scoreValue: flags[component.scoreFlag] ?? "",
+    modifierValue: flags[component.modifierFlag] ?? "",
+    scoreStyle: createPositionStyle(component.score),
+    modifierStyle: createPositionStyle(component.modifier)
   };
 }
 

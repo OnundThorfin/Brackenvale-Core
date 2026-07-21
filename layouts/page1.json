@@ -169,6 +169,132 @@
       "width": 5.15,
       "height": 5.15,
       "label": "Inspiration"
+    },
+    {
+      "component": "abilityScore",
+      "key": "strength",
+      "label": "Strength",
+      "scoreName": "flags.brackenvale-core.strengthScore",
+      "modifierName": "flags.brackenvale-core.strengthModifier",
+      "scoreFlag": "strengthScore",
+      "modifierFlag": "strengthModifier",
+      "score": {
+        "left": 6.15,
+        "top": 34.55,
+        "width": 8.1,
+        "height": 4.45
+      },
+      "modifier": {
+        "left": 18.65,
+        "top": 34.1,
+        "width": 6.2,
+        "height": 4.95
+      }
+    },
+    {
+      "component": "abilityScore",
+      "key": "intelligence",
+      "label": "Intelligence",
+      "scoreName": "flags.brackenvale-core.intelligenceScore",
+      "modifierName": "flags.brackenvale-core.intelligenceModifier",
+      "scoreFlag": "intelligenceScore",
+      "modifierFlag": "intelligenceModifier",
+      "score": {
+        "left": 30.55,
+        "top": 34.55,
+        "width": 8.1,
+        "height": 4.45
+      },
+      "modifier": {
+        "left": 43.05,
+        "top": 34.1,
+        "width": 6.2,
+        "height": 4.95
+      }
+    },
+    {
+      "component": "abilityScore",
+      "key": "dexterity",
+      "label": "Dexterity",
+      "scoreName": "flags.brackenvale-core.dexterityScore",
+      "modifierName": "flags.brackenvale-core.dexterityModifier",
+      "scoreFlag": "dexterityScore",
+      "modifierFlag": "dexterityModifier",
+      "score": {
+        "left": 6.15,
+        "top": 50.35,
+        "width": 8.1,
+        "height": 4.45
+      },
+      "modifier": {
+        "left": 18.65,
+        "top": 49.9,
+        "width": 6.2,
+        "height": 4.95
+      }
+    },
+    {
+      "component": "abilityScore",
+      "key": "wisdom",
+      "label": "Wisdom",
+      "scoreName": "flags.brackenvale-core.wisdomScore",
+      "modifierName": "flags.brackenvale-core.wisdomModifier",
+      "scoreFlag": "wisdomScore",
+      "modifierFlag": "wisdomModifier",
+      "score": {
+        "left": 30.55,
+        "top": 50.35,
+        "width": 8.1,
+        "height": 4.45
+      },
+      "modifier": {
+        "left": 43.05,
+        "top": 49.9,
+        "width": 6.2,
+        "height": 4.95
+      }
+    },
+    {
+      "component": "abilityScore",
+      "key": "constitution",
+      "label": "Constitution",
+      "scoreName": "flags.brackenvale-core.constitutionScore",
+      "modifierName": "flags.brackenvale-core.constitutionModifier",
+      "scoreFlag": "constitutionScore",
+      "modifierFlag": "constitutionModifier",
+      "score": {
+        "left": 6.15,
+        "top": 66.1,
+        "width": 8.1,
+        "height": 4.45
+      },
+      "modifier": {
+        "left": 18.65,
+        "top": 65.65,
+        "width": 6.2,
+        "height": 4.95
+      }
+    },
+    {
+      "component": "abilityScore",
+      "key": "charisma",
+      "label": "Charisma",
+      "scoreName": "flags.brackenvale-core.charismaScore",
+      "modifierName": "flags.brackenvale-core.charismaModifier",
+      "scoreFlag": "charismaScore",
+      "modifierFlag": "charismaModifier",
+      "score": {
+        "left": 30.55,
+        "top": 66.1,
+        "width": 8.1,
+        "height": 4.45
+      },
+      "modifier": {
+        "left": 43.05,
+        "top": 65.65,
+        "width": 6.2,
+        "height": 4.95
+      }
     }
   ]
 }
