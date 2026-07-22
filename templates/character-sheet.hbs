@@ -177,20 +177,17 @@
 
           {{#if isWeaponTable}}
             <div
-              class="overlay-field weapon-table-component"
+              class="overlay-field weapon-toolbar"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
               aria-label="{{label}}"
             >
               {{#each weapons}}
-                <div
-                  class="weapon-table-row {{#unless id}}empty{{/unless}}"
-                  data-item-id="{{id}}"
-                >
+                <div class="weapon-toolbar-row {{#unless id}}empty{{/unless}} {{#unless equipped}}unequipped{{/unless}}">
                   <button
                     type="button"
-                    class="weapon-cell weapon-name"
+                    class="weapon-toolbar-cell weapon-name"
                     data-action="edit-weapon"
                     data-item-id="{{id}}"
                     title="{{#if id}}Open weapon item{{/if}}"
@@ -199,36 +196,36 @@
 
                   <button
                     type="button"
-                    class="weapon-cell weapon-attack"
+                    class="weapon-toolbar-cell weapon-attack"
                     data-action="use-weapon"
                     data-item-id="{{id}}"
-                    title="{{#if id}}Use this weapon{{/if}}"
+                    title="{{#if id}}Use weapon attack{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{attack}}</button>
 
                   <button
                     type="button"
-                    class="weapon-cell weapon-damage"
+                    class="weapon-toolbar-cell weapon-damage"
                     data-action="use-weapon"
                     data-item-id="{{id}}"
-                    title="{{#if id}}Use this weapon{{/if}}"
+                    title="{{#if id}}Use weapon damage workflow{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{damage}}</button>
 
                   <button
                     type="button"
-                    class="weapon-cell weapon-mastery"
+                    class="weapon-toolbar-cell weapon-mastery"
                     data-action="edit-weapon"
                     data-item-id="{{id}}"
-                    title="{{#if id}}Open weapon item{{/if}}"
+                    title="{{#if id}}Open weapon mastery and properties{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{mastery}}</button>
 
-                  <div class="weapon-condition" aria-label="{{#if id}}Weapon condition{{/if}}">
+                  <div class="weapon-condition-overlay" aria-label="{{#if id}}Weapon condition{{/if}}">
                     {{#each conditionDots}}
                       <button
                         type="button"
-                        class="weapon-condition-dot {{#if filled}}filled{{/if}}"
+                        class="weapon-condition-hitbox {{#if filled}}filled{{/if}}"
                         data-action="set-weapon-condition"
                         data-item-id="{{../id}}"
                         data-value="{{value}}"

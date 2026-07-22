@@ -258,7 +258,6 @@ function prepareWeaponTable(component, actor) {
           ?? foundry.utils.getProperty(item, "system.properties.mastery")
           ?? "",
         equipped: isWeaponEquipped(item),
-        condition,
         conditionDots: [1, 2, 3, 4, 5].map((value) => ({
           value,
           filled: value <= condition
@@ -274,7 +273,6 @@ function prepareWeaponTable(component, actor) {
       damage: "",
       mastery: "",
       equipped: false,
-      condition: 0,
       conditionDots: [1, 2, 3, 4, 5].map((value) => ({
         value,
         filled: false
