@@ -248,8 +248,13 @@ function prepareWeaponTable(component, actor) {
     foundry.utils.getProperty(actor, "flags.brackenvale-core.weaponConditions") ?? {};
 
   const weapons = actor.items
-    ?.filter((item) => item.type === "weapon" && isWeaponEquipped(item))
-    .sort((a, b) => a.name.localeCompare(b.name))
+    ?.filter((item) => item.type === "weapon")
+    .sort((a, b) => {
+      const equippedA = isWeaponEquipped(a) ? 1 : 0;
+      const equippedB = isWeaponEquipped(b) ? 1 : 0;
+      if (equippedA !== equippedB) return equippedB - equippedA;
+      return a.name.localeCompare(b.name);
+    })
     .slice(0, component.maxRows ?? 4)
     .map((item) => {
       const condition = Math.max(
@@ -266,7 +271,7 @@ function prepareWeaponTable(component, actor) {
           foundry.utils.getProperty(item, "system.mastery")
           ?? foundry.utils.getProperty(item, "system.properties.mastery")
           ?? "",
-        equipped: true,
+        equipped: isWeaponEquipped(item),
         condition,
         conditionDots: [1, 2, 3, 4, 5].map((value) => ({
           value,
