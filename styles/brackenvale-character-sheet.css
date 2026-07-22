@@ -438,22 +438,6 @@
 .hit-dice-total { left: 34%; width: 28%; }
 .hit-dice-used { right: 0; width: 31%; }
 
-.death-saves-component {
-  pointer-events: auto;
-}
-
-.death-save-row {
-  position: absolute;
-  left: 56.5%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 24%;
-  height: 20%;
-}
-
-.death-save-row.successes { top: 35%; }
-.death-save-row.failures { top: 66%; }
 
 .death-save-dot {
   flex: 0 0 auto;
@@ -583,4 +567,44 @@
 
 .weapon-condition-dot.filled {
   background: #171612 !important;
+}
+
+
+/* Sprint 1: death-save rows are independent calibration components. */
+.death-save-row-component {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+}
+
+.death-save-row-component .death-save-dot {
+  flex: 0 0 auto;
+  width: 1.05em;
+  height: 1.05em;
+  min-width: 10px;
+  min-height: 10px;
+  padding: 0;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  background-image: none;
+  border: 1px solid #171717;
+  border-radius: 50%;
+  box-shadow: none;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.death-save-row-component .death-save-dot.filled {
+  background: #171717;
+}
+
+.death-save-row-component .death-save-dot:disabled {
+  opacity: 1;
+}
+
+.brackenvale-art-sheet.calibration-mode .death-save-row-component .death-save-dot {
+  pointer-events: none;
 }
