@@ -215,9 +215,12 @@
                   <button
                     type="button"
                     class="weapon-toolbar-cell weapon-mastery"
-                    data-action="edit-weapon"
+                    data-action="show-weapon-mastery"
                     data-item-id="{{id}}"
-                    title="{{#if id}}Open weapon mastery and properties{{/if}}"
+                    data-weapon-name="{{name}}"
+                    data-mastery-name="{{mastery}}"
+                    data-mastery-description="{{masteryDescription}}"
+                    title="{{#if id}}View weapon mastery{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{mastery}}</button>
 
