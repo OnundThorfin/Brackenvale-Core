@@ -175,6 +175,24 @@
             ></button>
           {{/if}}
 
+          {{#if isEquippedDefenseName}}
+            <button type="button" class="overlay-field equipped-defense-name" style="{{style}}"
+              data-component-key="{{key}}" data-layout-part="root"
+              data-action="edit-defense-item" data-item-id="{{itemId}}"
+              aria-label="{{label}}" title="{{#if itemId}}Open {{value}}{{else}}No equipped item{{/if}}"
+              {{#unless itemId}}disabled{{/unless}}>{{value}}</button>
+          {{/if}}
+
+          {{#if isDefenseConditionBubble}}
+            <button type="button"
+              class="overlay-field defense-condition-bubble {{#if filled}}filled{{/if}}"
+              style="{{style}}" data-component-key="{{key}}" data-layout-part="root"
+              data-action="set-defense-condition" data-defense-type="{{defenseType}}"
+              data-path="{{path}}" data-value="{{value}}" data-item-id="{{itemId}}"
+              aria-label="{{label}}" title="{{label}}: −1 AC per checked box"
+              {{#unless editable}}disabled{{/unless}}></button>
+          {{/if}}
+
           {{#if isWeaponTable}}
             <div
               class="overlay-field weapon-toolbar"
@@ -197,8 +215,9 @@
                   <button
                     type="button"
                     class="weapon-toolbar-cell weapon-attack"
-                    data-action="use-weapon"
+                    data-action="roll-weapon-attack"
                     data-item-id="{{id}}"
+                    data-condition-penalty="{{conditionPenalty}}"
                     title="{{#if id}}Use weapon attack{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{attack}}</button>
@@ -206,8 +225,9 @@
                   <button
                     type="button"
                     class="weapon-toolbar-cell weapon-damage"
-                    data-action="use-weapon"
+                    data-action="roll-weapon-damage"
                     data-item-id="{{id}}"
+                    data-condition-penalty="{{conditionPenalty}}"
                     title="{{#if id}}Use weapon damage workflow{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{damage}}</button>
@@ -215,9 +235,11 @@
                   <button
                     type="button"
                     class="weapon-toolbar-cell weapon-mastery"
-                    data-action="edit-weapon"
+                    data-action="show-mastery"
                     data-item-id="{{id}}"
-                    title="{{#if id}}Open weapon mastery and properties{{/if}}"
+                    data-mastery-label="{{mastery}}"
+                    data-mastery-description="{{masteryDescription}}"
+                    title="{{#if masteryDescription}}{{masteryDescription}}{{else}}{{#if id}}Open weapon mastery details{{/if}}{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{mastery}}</button>
 

@@ -668,6 +668,146 @@
       "width": 92.45,
       "height": 12.25,
       "maxRows": 4
+    },
+    {
+      "component": "equippedDefenseName",
+      "key": "equippedArmor",
+      "defenseType": "armor",
+      "label": "Equipped Armor",
+      "left": 58.4,
+      "top": 29.65,
+      "width": 34.0,
+      "height": 1.75
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "armorCondition1",
+      "defenseType": "armor",
+      "path": "flags.brackenvale-core.armorCondition",
+      "value": 1,
+      "label": "Armor Condition 1",
+      "left": 74.0,
+      "top": 32.1,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "armorCondition2",
+      "defenseType": "armor",
+      "path": "flags.brackenvale-core.armorCondition",
+      "value": 2,
+      "label": "Armor Condition 2",
+      "left": 78.2,
+      "top": 32.1,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "armorCondition3",
+      "defenseType": "armor",
+      "path": "flags.brackenvale-core.armorCondition",
+      "value": 3,
+      "label": "Armor Condition 3",
+      "left": 82.4,
+      "top": 32.1,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "armorCondition4",
+      "defenseType": "armor",
+      "path": "flags.brackenvale-core.armorCondition",
+      "value": 4,
+      "label": "Armor Condition 4",
+      "left": 86.6,
+      "top": 32.1,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "armorCondition5",
+      "defenseType": "armor",
+      "path": "flags.brackenvale-core.armorCondition",
+      "value": 5,
+      "label": "Armor Condition 5",
+      "left": 90.8,
+      "top": 32.1,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "equippedDefenseName",
+      "key": "equippedShield",
+      "defenseType": "shield",
+      "label": "Equipped Shield",
+      "left": 58.4,
+      "top": 36.45,
+      "width": 34.0,
+      "height": 1.75
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "shieldCondition1",
+      "defenseType": "shield",
+      "path": "flags.brackenvale-core.shieldCondition",
+      "value": 1,
+      "label": "Shield Condition 1",
+      "left": 74.0,
+      "top": 39.15,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "shieldCondition2",
+      "defenseType": "shield",
+      "path": "flags.brackenvale-core.shieldCondition",
+      "value": 2,
+      "label": "Shield Condition 2",
+      "left": 78.2,
+      "top": 39.15,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "shieldCondition3",
+      "defenseType": "shield",
+      "path": "flags.brackenvale-core.shieldCondition",
+      "value": 3,
+      "label": "Shield Condition 3",
+      "left": 82.4,
+      "top": 39.15,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "shieldCondition4",
+      "defenseType": "shield",
+      "path": "flags.brackenvale-core.shieldCondition",
+      "value": 4,
+      "label": "Shield Condition 4",
+      "left": 86.6,
+      "top": 39.15,
+      "width": 1.55,
+      "height": 1.55
+    },
+    {
+      "component": "defenseConditionBubble",
+      "key": "shieldCondition5",
+      "defenseType": "shield",
+      "path": "flags.brackenvale-core.shieldCondition",
+      "value": 5,
+      "label": "Shield Condition 5",
+      "left": 90.8,
+      "top": 39.15,
+      "width": 1.55,
+      "height": 1.55
     }
   ]
 }
