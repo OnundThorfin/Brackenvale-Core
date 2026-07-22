@@ -31,6 +31,10 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareDeathSaveBubble(component, actor, editable);
     case "weaponTable":
       return prepareWeaponTable(component, actor);
+    case "equippedDefenseName":
+      return prepareEquippedDefenseName(component, actor);
+    case "defenseConditionBubble":
+      return prepareDefenseConditionBubble(component, actor, editable);
     default:
       console.warn(`${moduleId} | Unknown sheet component: ${component.component}`, component);
       return {...component, unsupported: true};
@@ -243,23 +247,18 @@ function prepareWeaponTable(component, actor) {
     })
     .slice(0, component.maxRows ?? 4)
     .map((item) => {
-      const condition = Math.max(
-        0,
-        Math.min(5, Number(conditionMap[item.id] ?? 0))
-      );
-
+      const penalty = Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0)));
+      const mastery = getMasteryDetails(item);
       return {
         id: item.id,
         name: item.name,
         attack: applyNumericPenalty(getWeaponAttackLabel(item), penalty),
         damage: applyFormulaPenalty(getWeaponDamageLabel(item), penalty),
         mastery: mastery.label,
-        masteryReference: mastery.reference,
+        masteryReference: String(mastery.reference ?? ""),
         equipped: isWeaponEquipped(item),
-        conditionDots: [1, 2, 3, 4, 5].map((value) => ({
-          value,
-          filled: value <= condition
-        }))
+        conditionPenalty: penalty,
+        conditionDots: [1,2,3,4,5].map((value) => ({value, filled: value <= penalty}))
       };
     }) ?? [];
 
