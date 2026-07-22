@@ -251,12 +251,10 @@ function prepareWeaponTable(component, actor) {
       return {
         id: item.id,
         name: item.name,
-        attack: getWeaponAttackLabel(item),
-        damage: getWeaponDamageLabel(item),
-        mastery:
-          foundry.utils.getProperty(item, "system.mastery")
-          ?? foundry.utils.getProperty(item, "system.properties.mastery")
-          ?? "",
+        attack: applyNumericPenalty(getWeaponAttackLabel(item), penalty),
+        damage: applyFormulaPenalty(getWeaponDamageLabel(item), penalty),
+        mastery: mastery.label,
+        masteryReference: mastery.reference,
         equipped: isWeaponEquipped(item),
         conditionDots: [1, 2, 3, 4, 5].map((value) => ({
           value,
@@ -267,25 +265,76 @@ function prepareWeaponTable(component, actor) {
 
   while (weapons.length < (component.maxRows ?? 4)) {
     weapons.push({
-      id: "",
-      name: "",
-      attack: "",
-      damage: "",
-      mastery: "",
-      equipped: false,
-      conditionDots: [1, 2, 3, 4, 5].map((value) => ({
-        value,
-        filled: false
-      }))
+      id: "", name: "", attack: "", damage: "", mastery: "",
+      masteryReference: "", equipped: false, conditionPenalty: 0,
+      conditionDots: [1,2,3,4,5].map((value) => ({value, filled: false}))
     });
   }
 
+  return {...component, isWeaponTable: true, weapons, style: createPositionStyle(component)};
+}
+
+function applyNumericPenalty(value, penalty) {
+  if (!penalty || value === "") return value;
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return formatSignedNumber(numeric - penalty);
+  const match = String(value).trim().match(/^([+-]?\d+)$/);
+  if (match) return formatSignedNumber(Number(match[1]) - penalty);
+  return `${value} − ${penalty}`;
+}
+
+function applyFormulaPenalty(value, penalty) {
+  if (!penalty || !value) return value;
+  return `${value} − ${penalty}`;
+}
+
+function getMasteryDetails(item) {
+  const raw = foundry.utils.getProperty(item, "system.mastery")
+    ?? foundry.utils.getProperty(item, "system.properties.mastery")
+    ?? "";
+  const key = typeof raw === "string" ? raw : (raw?.value ?? raw?.identifier ?? "");
+  if (!key) return {label: "", reference: ""};
+
+  const config = CONFIG.DND5E?.weaponMasteries?.[key]
+    ?? CONFIG.DND5E?.weaponMastery?.[key]
+    ?? CONFIG.DND5E?.masteries?.[key]
+    ?? null;
+
+  const label = config?.label ?? config?.name ?? key;
+  const text = String(label);
+
   return {
-    ...component,
-    isWeaponTable: true,
-    weapons,
-    style: createPositionStyle(component)
+    label: game.i18n?.has?.(text) ? game.i18n.localize(text) : text,
+    reference: String(config?.reference ?? "")
   };
+}
+
+function prepareEquippedDefenseName(component, actor) {
+  const item = findEquippedDefense(actor, component.defenseType);
+  return {...component, isEquippedDefenseName: true, itemId: item?.id ?? "", value: item?.name ?? "", style: createPositionStyle(component)};
+}
+
+function prepareDefenseConditionBubble(component, actor, editable) {
+  const item = findEquippedDefense(actor, component.defenseType);
+  const current = item ? Number(foundry.utils.getProperty(actor, component.path) ?? 0) : 0;
+  return {...component, isDefenseConditionBubble: true, itemId: item?.id ?? "", filled: Number(component.value) <= current, editable: Boolean(editable && item), style: createPositionStyle(component)};
+}
+
+function findEquippedDefense(actor, defenseType) {
+  const equipment = actor.items?.filter((item) => item.type === "equipment" && isWeaponEquipped(item)) ?? [];
+  const isShield = (item) => {
+    const values = [
+      foundry.utils.getProperty(item, "system.type.value"),
+      foundry.utils.getProperty(item, "system.type.baseItem"),
+      foundry.utils.getProperty(item, "system.armor.type"),
+      foundry.utils.getProperty(item, "system.identifier"),
+      item.name
+    ].filter(Boolean).map((v) => String(v).toLowerCase());
+    return values.some((v) => v.includes("shield"));
+  };
+  return defenseType === "shield"
+    ? (equipment.find(isShield) ?? null)
+    : (equipment.find((item) => !isShield(item)) ?? null);
 }
 
 function isWeaponEquipped(item) {

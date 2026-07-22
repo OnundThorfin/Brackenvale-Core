@@ -217,10 +217,9 @@
                     class="weapon-toolbar-cell weapon-mastery"
                     data-action="show-weapon-mastery"
                     data-item-id="{{id}}"
-                    data-weapon-name="{{name}}"
                     data-mastery-name="{{mastery}}"
-                    data-mastery-description="{{masteryDescription}}"
-                    title="{{#if id}}View weapon mastery{{/if}}"
+                    data-mastery-reference="{{masteryReference}}"
+                    title="{{#if masteryReference}}Open {{mastery}} rules{{else}}No mastery rules entry available{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{mastery}}</button>
 
