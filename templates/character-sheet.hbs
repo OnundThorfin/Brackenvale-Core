@@ -159,26 +159,20 @@
             </div>
           {{/if}}
 
-          {{#if isDeathSaveRow}}
-            <div
-              class="overlay-field death-save-row-component"
+          {{#if isDeathSaveBubble}}
+            <button
+              type="button"
+              class="overlay-field death-save-bubble {{#if filled}}filled{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
+              data-action="set-death-save"
+              data-path="{{path}}"
+              data-value="{{value}}"
               aria-label="{{label}}"
-            >
-              {{#each dots}}
-                <button
-                  type="button"
-                  class="death-save-dot {{#if filled}}filled{{/if}}"
-                  data-action="set-death-save"
-                  data-path="{{../path}}"
-                  data-value="{{value}}"
-                  aria-label="Set {{../label}} to {{value}}"
-                  {{#unless ../editable}}disabled{{/unless}}
-                ></button>
-              {{/each}}
-            </div>
+              title="{{label}}"
+              {{#unless editable}}disabled{{/unless}}
+            ></button>
           {{/if}}
 
           {{#if isWeaponTable}}
