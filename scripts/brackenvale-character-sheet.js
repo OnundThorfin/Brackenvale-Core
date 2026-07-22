@@ -123,7 +123,6 @@ Hooks.once("init", () => {
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
     }
-
     _activateArtworkPageTabs(root) {
       const buttons = root.querySelectorAll(
         ".brackenvale-page-tabs [data-page]"
@@ -335,6 +334,39 @@ Hooks.once("init", () => {
     }
 
     _activateWeaponControls(root) {
+            for (const button of root.querySelectorAll("[data-action='show-weapon-mastery']")) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const weaponName = button.dataset.weaponName || "Weapon";
+          const masteryName = button.dataset.masteryName || "No Mastery";
+          const masteryDescription =
+            button.dataset.masteryDescription || "This weapon has no mastery description.";
+
+          await foundry.applications.api.DialogV2.wait({
+            window: {
+              title: `${weaponName}: ${masteryName}`
+            },
+            content: `
+              <div class="brackenvale-weapon-mastery-dialog">
+                <h2>${masteryName}</h2>
+                <p>${masteryDescription}</p>
+              </div>
+            `,
+            buttons: [
+              {
+                action: "close",
+                label: "Close",
+                default: true
+              }
+            ],
+            close: () => null
+          });
+        });
+      }
       for (const button of root.querySelectorAll("[data-action='edit-weapon']")) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
