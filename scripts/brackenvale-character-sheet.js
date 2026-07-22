@@ -334,39 +334,47 @@ Hooks.once("init", () => {
     }
 
     _activateWeaponControls(root) {
-            for (const button of root.querySelectorAll("[data-action='show-weapon-mastery']")) {
+      for (const button of root.querySelectorAll("[data-action='show-weapon-mastery']")) {
         button.addEventListener("click", async (event) => {
           if (this._calibrationMode) return;
 
           event.preventDefault();
           event.stopPropagation();
 
-          const weaponName = button.dataset.weaponName || "Weapon";
-          const masteryName = button.dataset.masteryName || "No Mastery";
-          const masteryDescription =
-            button.dataset.masteryDescription || "This weapon has no mastery description.";
+          const masteryName = button.dataset.masteryName || "Weapon Mastery";
+          const masteryReference = button.dataset.masteryReference;
 
-          await foundry.applications.api.DialogV2.wait({
-            window: {
-              title: `${weaponName}: ${masteryName}`
-            },
-            content: `
-              <div class="brackenvale-weapon-mastery-dialog">
-                <h2>${masteryName}</h2>
-                <p>${masteryDescription}</p>
-              </div>
-            `,
-            buttons: [
-              {
-                action: "close",
-                label: "Close",
-                default: true
-              }
-            ],
-            close: () => null
-          });
+          if (!masteryReference) {
+            ui.notifications?.warn(`${masteryName} does not have a linked D&D rules entry.`);
+            return;
+          }
+
+          try {
+            const document = await fromUuid(masteryReference);
+
+            if (!document) {
+              ui.notifications?.warn(`Could not find the D&D rules entry for ${masteryName}.`);
+              return;
+            }
+
+            if (document.sheet?.render) {
+              document.sheet.render(true);
+              return;
+            }
+
+            if (document.parent?.sheet?.render) {
+              document.parent.sheet.render(true);
+              return;
+            }
+
+            ui.notifications?.warn(`Could not open the D&D rules entry for ${masteryName}.`);
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not open mastery reference ${masteryReference}`, error);
+            ui.notifications?.error(`Brackenvale could not open the rules entry for ${masteryName}.`);
+          }
         });
       }
+
       for (const button of root.querySelectorAll("[data-action='edit-weapon']")) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;

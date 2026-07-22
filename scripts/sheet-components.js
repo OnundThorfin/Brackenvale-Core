@@ -255,7 +255,7 @@ function prepareWeaponTable(component, actor) {
         attack: applyNumericPenalty(getWeaponAttackLabel(item), penalty),
         damage: applyFormulaPenalty(getWeaponDamageLabel(item), penalty),
         mastery: mastery.label,
-        masteryDescription: mastery.description,
+        masteryReference: mastery.reference,
         equipped: isWeaponEquipped(item),
         conditionPenalty: penalty,
         conditionDots: [1,2,3,4,5].map((value) => ({value, filled: value <= penalty}))
@@ -265,7 +265,7 @@ function prepareWeaponTable(component, actor) {
   while (weapons.length < (component.maxRows ?? 4)) {
     weapons.push({
       id: "", name: "", attack: "", damage: "", mastery: "",
-      masteryDescription: "", equipped: false, conditionPenalty: 0,
+      masteryReference: "", equipped: false, conditionPenalty: 0,
       conditionDots: [1,2,3,4,5].map((value) => ({value, filled: false}))
     });
   }
@@ -292,22 +292,19 @@ function getMasteryDetails(item) {
     ?? foundry.utils.getProperty(item, "system.properties.mastery")
     ?? "";
   const key = typeof raw === "string" ? raw : (raw?.value ?? raw?.identifier ?? "");
-  if (!key) return {label: "", description: ""};
+  if (!key) return {label: "", reference: ""};
 
   const config = CONFIG.DND5E?.weaponMasteries?.[key]
     ?? CONFIG.DND5E?.weaponMastery?.[key]
     ?? CONFIG.DND5E?.masteries?.[key]
     ?? null;
 
-  const localize = (value) => {
-    if (!value) return "";
-    const text = String(value);
-    return game.i18n?.has?.(text) ? game.i18n.localize(text) : text;
-  };
+  const label = config?.label ?? config?.name ?? key;
+  const text = String(label);
 
   return {
-    label: localize(config?.label ?? config?.name ?? key),
-    description: localize(config?.description ?? config?.hint ?? config?.reference ?? "")
+    label: game.i18n?.has?.(text) ? game.i18n.localize(text) : text,
+    reference: String(config?.reference ?? "")
   };
 }
 
