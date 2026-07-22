@@ -72,6 +72,7 @@ Hooks.once("init", () => {
       context.pages = this._workingLayouts.map((layout, index) => ({
         ...layout,
         active: index === 0,
+        isEquipmentPage: Number(layout.page) === 3,
         components: layout.components.map((component) =>
           prepareSheetComponent(
             component,
@@ -122,6 +123,7 @@ Hooks.once("init", () => {
       this._activateDeathSaveControls(root);
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
+      this._activateEquipmentDropZones(root);
     }
     _activateArtworkPageTabs(root) {
       const buttons = root.querySelectorAll(
@@ -448,6 +450,105 @@ Hooks.once("init", () => {
           item.sheet?.render(true);
         });
       }
+    }
+
+
+    _activateEquipmentDropZones(root) {
+      const zones = root.querySelectorAll("[data-equipment-drop-zone]");
+
+      for (const zone of zones) {
+        const clearHighlight = () => {
+          zone.style.background = "transparent";
+          zone.style.outline = "none";
+        };
+
+        zone.addEventListener("dragenter", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          zone.style.background = "rgba(60, 100, 60, 0.12)";
+          zone.style.outline = "2px dashed rgba(40, 80, 40, 0.75)";
+        });
+
+        zone.addEventListener("dragover", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+        });
+
+        zone.addEventListener("dragleave", (event) => {
+          if (zone.contains(event.relatedTarget)) return;
+          clearHighlight();
+        });
+
+        zone.addEventListener("drop", async (event) => {
+          clearHighlight();
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          try {
+            const data = TextEditor.getDragEventData(event);
+            await this._handleEquipmentDrop(data, zone.dataset.equipmentDropZone);
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not process equipment drop`, error);
+            ui.notifications?.error("Brackenvale could not add that item.");
+          }
+        });
+      }
+    }
+
+    async _handleEquipmentDrop(data, zoneType) {
+      if (!data || data.type !== "Item") {
+        ui.notifications?.warn("Only items can be dropped into equipment sections.");
+        return;
+      }
+
+      let sourceItem = null;
+      if (data.uuid) sourceItem = await fromUuid(data.uuid);
+      if (!sourceItem && data.id) sourceItem = this.actor.items.get(data.id) ?? null;
+
+      if (!sourceItem) {
+        ui.notifications?.warn("Brackenvale could not find the dropped item.");
+        return;
+      }
+
+      if (zoneType === "weapons" && sourceItem.type !== "weapon") {
+        ui.notifications?.warn("Only weapons can be dropped into the Weapons section.");
+        return;
+      }
+
+      if (zoneType === "armor" && sourceItem.type !== "equipment") {
+        ui.notifications?.warn("Only armor or shields can be dropped into the Armor & Shield section.");
+        return;
+      }
+
+      const location = ["armor", "weapons"].includes(zoneType) ? "equipped" : zoneType;
+      const equipped = location === "equipped";
+      const ownedItem = sourceItem.parent === this.actor ? sourceItem : null;
+
+      if (ownedItem) {
+        await ownedItem.update({
+          [`flags.${MODULE_ID}.location`]: location,
+          "system.equipped": equipped
+        });
+      } else {
+        const itemData = sourceItem.toObject();
+        foundry.utils.setProperty(itemData, `flags.${MODULE_ID}.location`, location);
+        foundry.utils.setProperty(itemData, "system.equipped", equipped);
+        delete itemData._id;
+        await this.actor.createEmbeddedDocuments("Item", [itemData]);
+      }
+
+      const sectionName = {
+        armor: "Armor & Shield",
+        weapons: "Weapons",
+        worn: "Worn Equipment",
+        packed: "Packed Gear"
+      }[zoneType] ?? "Equipment";
+
+      ui.notifications?.info(`${sourceItem.name} added to ${sectionName}.`);
+      this.render();
     }
 
     _activateCalibrationControls(root) {

@@ -268,6 +268,32 @@
           {{/if}}
         {{/each}}
       </div>
+
+      {{#if isEquipmentPage}}
+        <div class="brackenvale-equipment-drop-zone"
+          data-equipment-drop-zone="armor"
+          aria-label="Armor and Shield drop zone"
+          title="Drop armor or a shield here"
+          style="position:absolute;left:4.6%;top:6.4%;width:44.1%;height:8.4%;z-index:8;background:transparent;"></div>
+
+        <div class="brackenvale-equipment-drop-zone"
+          data-equipment-drop-zone="weapons"
+          aria-label="Weapons drop zone"
+          title="Drop weapons here"
+          style="position:absolute;left:4.6%;top:14.8%;width:44.1%;height:14.5%;z-index:8;background:transparent;"></div>
+
+        <div class="brackenvale-equipment-drop-zone"
+          data-equipment-drop-zone="worn"
+          aria-label="Worn Equipment drop zone"
+          title="Drop worn equipment here"
+          style="position:absolute;left:50.3%;top:6.4%;width:45.0%;height:22.9%;z-index:8;background:transparent;"></div>
+
+        <div class="brackenvale-equipment-drop-zone"
+          data-equipment-drop-zone="packed"
+          aria-label="Packed Gear drop zone"
+          title="Drop packed gear here"
+          style="position:absolute;left:4.6%;top:31.2%;width:90.7%;height:48.6%;z-index:8;background:transparent;"></div>
+      {{/if}}
     </div>
   {{/each}}
 </form>
