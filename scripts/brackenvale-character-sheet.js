@@ -123,7 +123,6 @@ Hooks.once("init", () => {
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
       this._activateWeaponConditionControls(root);
-      this._activateDefenseControls(root);
     }
 
     _activateArtworkPageTabs(root) {
@@ -340,178 +339,58 @@ Hooks.once("init", () => {
       for (const button of root.querySelectorAll("[data-action='edit-weapon']")) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
+
           event.preventDefault();
           event.stopPropagation();
-          this.actor.items.get(button.dataset.itemId)?.sheet?.render(true);
+
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+          this.actor.items.get(itemId)?.sheet?.render(true);
         });
       }
 
-      for (const button of root.querySelectorAll("[data-action='show-mastery']")) {
+      for (const button of root.querySelectorAll("[data-action='use-weapon']")) {
         button.addEventListener("click", async (event) => {
           if (this._calibrationMode) return;
+
           event.preventDefault();
           event.stopPropagation();
 
-          const item = this.actor.items.get(button.dataset.itemId);
-          const title = button.dataset.masteryLabel || "Weapon Mastery";
-          let description = button.dataset.masteryDescription || "";
+          const itemId = button.dataset.itemId;
+          const item = this.actor.items.get(itemId);
+          if (!item) return;
 
-          if (!description) {
-            item?.sheet?.render(true);
-            return;
-          }
-
-          description = await TextEditor.enrichHTML(description, {async: true, documents: true});
-          const content = `<div class="brackenvale-mastery-dialog"><p>${description}</p></div>`;
-          const DialogV2 = foundry.applications?.api?.DialogV2;
-          if (DialogV2?.prompt) {
-            await DialogV2.prompt({window: {title}, content, ok: {label: "Close"}});
+          if (typeof item.use === "function") {
+            await item.use();
           } else {
-            new Dialog({title, content, buttons: {close: {label: "Close"}}}).render(true);
+            item.sheet?.render(true);
           }
         });
       }
-
-      for (const button of root.querySelectorAll("[data-action='roll-weapon-attack']")) {
-        button.addEventListener("click", async (event) => {
-          if (this._calibrationMode) return;
-          event.preventDefault();
-          event.stopPropagation();
-
-          const item = this.actor.items.get(button.dataset.itemId);
-          if (!item) return;
-          const activity = this._getWeaponAttackActivity(item);
-          const penalty = Math.max(0, Number(button.dataset.conditionPenalty ?? 0));
-
-          if (typeof activity?.rollAttack === "function") {
-            const rolls = penalty ? [{parts: [String(-penalty)]}] : undefined;
-            await activity.rollAttack({event, rolls});
-            return;
-          }
-          if (typeof item.use === "function") await item.use();
-          else item.sheet?.render(true);
-        });
-      }
-
-      for (const button of root.querySelectorAll("[data-action='roll-weapon-damage']")) {
-        button.addEventListener("click", async (event) => {
-          if (this._calibrationMode) return;
-          event.preventDefault();
-          event.stopPropagation();
-
-          const item = this.actor.items.get(button.dataset.itemId);
-          if (!item) return;
-          const activity = this._getWeaponAttackActivity(item);
-          const penalty = Math.max(0, Number(button.dataset.conditionPenalty ?? 0));
-
-          if (typeof activity?.rollDamage === "function") {
-            const rolls = penalty ? [{parts: [String(-penalty)]}] : undefined;
-            await activity.rollDamage({event, rolls});
-            return;
-          }
-          ui.notifications?.warn(`${item.name} does not expose a damage activity.`);
-          item.sheet?.render(true);
-        });
-      }
-    }
-
-    _getWeaponAttackActivity(item) {
-      const activities = foundry.utils.getProperty(item, "system.activities");
-      if (!activities) return null;
-      if (typeof activities.getByType === "function") {
-        const activity = activities.getByType("attack")?.[0];
-        if (activity) return activity;
-      }
-      if (typeof activities.values === "function") {
-        return Array.from(activities.values()).find(
-          (activity) => typeof activity?.rollAttack === "function"
-            || typeof activity?.rollDamage === "function"
-        ) ?? null;
-      }
-      if (typeof activities === "object") {
-        return Object.values(activities).find(
-          (activity) => typeof activity?.rollAttack === "function"
-            || typeof activity?.rollDamage === "function"
-        ) ?? null;
-      }
-      return null;
     }
 
     _activateWeaponConditionControls(root) {
       for (const button of root.querySelectorAll("[data-action='set-weapon-condition']")) {
         button.addEventListener("click", async (event) => {
           if (this._calibrationMode) return;
+
           event.preventDefault();
           event.stopPropagation();
 
           const itemId = button.dataset.itemId;
           if (!itemId) return;
+
           const clicked = Number(button.dataset.value ?? 0);
           const path = "flags.brackenvale-core.weaponConditions";
-          const map = foundry.utils.deepClone(foundry.utils.getProperty(this.actor, path) ?? {});
-          const current = Number(map[itemId] ?? 0);
-          map[itemId] = current === clicked ? Math.max(0, clicked - 1) : clicked;
-          await this.actor.update({[path]: map});
+          const currentMap = foundry.utils.deepClone(
+            foundry.utils.getProperty(this.actor, path) ?? {}
+          );
+          const current = Number(currentMap[itemId] ?? 0);
+          currentMap[itemId] = current === clicked ? Math.max(0, clicked - 1) : clicked;
+
+          await this.actor.update({[path]: currentMap});
         });
       }
-    }
-
-    _activateDefenseControls(root) {
-      for (const button of root.querySelectorAll("[data-action='edit-defense-item']")) {
-        button.addEventListener("click", (event) => {
-          if (this._calibrationMode) return;
-          event.preventDefault();
-          event.stopPropagation();
-          this.actor.items.get(button.dataset.itemId)?.sheet?.render(true);
-        });
-      }
-
-      for (const button of root.querySelectorAll("[data-action='set-defense-condition']")) {
-        button.addEventListener("click", async (event) => {
-          if (this._calibrationMode) return;
-          event.preventDefault();
-          event.stopPropagation();
-
-          const path = button.dataset.path;
-          const clicked = Number(button.dataset.value ?? 0);
-          const current = Number(foundry.utils.getProperty(this.actor, path) ?? 0);
-          const next = current === clicked ? Math.max(0, clicked - 1) : clicked;
-
-          await this.actor.update({[path]: next});
-          await this._syncDefenseConditionEffect();
-        });
-      }
-    }
-
-    async _syncDefenseConditionEffect() {
-      const armor = Math.max(0, Math.min(5, Number(this.actor.getFlag(MODULE_ID, "armorCondition") ?? 0)));
-      const shield = Math.max(0, Math.min(5, Number(this.actor.getFlag(MODULE_ID, "shieldCondition") ?? 0)));
-      const penalty = armor + shield;
-      const existing = this.actor.effects?.find(
-        (effect) => effect.getFlag(MODULE_ID, "equipmentCondition")
-      );
-
-      if (!penalty) {
-        if (existing) await existing.delete();
-        return;
-      }
-
-      const data = {
-        name: "Brackenvale Equipment Condition",
-        icon: "icons/svg/broken-shield.svg",
-        disabled: false,
-        transfer: false,
-        flags: {[MODULE_ID]: {equipmentCondition: true}},
-        changes: [{
-          key: "system.attributes.ac.bonus",
-          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: String(-penalty),
-          priority: 20
-        }]
-      };
-
-      if (existing) await existing.update(data);
-      else await this.actor.createEmbeddedDocuments("ActiveEffect", [data]);
     }
 
     _activateCalibrationControls(root) {

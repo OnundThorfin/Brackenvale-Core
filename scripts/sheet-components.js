@@ -31,10 +31,6 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareDeathSaveBubble(component, actor, editable);
     case "weaponTable":
       return prepareWeaponTable(component, actor);
-    case "equippedDefenseName":
-      return prepareEquippedDefenseName(component, actor);
-    case "defenseConditionBubble":
-      return prepareDefenseConditionBubble(component, actor, editable);
     default:
       console.warn(`${moduleId} | Unknown sheet component: ${component.component}`, component);
       return {...component, unsupported: true};
@@ -247,96 +243,49 @@ function prepareWeaponTable(component, actor) {
     })
     .slice(0, component.maxRows ?? 4)
     .map((item) => {
-      const penalty = Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0)));
-      const mastery = getMasteryDetails(item);
+      const condition = Math.max(
+        0,
+        Math.min(5, Number(conditionMap[item.id] ?? 0))
+      );
+
       return {
         id: item.id,
         name: item.name,
-        attack: applyNumericPenalty(getWeaponAttackLabel(item), penalty),
-        damage: applyFormulaPenalty(getWeaponDamageLabel(item), penalty),
-        mastery: mastery.label,
-        masteryDescription: mastery.description,
+        attack: getWeaponAttackLabel(item),
+        damage: getWeaponDamageLabel(item),
+        mastery:
+          foundry.utils.getProperty(item, "system.mastery")
+          ?? foundry.utils.getProperty(item, "system.properties.mastery")
+          ?? "",
         equipped: isWeaponEquipped(item),
-        conditionPenalty: penalty,
-        conditionDots: [1,2,3,4,5].map((value) => ({value, filled: value <= penalty}))
+        conditionDots: [1, 2, 3, 4, 5].map((value) => ({
+          value,
+          filled: value <= condition
+        }))
       };
     }) ?? [];
 
   while (weapons.length < (component.maxRows ?? 4)) {
     weapons.push({
-      id: "", name: "", attack: "", damage: "", mastery: "",
-      masteryDescription: "", equipped: false, conditionPenalty: 0,
-      conditionDots: [1,2,3,4,5].map((value) => ({value, filled: false}))
+      id: "",
+      name: "",
+      attack: "",
+      damage: "",
+      mastery: "",
+      equipped: false,
+      conditionDots: [1, 2, 3, 4, 5].map((value) => ({
+        value,
+        filled: false
+      }))
     });
   }
 
-  return {...component, isWeaponTable: true, weapons, style: createPositionStyle(component)};
-}
-
-function applyNumericPenalty(value, penalty) {
-  if (!penalty || value === "") return value;
-  const numeric = Number(value);
-  if (Number.isFinite(numeric)) return formatSignedNumber(numeric - penalty);
-  const match = String(value).trim().match(/^([+-]?\d+)$/);
-  if (match) return formatSignedNumber(Number(match[1]) - penalty);
-  return `${value} − ${penalty}`;
-}
-
-function applyFormulaPenalty(value, penalty) {
-  if (!penalty || !value) return value;
-  return `${value} − ${penalty}`;
-}
-
-function getMasteryDetails(item) {
-  const raw = foundry.utils.getProperty(item, "system.mastery")
-    ?? foundry.utils.getProperty(item, "system.properties.mastery")
-    ?? "";
-  const key = typeof raw === "string" ? raw : (raw?.value ?? raw?.identifier ?? "");
-  if (!key) return {label: "", description: ""};
-
-  const config = CONFIG.DND5E?.weaponMasteries?.[key]
-    ?? CONFIG.DND5E?.weaponMastery?.[key]
-    ?? CONFIG.DND5E?.masteries?.[key]
-    ?? null;
-
-  const localize = (value) => {
-    if (!value) return "";
-    const text = String(value);
-    return game.i18n?.has?.(text) ? game.i18n.localize(text) : text;
-  };
-
   return {
-    label: localize(config?.label ?? config?.name ?? key),
-    description: localize(config?.description ?? config?.hint ?? config?.reference ?? "")
+    ...component,
+    isWeaponTable: true,
+    weapons,
+    style: createPositionStyle(component)
   };
-}
-
-function prepareEquippedDefenseName(component, actor) {
-  const item = findEquippedDefense(actor, component.defenseType);
-  return {...component, isEquippedDefenseName: true, itemId: item?.id ?? "", value: item?.name ?? "", style: createPositionStyle(component)};
-}
-
-function prepareDefenseConditionBubble(component, actor, editable) {
-  const item = findEquippedDefense(actor, component.defenseType);
-  const current = item ? Number(foundry.utils.getProperty(actor, component.path) ?? 0) : 0;
-  return {...component, isDefenseConditionBubble: true, itemId: item?.id ?? "", filled: Number(component.value) <= current, editable: Boolean(editable && item), style: createPositionStyle(component)};
-}
-
-function findEquippedDefense(actor, defenseType) {
-  const equipment = actor.items?.filter((item) => item.type === "equipment" && isWeaponEquipped(item)) ?? [];
-  const isShield = (item) => {
-    const values = [
-      foundry.utils.getProperty(item, "system.type.value"),
-      foundry.utils.getProperty(item, "system.type.baseItem"),
-      foundry.utils.getProperty(item, "system.armor.type"),
-      foundry.utils.getProperty(item, "system.identifier"),
-      item.name
-    ].filter(Boolean).map((v) => String(v).toLowerCase());
-    return values.some((v) => v.includes("shield"));
-  };
-  return defenseType === "shield"
-    ? (equipment.find(isShield) ?? null)
-    : (equipment.find((item) => !isShield(item)) ?? null);
 }
 
 function isWeaponEquipped(item) {

@@ -70,8 +70,8 @@
   position: absolute;
   inset: 0;
   display: block;
-  width: 72%;
-  height: 72%;
+  width: 100%;
+  height: 100%;
   border: 0;
   object-fit: fill;
   pointer-events: none;
@@ -550,12 +550,11 @@
 .weapon-condition-overlay {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  align-items: center;
-  justify-items: center;
-  gap: 7%;
+  align-items: stretch;
+  gap: 0;
   min-width: 0;
   min-height: 0;
-  padding: 16% 7%;
+  padding: 5% 2%;
 }
 
 .weapon-condition-hitbox,
@@ -590,51 +589,4 @@
 .brackenvale-art-sheet.calibration-mode .weapon-toolbar-cell,
 .brackenvale-art-sheet.calibration-mode .weapon-condition-hitbox {
   pointer-events: none;
-}
-
-
-.equipped-defense-name,
-.equipped-defense-name:disabled {
-  appearance: none;
-  -webkit-appearance: none;
-  padding: 0;
-  color: #171612;
-  font: inherit;
-  font-size: clamp(9px, 1vw, 13px);
-  font-style: italic;
-  text-align: left;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  opacity: 1;
-  cursor: pointer;
-}
-
-.defense-condition-bubble,
-.defense-condition-bubble:disabled {
-  appearance: none;
-  -webkit-appearance: none;
-  display: block;
-  padding: 0;
-  box-sizing: border-box;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  opacity: 1;
-  cursor: pointer;
-}
-
-.defense-condition-bubble.filled {
-  background: #171612 !important;
-}
-
-.brackenvale-art-sheet.calibration-mode .defense-condition-bubble,
-.brackenvale-art-sheet.calibration-mode .equipped-defense-name {
-  pointer-events: none;
-}
-
-.brackenvale-mastery-dialog {
-  max-width: 34rem;
-  line-height: 1.5;
 }
