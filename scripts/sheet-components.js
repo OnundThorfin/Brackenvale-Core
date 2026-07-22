@@ -27,8 +27,8 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareSkill(component, actor, editable);
     case "hitDiceSummary":
       return prepareHitDiceSummary(component, actor, editable);
-    case "deathSaves":
-      return prepareDeathSaves(component, actor, editable);
+    case "deathSaveRow":
+      return prepareDeathSaveRow(component, actor, editable);
     case "weaponTable":
       return prepareWeaponTable(component, actor);
     default:
@@ -217,26 +217,16 @@ function prepareHitDiceSummary(component, actor, editable) {
   };
 }
 
-function prepareDeathSaves(component, actor, editable) {
-  const successes = Number(
-    foundry.utils.getProperty(actor, "system.attributes.death.success") ?? 0
-  );
-  const failures = Number(
-    foundry.utils.getProperty(actor, "system.attributes.death.failure") ?? 0
-  );
+function prepareDeathSaveRow(component, actor, editable) {
+  const current = Number(foundry.utils.getProperty(actor, component.path) ?? 0);
 
   return {
     ...component,
-    isDeathSaves: true,
-    successes,
-    failures,
-    successDots: [1, 2, 3].map((value) => ({
+    isDeathSaveRow: true,
+    current,
+    dots: [1, 2, 3].map((value) => ({
       value,
-      filled: value <= successes
-    })),
-    failureDots: [1, 2, 3].map((value) => ({
-      value,
-      filled: value <= failures
+      filled: value <= current
     })),
     editable,
     style: createPositionStyle(component)

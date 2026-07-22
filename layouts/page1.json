@@ -594,13 +594,26 @@
       "height": 2.25
     },
     {
-      "component": "deathSaves",
-      "key": "deathSaves",
-      "label": "Death Saves",
-      "left": 57.330322265625,
-      "top": 67.95247395833334,
-      "width": 39.15,
-      "height": 10.75
+      "component": "deathSaveRow",
+      "key": "deathSaveSuccesses",
+      "label": "Death Save Successes",
+      "saveType": "success",
+      "path": "system.attributes.death.success",
+      "left": 64.55,
+      "top": 71.2,
+      "width": 16.5,
+      "height": 2.35
+    },
+    {
+      "component": "deathSaveRow",
+      "key": "deathSaveFailures",
+      "label": "Death Save Failures",
+      "saveType": "failure",
+      "path": "system.attributes.death.failure",
+      "left": 64.55,
+      "top": 74.4,
+      "width": 16.5,
+      "height": 2.35
     },
     {
       "component": "weaponTable",

@@ -159,40 +159,25 @@
             </div>
           {{/if}}
 
-          {{#if isDeathSaves}}
+          {{#if isDeathSaveRow}}
             <div
-              class="overlay-field death-saves-component"
+              class="overlay-field death-save-row-component"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
               aria-label="{{label}}"
             >
-              <div class="death-save-row successes">
-                {{#each successDots}}
-                  <button
-                    type="button"
-                    class="death-save-dot {{#if filled}}filled{{/if}}"
-                    data-action="set-death-save"
-                    data-path="system.attributes.death.success"
-                    data-value="{{value}}"
-                    aria-label="Set death save successes to {{value}}"
-                    {{#unless ../editable}}disabled{{/unless}}
-                  ></button>
-                {{/each}}
-              </div>
-              <div class="death-save-row failures">
-                {{#each failureDots}}
-                  <button
-                    type="button"
-                    class="death-save-dot {{#if filled}}filled{{/if}}"
-                    data-action="set-death-save"
-                    data-path="system.attributes.death.failure"
-                    data-value="{{value}}"
-                    aria-label="Set death save failures to {{value}}"
-                    {{#unless ../editable}}disabled{{/unless}}
-                  ></button>
-                {{/each}}
-              </div>
+              {{#each dots}}
+                <button
+                  type="button"
+                  class="death-save-dot {{#if filled}}filled{{/if}}"
+                  data-action="set-death-save"
+                  data-path="{{../path}}"
+                  data-value="{{value}}"
+                  aria-label="Set {{../label}} to {{value}}"
+                  {{#unless ../editable}}disabled{{/unless}}
+                ></button>
+              {{/each}}
             </div>
           {{/if}}
 
