@@ -457,121 +457,6 @@
   background: #171717;
 }
 
-.weapon-table-component {
-  display: grid;
-  grid-template-rows: repeat(4, 1fr);
-  pointer-events: auto;
-}
-
-.weapon-table-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 23% 20% 20% 19% 18%;
-  align-items: stretch;
-  width: 100%;
-  min-height: 0;
-  color: #111;
-  font: inherit;
-  background: transparent;
-}
-
-.weapon-table-row.empty {
-  pointer-events: none;
-}
-
-.weapon-cell,
-
-.brackenvale-art-sheet.calibration-mode .weapon-cell,
-.brackenvale-art-sheet.calibration-mode .death-save-dot,
-.brackenvale-art-sheet.calibration-mode .hit-dice-summary button,
-.brackenvale-art-sheet.calibration-mode .hit-dice-summary input,
-.brackenvale-art-sheet.calibration-mode .ability-roll-button,
-.brackenvale-art-sheet.calibration-mode .ability-roll-proficiency {
-  pointer-events: none;
-}
-
-
-
-
-.weapon-condition {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
-  padding: 0 3%;
-}
-
-.weapon-condition-dot {
-  width: 16%;
-  height: 76%;
-  min-width: 0;
-  min-height: 0;
-  padding: 0;
-  box-sizing: border-box;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-
-.weapon-condition-dot.filled {
-  background: #171717;
-  box-shadow: inset 0 0 0 1px #171717;
-}
-
-.weapon-condition-dot:hover:not(:disabled),
-.weapon-condition-dot:focus-visible:not(:disabled) {
-  background: rgba(23, 23, 23, 0.18);
-  outline: none;
-}
-
-.brackenvale-art-sheet.calibration-mode .weapon-condition-dot {
-  pointer-events: none;
-}
-
-
-/* Final correction: neutralize Foundry's native button treatment in the attack table. */
-.weapon-table-component button,
-.weapon-table-component button:disabled {
-  appearance: none;
-  -webkit-appearance: none;
-  color: #171612;
-  background: transparent !important;
-  background-image: none !important;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none !important;
-  opacity: 1;
-}
-
-.weapon-table-row.empty {
-  background: transparent !important;
-}
-
-.weapon-table-row:not(.empty) .weapon-name {
-  opacity: 1;
-}
-
-.weapon-table-row.unequipped .weapon-name {
-  opacity: 0.58;
-  font-style: italic;
-}
-
-/* Keep printed condition boxes visible; only the filled state adds ink. */
-.weapon-condition-dot,
-.weapon-condition-dot:disabled {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  opacity: 1;
-}
-
-.weapon-condition-dot.filled {
-  background: #171612 !important;
-}
-
-
-
-
 /* Sprint 1: each death-save bubble is its own calibration component. */
 .death-save-bubble,
 .death-save-bubble:disabled {
@@ -599,5 +484,109 @@
 }
 
 .brackenvale-art-sheet.calibration-mode .death-save-bubble {
+  pointer-events: none;
+}
+
+
+/* Sprint 1 — weapon toolbar cleanup. */
+.weapon-toolbar {
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  pointer-events: auto;
+}
+
+.weapon-toolbar-row {
+  display: grid;
+  grid-template-columns: 23% 20% 20% 19% 18%;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.weapon-toolbar-row.empty {
+  pointer-events: none;
+}
+
+.weapon-toolbar-cell,
+.weapon-toolbar-cell:disabled {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0 4%;
+  overflow: hidden;
+  color: #171612;
+  font: inherit;
+  font-size: clamp(9px, 1.05vw, 13px);
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.weapon-toolbar-cell:hover:not(:disabled),
+.weapon-toolbar-cell:focus-visible:not(:disabled) {
+  background: rgba(142, 114, 45, 0.14) !important;
+  outline: 1px solid rgba(95, 69, 22, 0.55);
+  outline-offset: -1px;
+}
+
+.weapon-toolbar-row .weapon-name {
+  text-align: left;
+}
+
+.weapon-toolbar-row.unequipped .weapon-name {
+  opacity: 0.58;
+  font-style: italic;
+}
+
+.weapon-condition-overlay {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  min-height: 0;
+  padding: 5% 2%;
+}
+
+.weapon-condition-hitbox,
+.weapon-condition-hitbox:disabled {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.weapon-condition-hitbox.filled {
+  background: #171612 !important;
+  box-shadow: inset 0 0 0 18% #171612 !important;
+}
+
+.weapon-condition-hitbox:hover:not(:disabled),
+.weapon-condition-hitbox:focus-visible:not(:disabled) {
+  background: rgba(23, 22, 18, 0.18) !important;
+  outline: none;
+}
+
+.brackenvale-art-sheet.calibration-mode .weapon-toolbar-cell,
+.brackenvale-art-sheet.calibration-mode .weapon-condition-hitbox {
   pointer-events: none;
 }
