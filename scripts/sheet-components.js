@@ -27,8 +27,8 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareSkill(component, actor, editable);
     case "hitDiceSummary":
       return prepareHitDiceSummary(component, actor, editable);
-    case "deathSaveRow":
-      return prepareDeathSaveRow(component, actor, editable);
+    case "deathSaveBubble":
+      return prepareDeathSaveBubble(component, actor, editable);
     case "weaponTable":
       return prepareWeaponTable(component, actor);
     default:
@@ -217,17 +217,13 @@ function prepareHitDiceSummary(component, actor, editable) {
   };
 }
 
-function prepareDeathSaveRow(component, actor, editable) {
+function prepareDeathSaveBubble(component, actor, editable) {
   const current = Number(foundry.utils.getProperty(actor, component.path) ?? 0);
 
   return {
     ...component,
-    isDeathSaveRow: true,
-    current,
-    dots: [1, 2, 3].map((value) => ({
-      value,
-      filled: value <= current
-    })),
+    isDeathSaveBubble: true,
+    filled: Number(component.value) <= current,
     editable,
     style: createPositionStyle(component)
   };

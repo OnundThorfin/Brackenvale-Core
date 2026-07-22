@@ -570,24 +570,17 @@
 }
 
 
-/* Sprint 1: death-save rows are independent calibration components. */
-.death-save-row-component {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  pointer-events: auto;
-}
 
-.death-save-row-component .death-save-dot {
-  flex: 0 0 auto;
-  width: 1.05em;
-  height: 1.05em;
-  min-width: 10px;
-  min-height: 10px;
+
+/* Sprint 1: each death-save bubble is its own calibration component. */
+.death-save-bubble,
+.death-save-bubble:disabled {
+  display: block;
   padding: 0;
   box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
+  pointer-events: auto;
   background: transparent;
   background-image: none;
   border: 1px solid #171717;
@@ -597,14 +590,14 @@
   cursor: pointer;
 }
 
-.death-save-row-component .death-save-dot.filled {
+.death-save-bubble.filled {
   background: #171717;
 }
 
-.death-save-row-component .death-save-dot:disabled {
-  opacity: 1;
+.death-save-bubble:disabled {
+  cursor: default;
 }
 
-.brackenvale-art-sheet.calibration-mode .death-save-row-component .death-save-dot {
+.brackenvale-art-sheet.calibration-mode .death-save-bubble {
   pointer-events: none;
 }

@@ -594,26 +594,70 @@
       "height": 2.25
     },
     {
-      "component": "deathSaveRow",
-      "key": "deathSaveSuccesses",
-      "label": "Death Save Successes",
-      "saveType": "success",
+      "component": "deathSaveBubble",
+      "key": "deathSuccess1",
+      "label": "Death Save Success 1",
       "path": "system.attributes.death.success",
-      "left": 64.55,
-      "top": 71.2,
-      "width": 16.5,
-      "height": 2.35
+      "value": 1,
+      "left": 67.2,
+      "top": 71.55,
+      "width": 1.45,
+      "height": 1.45
     },
     {
-      "component": "deathSaveRow",
-      "key": "deathSaveFailures",
-      "label": "Death Save Failures",
-      "saveType": "failure",
+      "component": "deathSaveBubble",
+      "key": "deathSuccess2",
+      "label": "Death Save Success 2",
+      "path": "system.attributes.death.success",
+      "value": 2,
+      "left": 71.2,
+      "top": 71.55,
+      "width": 1.45,
+      "height": 1.45
+    },
+    {
+      "component": "deathSaveBubble",
+      "key": "deathSuccess3",
+      "label": "Death Save Success 3",
+      "path": "system.attributes.death.success",
+      "value": 3,
+      "left": 75.2,
+      "top": 71.55,
+      "width": 1.45,
+      "height": 1.45
+    },
+    {
+      "component": "deathSaveBubble",
+      "key": "deathFailure1",
+      "label": "Death Save Failure 1",
       "path": "system.attributes.death.failure",
-      "left": 64.55,
-      "top": 74.4,
-      "width": 16.5,
-      "height": 2.35
+      "value": 1,
+      "left": 67.2,
+      "top": 74.65,
+      "width": 1.45,
+      "height": 1.45
+    },
+    {
+      "component": "deathSaveBubble",
+      "key": "deathFailure2",
+      "label": "Death Save Failure 2",
+      "path": "system.attributes.death.failure",
+      "value": 2,
+      "left": 71.2,
+      "top": 74.65,
+      "width": 1.45,
+      "height": 1.45
+    },
+    {
+      "component": "deathSaveBubble",
+      "key": "deathFailure3",
+      "label": "Death Save Failure 3",
+      "path": "system.attributes.death.failure",
+      "value": 3,
+      "left": 75.2,
+      "top": 74.65,
+      "width": 1.45,
+      "height": 1.45
     },
     {
       "component": "weaponTable",
