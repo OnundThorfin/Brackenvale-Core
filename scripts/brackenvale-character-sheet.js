@@ -122,7 +122,6 @@ Hooks.once("init", () => {
       this._activateDeathSaveControls(root);
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
-      this._activateWeaponConditionControls(root);
     }
 
     _activateArtworkPageTabs(root) {
@@ -367,10 +366,8 @@ Hooks.once("init", () => {
           }
         });
       }
-    }
 
-    _activateWeaponConditionControls(root) {
-      for (const button of root.querySelectorAll("[data-action='set-weapon-condition']")) {
+      for (const button of root.querySelectorAll("[data-action='roll-weapon-damage']")) {
         button.addEventListener("click", async (event) => {
           if (this._calibrationMode) return;
 
@@ -378,17 +375,37 @@ Hooks.once("init", () => {
           event.stopPropagation();
 
           const itemId = button.dataset.itemId;
-          if (!itemId) return;
+          const item = this.actor.items.get(itemId);
+          if (!item) return;
 
-          const clicked = Number(button.dataset.value ?? 0);
-          const path = "flags.brackenvale-core.weaponConditions";
-          const currentMap = foundry.utils.deepClone(
-            foundry.utils.getProperty(this.actor, path) ?? {}
+          const activities = foundry.utils.getProperty(item, "system.activities");
+          let attackActivity = null;
+
+          if (typeof activities?.getByType === "function") {
+            attackActivity = activities.getByType("attack")?.[0] ?? null;
+          }
+
+          if (!attackActivity && typeof activities?.values === "function") {
+            attackActivity = Array.from(activities.values()).find(
+              (activity) => typeof activity?.rollDamage === "function"
+            ) ?? null;
+          }
+
+          if (!attackActivity && activities && typeof activities === "object") {
+            attackActivity = Object.values(activities).find(
+              (activity) => typeof activity?.rollDamage === "function"
+            ) ?? null;
+          }
+
+          if (typeof attackActivity?.rollDamage === "function") {
+            await attackActivity.rollDamage({event});
+            return;
+          }
+
+          ui.notifications?.warn(
+            `${item.name} does not expose a damage activity. Open the weapon item to review its activities.`
           );
-          const current = Number(currentMap[itemId] ?? 0);
-          currentMap[itemId] = current === clicked ? Math.max(0, clicked - 1) : clicked;
-
-          await this.actor.update({[path]: currentMap});
+          item.sheet?.render(true);
         });
       }
     }
