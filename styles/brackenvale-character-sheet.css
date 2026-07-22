@@ -444,11 +444,11 @@
 
 .death-save-row {
   position: absolute;
-  left: 51.5%;
+  left: 56.5%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 34%;
+  width: 24%;
   height: 20%;
 }
 
@@ -542,4 +542,45 @@
 
 .brackenvale-art-sheet.calibration-mode .weapon-condition-dot {
   pointer-events: none;
+}
+
+
+/* Final correction: neutralize Foundry's native button treatment in the attack table. */
+.weapon-table-component button,
+.weapon-table-component button:disabled {
+  appearance: none;
+  -webkit-appearance: none;
+  color: #171612;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none !important;
+  opacity: 1;
+}
+
+.weapon-table-row.empty {
+  background: transparent !important;
+}
+
+.weapon-table-row:not(.empty) .weapon-name {
+  opacity: 1;
+}
+
+.weapon-table-row.unequipped .weapon-name {
+  opacity: 0.58;
+  font-style: italic;
+}
+
+/* Keep printed condition boxes visible; only the filled state adds ink. */
+.weapon-condition-dot,
+.weapon-condition-dot:disabled {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  opacity: 1;
+}
+
+.weapon-condition-dot.filled {
+  background: #171612 !important;
 }
