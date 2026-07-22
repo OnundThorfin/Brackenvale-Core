@@ -248,30 +248,32 @@ function prepareWeaponTable(component, actor) {
     foundry.utils.getProperty(actor, "flags.brackenvale-core.weaponConditions") ?? {};
 
   const weapons = actor.items
-    ?.filter((item) => item.type === "weapon")
-    .sort((a, b) => {
-      const equippedA = isWeaponEquipped(a) ? 1 : 0;
-      const equippedB = isWeaponEquipped(b) ? 1 : 0;
-      if (equippedA !== equippedB) return equippedB - equippedA;
-      return a.name.localeCompare(b.name);
-    })
+    ?.filter((item) => item.type === "weapon" && isWeaponEquipped(item))
+    .sort((a, b) => a.name.localeCompare(b.name))
     .slice(0, component.maxRows ?? 4)
-    .map((item) => ({
-      id: item.id,
-      name: item.name,
-      attack: getWeaponAttackLabel(item),
-      damage: getWeaponDamageLabel(item),
-      mastery:
-        foundry.utils.getProperty(item, "system.mastery")
-        ?? foundry.utils.getProperty(item, "system.properties.mastery")
-        ?? "",
-      equipped: isWeaponEquipped(item),
-      condition: Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0))),
-      conditionDots: [1, 2, 3, 4, 5].map((value) => ({
-        value,
-        filled: value <= Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0)))
-      }))
-    })) ?? [];
+    .map((item) => {
+      const condition = Math.max(
+        0,
+        Math.min(5, Number(conditionMap[item.id] ?? 0))
+      );
+
+      return {
+        id: item.id,
+        name: item.name,
+        attack: getWeaponAttackLabel(item),
+        damage: getWeaponDamageLabel(item),
+        mastery:
+          foundry.utils.getProperty(item, "system.mastery")
+          ?? foundry.utils.getProperty(item, "system.properties.mastery")
+          ?? "",
+        equipped: true,
+        condition,
+        conditionDots: [1, 2, 3, 4, 5].map((value) => ({
+          value,
+          filled: value <= condition
+        }))
+      };
+    }) ?? [];
 
   while (weapons.length < (component.maxRows ?? 4)) {
     weapons.push({
@@ -282,7 +284,10 @@ function prepareWeaponTable(component, actor) {
       mastery: "",
       equipped: false,
       condition: 0,
-      conditionDots: [1, 2, 3, 4, 5].map((value) => ({value, filled: false}))
+      conditionDots: [1, 2, 3, 4, 5].map((value) => ({
+        value,
+        filled: false
+      }))
     });
   }
 

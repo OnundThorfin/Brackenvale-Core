@@ -444,11 +444,11 @@
 
 .death-save-row {
   position: absolute;
-  left: 45.5%;
+  left: 51.5%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 48%;
+  width: 34%;
   height: 20%;
 }
 
@@ -482,7 +482,7 @@
 .weapon-table-row {
   position: relative;
   display: grid;
-  grid-template-columns: 23% 20% 20% 18% 16% 3%;
+  grid-template-columns: 23% 20% 20% 19% 18%;
   align-items: stretch;
   width: 100%;
   min-height: 0;
@@ -496,46 +496,8 @@
 }
 
 .weapon-cell,
-.weapon-edit-button {
-  min-width: 0;
-  min-height: 0;
-  padding: 0 4%;
-  overflow: hidden;
-  color: #111;
-  font: inherit;
-  font-size: clamp(9px, 1.05vw, 13px);
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-
-.weapon-cell:hover:not(:disabled),
-.weapon-cell:focus-visible:not(:disabled),
-.weapon-edit-button:hover:not(:disabled),
-.weapon-edit-button:focus-visible:not(:disabled) {
-  background: rgba(142, 114, 45, 0.16);
-  outline: 1px solid rgba(95, 69, 22, 0.65);
-}
-
-.weapon-name {
-  text-align: left;
-}
-
-.weapon-edit-button {
-  font-size: clamp(11px, 1.25vw, 16px);
-  opacity: 0.65;
-}
-
-.weapon-edit-button:hover:not(:disabled),
-.weapon-edit-button:focus-visible:not(:disabled) {
-  opacity: 1;
-}
 
 .brackenvale-art-sheet.calibration-mode .weapon-cell,
-.brackenvale-art-sheet.calibration-mode .weapon-edit-button,
 .brackenvale-art-sheet.calibration-mode .death-save-dot,
 .brackenvale-art-sheet.calibration-mode .hit-dice-summary button,
 .brackenvale-art-sheet.calibration-mode .hit-dice-summary input,
@@ -546,39 +508,36 @@
 
 
 
-.weapon-table-row.unequipped .weapon-name {
-  opacity: 0.58;
-  font-style: italic;
-}
 
 .weapon-condition {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2px;
-  padding: 0 5%;
+  gap: 0;
+  padding: 0 3%;
 }
 
 .weapon-condition-dot {
-  width: 0.72em;
-  height: 0.72em;
-  min-width: 7px;
-  min-height: 7px;
+  width: 16%;
+  height: 76%;
+  min-width: 0;
+  min-height: 0;
   padding: 0;
   box-sizing: border-box;
   background: transparent;
-  border: 1px solid #171717;
+  border: 0;
   cursor: pointer;
 }
 
 .weapon-condition-dot.filled {
   background: #171717;
+  box-shadow: inset 0 0 0 1px #171717;
 }
 
 .weapon-condition-dot:hover:not(:disabled),
 .weapon-condition-dot:focus-visible:not(:disabled) {
-  outline: 1px solid rgba(95, 69, 22, 0.65);
-  outline-offset: 1px;
+  background: rgba(23, 23, 23, 0.18);
+  outline: none;
 }
 
 .brackenvale-art-sheet.calibration-mode .weapon-condition-dot {
