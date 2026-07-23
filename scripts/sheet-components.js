@@ -31,6 +31,8 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareDeathSaveBubble(component, actor, editable);
     case "weaponTable":
       return prepareWeaponTable(component, actor);
+    case "equipmentRegion":
+      return prepareEquipmentRegion(component, actor, moduleId, editable);
     case "equippedDefenseName":
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
@@ -255,7 +257,7 @@ function prepareWeaponTable(component, actor) {
         attack: applyNumericPenalty(getWeaponAttackLabel(item), penalty),
         damage: applyFormulaPenalty(getWeaponDamageLabel(item), penalty),
         mastery: mastery.label,
-        masteryReference: String(mastery.reference ?? ""),
+        masteryDescription: mastery.description,
         equipped: isWeaponEquipped(item),
         conditionPenalty: penalty,
         conditionDots: [1,2,3,4,5].map((value) => ({value, filled: value <= penalty}))
@@ -265,12 +267,105 @@ function prepareWeaponTable(component, actor) {
   while (weapons.length < (component.maxRows ?? 4)) {
     weapons.push({
       id: "", name: "", attack: "", damage: "", mastery: "",
-      masteryReference: "", equipped: false, conditionPenalty: 0,
+      masteryDescription: "", equipped: false, conditionPenalty: 0,
       conditionDots: [1,2,3,4,5].map((value) => ({value, filled: false}))
     });
   }
 
   return {...component, isWeaponTable: true, weapons, style: createPositionStyle(component)};
+}
+
+
+function prepareEquipmentRegion(component, actor, moduleId, editable) {
+  const inventoryTypes = new Set([
+    "weapon",
+    "equipment",
+    "consumable",
+    "tool",
+    "loot",
+    "container"
+  ]);
+
+  const items = (actor.items ?? [])
+    .filter((item) => inventoryTypes.has(item.type))
+    .map((item) => {
+      const nativeEquipped = Boolean(foundry.utils.getProperty(item, "system.equipped"));
+      const location =
+        foundry.utils.getProperty(item, `flags.${moduleId}.location`)
+        ?? (nativeEquipped ? "equipped" : "packed");
+
+      return {
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        location,
+        nativeEquipped,
+        isWeapon: item.type === "weapon",
+        isShield: isShieldItem(item),
+        isArmor: isArmorItem(item)
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const region = component.region;
+  let regionItems = [];
+  let armorItem = null;
+  let shieldItem = null;
+
+  if (region === "armor") {
+    armorItem = items.find((item) => item.location === "equipped" && item.isArmor) ?? null;
+    shieldItem = items.find((item) => item.location === "equipped" && item.isShield) ?? null;
+  } else if (region === "weapons") {
+    regionItems = items.filter((item) => item.location === "equipped" && item.isWeapon);
+  } else {
+    regionItems = items.filter((item) => item.location === region);
+  }
+
+  return {
+    ...component,
+    isEquipmentRegion: true,
+    region,
+    items: regionItems,
+    armorItem,
+    shieldItem,
+    editable,
+    style: createPositionStyle(component)
+  };
+}
+
+function isShieldItem(item) {
+  if (item.type !== "equipment") return false;
+
+  const values = [
+    foundry.utils.getProperty(item, "system.type.value"),
+    foundry.utils.getProperty(item, "system.type.baseItem"),
+    foundry.utils.getProperty(item, "system.armor.type"),
+    foundry.utils.getProperty(item, "system.identifier"),
+    item.name
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+
+  return values.some((value) => value.includes("shield"));
+}
+
+function isArmorItem(item) {
+  if (item.type !== "equipment" || isShieldItem(item)) return false;
+
+  const values = [
+    foundry.utils.getProperty(item, "system.type.value"),
+    foundry.utils.getProperty(item, "system.type.baseItem"),
+    foundry.utils.getProperty(item, "system.armor.type"),
+    foundry.utils.getProperty(item, "system.identifier"),
+    item.name
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+
+  return values.some((value) =>
+    value.includes("armor")
+    || ["light", "medium", "heavy"].includes(value)
+  );
 }
 
 function applyNumericPenalty(value, penalty) {
@@ -292,19 +387,22 @@ function getMasteryDetails(item) {
     ?? foundry.utils.getProperty(item, "system.properties.mastery")
     ?? "";
   const key = typeof raw === "string" ? raw : (raw?.value ?? raw?.identifier ?? "");
-  if (!key) return {label: "", reference: ""};
+  if (!key) return {label: "", description: ""};
 
   const config = CONFIG.DND5E?.weaponMasteries?.[key]
     ?? CONFIG.DND5E?.weaponMastery?.[key]
     ?? CONFIG.DND5E?.masteries?.[key]
     ?? null;
 
-  const label = config?.label ?? config?.name ?? key;
-  const text = String(label);
+  const localize = (value) => {
+    if (!value) return "";
+    const text = String(value);
+    return game.i18n?.has?.(text) ? game.i18n.localize(text) : text;
+  };
 
   return {
-    label: game.i18n?.has?.(text) ? game.i18n.localize(text) : text,
-    reference: String(config?.reference ?? "")
+    label: localize(config?.label ?? config?.name ?? key),
+    description: localize(config?.description ?? config?.hint ?? config?.reference ?? "")
   };
 }
 

@@ -241,6 +241,51 @@
             </div>
           {{/if}}
 
+          {{#if isEquipmentRegion}}
+            <div
+              class="overlay-field equipment-region equipment-region-{{region}}"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              data-equipment-drop-zone="{{region}}"
+              aria-label="{{label}}"
+              title="Drop items here"
+            >
+              {{#if armorItem}}
+                <div class="equipment-row equipment-defense-row equipment-armor-row">
+                  <button type="button" class="equipment-item-name" data-item-id="{{armorItem.id}}" title="Double-click to open item">
+                    {{armorItem.name}}
+                  </button>
+                  {{#if editable}}
+                    <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{armorItem.id}}" title="Delete {{armorItem.name}}">×</button>
+                  {{/if}}
+                </div>
+              {{/if}}
+
+              {{#if shieldItem}}
+                <div class="equipment-row equipment-defense-row equipment-shield-row">
+                  <button type="button" class="equipment-item-name" data-item-id="{{shieldItem.id}}" title="Double-click to open item">
+                    {{shieldItem.name}}
+                  </button>
+                  {{#if editable}}
+                    <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{shieldItem.id}}" title="Delete {{shieldItem.name}}">×</button>
+                  {{/if}}
+                </div>
+              {{/if}}
+
+              {{#each items}}
+                <div class="equipment-row">
+                  <button type="button" class="equipment-item-name" data-item-id="{{id}}" title="Double-click to open item">
+                    {{name}}
+                  </button>
+                  {{#if ../editable}}
+                    <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{id}}" title="Delete {{name}}">×</button>
+                  {{/if}}
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+
           {{#if isAbilityScore}}
             <input
               class="overlay-field ability-score-field"
@@ -269,59 +314,7 @@
         {{/each}}
       </div>
 
-      {{#if isEquipmentPage}}
-        <div class="brackenvale-equipment-drop-zone"
-          data-equipment-drop-zone="armor"
-          aria-label="Armor and Shield drop zone"
-          title="Drop armor or a shield here"
-          style="position:absolute;left:4.6%;top:6.4%;width:44.1%;height:8.4%;z-index:8;background:transparent;padding:2.8% 2% 0 2%;box-sizing:border-box;">
-          {{#each equipment.armor}}
-            <button type="button" data-item-id="{{id}}" title="Double-click to open item"
-              style="display:block;width:82%;height:22px;border:0;background:transparent;color:#111;opacity:1;font-weight:600;text-shadow:0 0 1px rgba(255,255,255,0.8);text-align:left;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
-              {{name}}
-            </button>
-          {{/each}}
-        </div>
 
-        <div class="brackenvale-equipment-drop-zone"
-          data-equipment-drop-zone="weapons"
-          aria-label="Weapons drop zone"
-          title="Drop weapons here"
-          style="position:absolute;left:4.6%;top:14.8%;width:44.1%;height:14.5%;z-index:8;background:transparent;padding:3.2% 2% 0 2%;box-sizing:border-box;">
-          {{#each equipment.weapons}}
-            <button type="button" data-item-id="{{id}}" title="Double-click to open item"
-              style="display:block;width:82%;height:22px;border:0;background:transparent;color:#111;opacity:1;font-weight:600;text-shadow:0 0 1px rgba(255,255,255,0.8);text-align:left;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
-              {{name}}
-            </button>
-          {{/each}}
-        </div>
-
-        <div class="brackenvale-equipment-drop-zone"
-          data-equipment-drop-zone="worn"
-          aria-label="Worn Equipment drop zone"
-          title="Drop worn equipment here"
-          style="position:absolute;left:50.3%;top:6.4%;width:45.0%;height:22.9%;z-index:8;background:transparent;padding:3.8% 3% 0 3%;box-sizing:border-box;">
-          {{#each equipment.worn}}
-            <button type="button" data-item-id="{{id}}" title="Double-click to open item"
-              style="display:block;width:84%;height:22px;border:0;background:transparent;color:#111;opacity:1;font-weight:600;text-shadow:0 0 1px rgba(255,255,255,0.8);text-align:left;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
-              {{name}}
-            </button>
-          {{/each}}
-        </div>
-
-        <div class="brackenvale-equipment-drop-zone"
-          data-equipment-drop-zone="packed"
-          aria-label="Packed Gear drop zone"
-          title="Drop packed gear here"
-          style="position:absolute;left:4.6%;top:31.2%;width:90.7%;height:48.6%;z-index:8;background:transparent;padding:5.2% 2% 0 2%;box-sizing:border-box;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:22px;column-gap:5%;">
-          {{#each equipment.packed}}
-            <button type="button" data-item-id="{{id}}" title="Double-click to open item"
-              style="display:block;width:86%;height:22px;border:0;background:transparent;color:#111;opacity:1;font-weight:600;text-shadow:0 0 1px rgba(255,255,255,0.8);text-align:left;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
-              {{name}}
-            </button>
-          {{/each}}
-        </div>
-      {{/if}}
     </div>
   {{/each}}
 </form>
