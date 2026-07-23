@@ -4,6 +4,7 @@
  */
 
 export const EQUIPMENT_LOCATION_FLAG = "location";
+const PREVIOUS_AC_FLAG = "previousArmorClass";
 
 const INVENTORY_TYPES = new Set([
   "weapon",
@@ -106,14 +107,13 @@ export async function placeEquipmentItem(
   const sourceIsArmor = isArmorItem(sourceItem);
   const sourceIsShield = isShieldItem(sourceItem);
 
-  // Only one armor and one shield can occupy their equipped lines.
   if (equipped && (sourceIsArmor || sourceIsShield)) {
     const state = getEquipmentState(actor, moduleId);
     const previous = sourceIsShield ? state.shield : state.armor;
 
     if (previous && previous.id !== sourceItem.id) {
       await previous.update({
-        [`flags.${moduleId}.${EQUIPMENT_LOCATION_FLAG}`]: "packed",
+        [`flags.${moduleId}.${EQUIPMENT_LOCATION_FLAG}`]: "packed-left",
         "system.equipped": false
       });
     }
@@ -139,16 +139,76 @@ export async function placeEquipmentItem(
     [ownedItem] = await actor.createEmbeddedDocuments("Item", [itemData]);
   }
 
-  // Armor should use D&D's normal armor calculation rather than a locked
-  // unarmored-defense calculation. Shields work with either mode.
-  if (equipped && sourceIsArmor) {
-    await actor.update({
-      "system.attributes.ac.calc": "default",
-      "system.attributes.ac.formula": ""
-    });
+  if (sourceIsArmor) {
+    if (equipped) {
+      await applyArmorClass(actor, ownedItem, moduleId);
+    } else {
+      await restoreArmorClassIfUnarmored(actor, moduleId);
+    }
   }
 
   return ownedItem;
+}
+
+export async function deleteEquipmentItem(
+  actor,
+  item,
+  moduleId = "brackenvale-core"
+) {
+  const wasArmor = isArmorItem(item) && getItemLocation(item, moduleId) === "equipped";
+  await item.delete();
+  if (wasArmor) await restoreArmorClassIfUnarmored(actor, moduleId);
+}
+
+async function applyArmorClass(actor, armor, moduleId) {
+  const saved = foundry.utils.getProperty(actor, `flags.${moduleId}.${PREVIOUS_AC_FLAG}`);
+
+  if (!saved) {
+    const ac = foundry.utils.getProperty(actor, "system.attributes.ac") ?? {};
+    await actor.setFlag(moduleId, PREVIOUS_AC_FLAG, {
+      calc: ac.calc ?? "default",
+      flat: ac.flat ?? null,
+      formula: ac.formula ?? ""
+    });
+  }
+
+  const dexterity = Number(
+    foundry.utils.getProperty(actor, "system.abilities.dex.mod") ?? 0
+  );
+  const armorValue = Number(
+    foundry.utils.getProperty(armor, "system.armor.value")
+    ?? foundry.utils.getProperty(armor, "system.armor.base")
+    ?? 10
+  );
+  const dexterityCap = foundry.utils.getProperty(armor, "system.armor.dex");
+  const allowedDexterity = dexterityCap === null || dexterityCap === undefined
+    ? dexterity
+    : Math.min(dexterity, Number(dexterityCap));
+  const armorBase = armorValue + allowedDexterity;
+
+  // D&D 5.3 exposes "natural" as a stable base-AC calculation that still
+  // adds the system's native shield and bonus values. This avoids characters
+  // remaining locked to an unarmored class formula after armor is equipped.
+  await actor.update({
+    "system.attributes.ac.calc": "natural",
+    "system.attributes.ac.flat": armorBase,
+    "system.attributes.ac.formula": ""
+  });
+}
+
+async function restoreArmorClassIfUnarmored(actor, moduleId) {
+  const state = getEquipmentState(actor, moduleId);
+  if (state.armor) return;
+
+  const saved = foundry.utils.getProperty(actor, `flags.${moduleId}.${PREVIOUS_AC_FLAG}`);
+  if (!saved) return;
+
+  await actor.update({
+    "system.attributes.ac.calc": saved.calc ?? "default",
+    "system.attributes.ac.flat": saved.flat ?? null,
+    "system.attributes.ac.formula": saved.formula ?? ""
+  });
+  await actor.unsetFlag(moduleId, PREVIOUS_AC_FLAG);
 }
 
 function getEquipmentIdentityValues(item) {

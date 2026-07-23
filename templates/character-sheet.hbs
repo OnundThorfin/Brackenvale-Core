@@ -252,12 +252,15 @@
               title="Drop items here"
             >
               {{#if armorItem}}
-                <div class="equipment-row equipment-defense-row equipment-armor-row"
-                  draggable="true"
-                  data-equipment-item-id="{{armorItem.id}}">
-                  <button type="button" class="equipment-item-name" style="text-align:left !important;justify-content:flex-start !important;" draggable="true" data-equipment-item-id="{{id}}" draggable="true" data-equipment-item-id="{{shieldItem.id}}" draggable="true" data-equipment-item-id="{{armorItem.id}}" data-item-id="{{armorItem.id}}" title="Double-click to open item">
-                    {{armorItem.name}}
-                  </button>
+                <div class="equipment-row equipment-defense-row equipment-armor-row">
+                  <button
+                    type="button"
+                    class="equipment-item-name"
+                    draggable="true"
+                    data-equipment-item-id="{{armorItem.id}}"
+                    data-item-id="{{armorItem.id}}"
+                    title="Double-click to open item"
+                  >{{armorItem.name}}</button>
                   {{#if editable}}
                     <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{armorItem.id}}" title="Delete {{armorItem.name}}">×</button>
                   {{/if}}
@@ -265,12 +268,15 @@
               {{/if}}
 
               {{#if shieldItem}}
-                <div class="equipment-row equipment-defense-row equipment-shield-row"
-                  draggable="true"
-                  data-equipment-item-id="{{shieldItem.id}}">
-                  <button type="button" class="equipment-item-name" style="text-align:left !important;justify-content:flex-start !important;" data-item-id="{{shieldItem.id}}" title="Double-click to open item">
-                    {{shieldItem.name}}
-                  </button>
+                <div class="equipment-row equipment-defense-row equipment-shield-row">
+                  <button
+                    type="button"
+                    class="equipment-item-name"
+                    draggable="true"
+                    data-equipment-item-id="{{shieldItem.id}}"
+                    data-item-id="{{shieldItem.id}}"
+                    title="Double-click to open item"
+                  >{{shieldItem.name}}</button>
                   {{#if editable}}
                     <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{shieldItem.id}}" title="Delete {{shieldItem.name}}">×</button>
                   {{/if}}
@@ -278,12 +284,15 @@
               {{/if}}
 
               {{#each items}}
-                <div class="equipment-row"
-                  draggable="true"
-                  data-equipment-item-id="{{id}}">
-                  <button type="button" class="equipment-item-name" style="text-align:left !important;justify-content:flex-start !important;" data-item-id="{{id}}" title="Double-click to open item">
-                    {{name}}
-                  </button>
+                <div class="equipment-row">
+                  <button
+                    type="button"
+                    class="equipment-item-name"
+                    draggable="true"
+                    data-equipment-item-id="{{id}}"
+                    data-item-id="{{id}}"
+                    title="Double-click to open item"
+                  >{{name}}</button>
                   {{#if ../editable}}
                     <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{id}}" title="Delete {{name}}">×</button>
                   {{/if}}

@@ -6,6 +6,7 @@
 
 import { prepareSheetComponent } from "./sheet-components.js";
 import {
+  deleteEquipmentItem,
   isArmorOrShieldItem,
   placeEquipmentItem
 } from "./equipment-manager.js";
@@ -17,7 +18,7 @@ const LAYOUT_ROOT =
   "modules/brackenvale-core/layouts";
 
 Hooks.once("init", () => {
-  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet`);
+  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet (equipment repository repair)`);
 
   const CharacterActorSheet =
     game.dnd5e?.applications?.actor?.CharacterActorSheet;
@@ -114,8 +115,6 @@ Hooks.once("init", () => {
     }
 
     _onRender(context, options) {
-      super._onRender(context, options);
-
       const root = this.element;
       if (!root) return;
 
@@ -480,7 +479,13 @@ Hooks.once("init", () => {
         zone.addEventListener("dragover", (event) => {
           if (this._calibrationMode || !this.isEditable) return;
           event.preventDefault();
-          if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+          if (event.dataTransfer) {
+            const raw = event.dataTransfer.getData("application/json")
+              || event.dataTransfer.getData("text/plain");
+            event.dataTransfer.dropEffect = raw?.includes("brackenvaleOwnedItem")
+              ? "move"
+              : "copy";
+          }
         });
 
         zone.addEventListener("dragleave", (event) => {
@@ -569,45 +574,39 @@ Hooks.once("init", () => {
 
 
     _activateEquipmentDragging(root) {
-      for (const row of root.querySelectorAll(".equipment-item-name[data-equipment-item-id]")) {
-        row.addEventListener("pointerdown", (event) => {
-          if (event.button !== 0) return;
-          row.dataset.dragReady = "true";
-        });
+      for (const handle of root.querySelectorAll(".equipment-item-name[data-equipment-item-id]")) {
+        handle.addEventListener("dragstart", (event) => {
+          event.stopPropagation();
 
-        row.addEventListener("pointerup", () => {
-          delete row.dataset.dragReady;
-        });
-
-        row.addEventListener("dragend", () => {
-          delete row.dataset.dragReady;
-        });
-
-        row.addEventListener("dragstart", (event) => {
-          if (this._calibrationMode || !this.isEditable) {
+          if (this._calibrationMode || !this.isEditable || !event.dataTransfer) {
             event.preventDefault();
             return;
           }
 
-          const itemId = row.dataset.equipmentItemId;
+          const itemId = handle.dataset.equipmentItemId;
           const item = this.actor.items.get(itemId);
-          if (!item || !event.dataTransfer) {
+          if (!item) {
             event.preventDefault();
             return;
           }
 
-          const dragData = {
+          const serialized = JSON.stringify({
             type: "Item",
             uuid: item.uuid,
             id: item.id,
             actorId: this.actor.id,
             brackenvaleOwnedItem: true
-          };
+          });
 
-          const serialized = JSON.stringify(dragData);
-          event.dataTransfer.setData("text/plain", serialized);
+          event.dataTransfer.clearData();
           event.dataTransfer.setData("application/json", serialized);
+          event.dataTransfer.setData("text/plain", serialized);
           event.dataTransfer.effectAllowed = "move";
+          handle.classList.add("dragging");
+        });
+
+        handle.addEventListener("dragend", () => {
+          handle.classList.remove("dragging");
         });
       }
     }
@@ -627,7 +626,7 @@ Hooks.once("init", () => {
           const confirmed = globalThis.confirm(`Delete ${item.name} from this character?`);
           if (!confirmed) return;
 
-          await item.delete();
+          await deleteEquipmentItem(this.actor, item, MODULE_ID);
           this._activePage = 3;
         });
       }
