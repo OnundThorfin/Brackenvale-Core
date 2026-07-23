@@ -512,10 +512,6 @@ Hooks.once("init", () => {
               }
             }
 
-            if (!data?.type) {
-              data = TextEditor.getDragEventData(event);
-            }
-
             await this._handleEquipmentDrop(data, zone.dataset.equipmentDropZone);
           } catch (error) {
             console.error(`${MODULE_ID} | Could not process equipment drop`, error);
@@ -568,9 +564,6 @@ Hooks.once("init", () => {
 
       ui.notifications?.info(`${sourceItem.name} added to ${sectionName}.`);
       this._activePage = 3;
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      this.render(false);
     }
 
 
@@ -603,13 +596,13 @@ Hooks.once("init", () => {
             return;
           }
 
-          const dragData = typeof item.toDragData === "function"
-            ? item.toDragData()
-            : {
-                type: "Item",
-                uuid: item.uuid,
-                id: item.id
-              };
+          const dragData = {
+            type: "Item",
+            uuid: item.uuid,
+            id: item.id,
+            actorId: this.actor.id,
+            brackenvaleOwnedItem: true
+          };
 
           const serialized = JSON.stringify(dragData);
           event.dataTransfer.setData("text/plain", serialized);
@@ -636,7 +629,6 @@ Hooks.once("init", () => {
 
           await item.delete();
           this._activePage = 3;
-          this.render();
         });
       }
     }
