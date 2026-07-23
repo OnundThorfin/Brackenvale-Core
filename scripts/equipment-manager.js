@@ -142,10 +142,12 @@ export async function placeEquipmentItem(
   // Armor should use D&D's normal armor calculation rather than a locked
   // unarmored-defense calculation. Shields work with either mode.
   if (equipped && sourceIsArmor) {
-    const currentCalc = foundry.utils.getProperty(actor, "system.attributes.ac.calc");
-    if (currentCalc && currentCalc !== "default") {
-      await actor.update({"system.attributes.ac.calc": "default"});
-    }
+    await actor.update({
+      "system.attributes.ac.calc": "default",
+      "system.attributes.ac.formula": ""
+    });
+
+    actor.prepareData();
   }
 
   return ownedItem;

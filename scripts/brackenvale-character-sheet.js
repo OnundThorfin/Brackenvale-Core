@@ -496,14 +496,24 @@ Hooks.once("init", () => {
           event.stopPropagation();
 
           try {
-            let data = TextEditor.getDragEventData(event);
+            let data = null;
 
-            if (!data?.type && event.dataTransfer) {
+            if (event.dataTransfer) {
               const raw =
                 event.dataTransfer.getData("application/json")
                 || event.dataTransfer.getData("text/plain");
 
-              if (raw) data = JSON.parse(raw);
+              if (raw) {
+                try {
+                  data = JSON.parse(raw);
+                } catch (_error) {
+                  data = null;
+                }
+              }
+            }
+
+            if (!data?.type) {
+              data = TextEditor.getDragEventData(event);
             }
 
             await this._handleEquipmentDrop(data, zone.dataset.equipmentDropZone);
@@ -522,8 +532,14 @@ Hooks.once("init", () => {
       }
 
       let sourceItem = null;
-      if (data.uuid) sourceItem = await fromUuid(data.uuid);
-      if (!sourceItem && data.id) sourceItem = this.actor.items.get(data.id) ?? null;
+
+      if (data.id) {
+        sourceItem = this.actor.items.get(data.id) ?? null;
+      }
+
+      if (!sourceItem && data.uuid) {
+        sourceItem = await fromUuid(data.uuid);
+      }
 
       if (!sourceItem) {
         ui.notifications?.warn("Brackenvale could not find the dropped item.");
