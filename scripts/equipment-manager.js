@@ -6,6 +6,7 @@
 export const EQUIPMENT_LOCATION_FLAG = "location";
 const PREVIOUS_AC_FLAG = "previousArmorClass";
 const DISABLED_AC_EFFECTS_FLAG = "disabledArmorClassEffects";
+const ARMOR_AC_EFFECT_FLAG = "equippedArmorClass";
 
 const INVENTORY_TYPES = new Set([
   "weapon",
@@ -168,53 +169,57 @@ async function applyArmorClass(actor, armor, moduleId) {
   );
 
   if (!saved) {
-    const ac = foundry.utils.getProperty(
+    const sourceAc = foundry.utils.getProperty(
       actor,
-      "system.attributes.ac"
+      "_source.system.attributes.ac"
     ) ?? {};
 
     await actor.setFlag(moduleId, PREVIOUS_AC_FLAG, {
-      calc: ac.calc ?? "default",
-      flat: ac.flat ?? null,
-      formula: ac.formula ?? ""
+      calc: sourceAc.calc ?? "default",
+      flat: sourceAc.flat ?? null,
+      formula: sourceAc.formula ?? ""
     });
   }
 
-  // Class features such as Barbarian or Monk Unarmored Defense can override
-  // system.attributes.ac.calc through an Active Effect. Temporarily disable
-  // only effects that change the AC calculation while armor is equipped.
-  const disabledEffectIds = [];
+  // D&D5e can reapply a class AC calculation (such as Barbarian
+  // Unarmored Defense) during data preparation even when the actor source
+  // is set to custom. A managed Active Effect applies after that class
+  // calculation and reliably selects the equipped-armor formula.
+  const existingEffect = (actor.effects ?? []).find((effect) =>
+    effect.getFlag(moduleId, ARMOR_AC_EFFECT_FLAG)
+  );
 
-  for (const effect of actor.effects ?? []) {
-    if (effect.disabled) continue;
+  const effectData = {
+    name: "Brackenvale Equipped Armor",
+    icon: armor?.img ?? "icons/svg/shield.svg",
+    disabled: false,
+    transfer: false,
+    changes: [
+      {
+        key: "system.attributes.ac.calc",
+        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+        value: "custom",
+        priority: 100
+      },
+      {
+        key: "system.attributes.ac.formula",
+        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+        value: "@attributes.ac.armor + @attributes.ac.dex",
+        priority: 100
+      }
+    ],
+    flags: {
+      [moduleId]: {
+        [ARMOR_AC_EFFECT_FLAG]: true
+      }
+    }
+  };
 
-    const changes = Array.from(effect.changes ?? []);
-    const overridesArmorCalculation = changes.some((change) =>
-      change?.key === "system.attributes.ac.calc"
-    );
-
-    if (!overridesArmorCalculation) continue;
-
-    disabledEffectIds.push(effect.id);
-    await effect.update({disabled: true});
+  if (existingEffect) {
+    await existingEffect.update(effectData);
+  } else {
+    await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
   }
-
-  if (disabledEffectIds.length) {
-    await actor.setFlag(
-      moduleId,
-      DISABLED_AC_EFFECTS_FLAG,
-      disabledEffectIds
-    );
-  }
-
-  // Use D&D5e's equipped armor base and capped Dexterity modifier.
-  // Shield, bonuses, and cover are added by the system after this base.
-  await actor.update({
-    "system.attributes.ac.calc": "custom",
-    "system.attributes.ac.flat": null,
-    "system.attributes.ac.formula":
-      "@attributes.ac.armor + @attributes.ac.dex"
-  });
 }
 
 async function restoreArmorClassIfUnarmored(
@@ -224,9 +229,18 @@ async function restoreArmorClassIfUnarmored(
   const state = getEquipmentState(actor, moduleId);
   if (state.armor) return;
 
+  const armorEffects = (actor.effects ?? []).filter((effect) =>
+    effect.getFlag(moduleId, ARMOR_AC_EFFECT_FLAG)
+  );
+
+  if (armorEffects.length) {
+    await actor.deleteEmbeddedDocuments(
+      "ActiveEffect",
+      armorEffects.map((effect) => effect.id)
+    );
+  }
+
   const saved = actor.getFlag(moduleId, PREVIOUS_AC_FLAG);
-  const disabledEffectIds =
-    actor.getFlag(moduleId, DISABLED_AC_EFFECTS_FLAG) ?? [];
 
   if (saved) {
     await actor.update({
@@ -238,12 +252,8 @@ async function restoreArmorClassIfUnarmored(
     await actor.unsetFlag(moduleId, PREVIOUS_AC_FLAG);
   }
 
-  for (const effectId of disabledEffectIds) {
-    const effect = actor.effects?.get?.(effectId);
-    if (effect) await effect.update({disabled: false});
-  }
-
-  if (disabledEffectIds.length) {
+  // Clean up flags from the earlier experimental implementation.
+  if (actor.getFlag(moduleId, DISABLED_AC_EFFECTS_FLAG)) {
     await actor.unsetFlag(moduleId, DISABLED_AC_EFFECTS_FLAG);
   }
 }
