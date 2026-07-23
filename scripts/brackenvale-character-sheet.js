@@ -568,13 +568,28 @@ Hooks.once("init", () => {
 
       ui.notifications?.info(`${sourceItem.name} added to ${sectionName}.`);
       this._activePage = 3;
-      this.render();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      this.render(false);
     }
 
 
 
     _activateEquipmentDragging(root) {
-      for (const row of root.querySelectorAll("[data-equipment-item-id]")) {
+      for (const row of root.querySelectorAll(".equipment-item-name[data-equipment-item-id]")) {
+        row.addEventListener("pointerdown", (event) => {
+          if (event.button !== 0) return;
+          row.dataset.dragReady = "true";
+        });
+
+        row.addEventListener("pointerup", () => {
+          delete row.dataset.dragReady;
+        });
+
+        row.addEventListener("dragend", () => {
+          delete row.dataset.dragReady;
+        });
+
         row.addEventListener("dragstart", (event) => {
           if (this._calibrationMode || !this.isEditable) {
             event.preventDefault();

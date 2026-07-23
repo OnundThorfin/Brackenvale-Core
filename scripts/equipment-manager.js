@@ -146,8 +146,6 @@ export async function placeEquipmentItem(
       "system.attributes.ac.calc": "default",
       "system.attributes.ac.formula": ""
     });
-
-    actor.prepareData();
   }
 
   return ownedItem;
