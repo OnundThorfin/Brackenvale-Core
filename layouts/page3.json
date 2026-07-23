@@ -1,5 +1,56 @@
 {
   "page": 3,
   "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-3.webp",
-  "components": []
+  "components": [
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-armor",
+      "label": "Armor and Shield",
+      "region": "armor",
+      "left": 4.8583984375,
+      "top": 6.138780381944445,
+      "width": 44.1,
+      "height": 8.4
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-weapons",
+      "label": "Weapons",
+      "region": "weapons",
+      "left": 6.551106770833333,
+      "top": 16.187879774305554,
+      "width": 44.1,
+      "height": 14.5
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-worn",
+      "label": "Worn Equipment",
+      "region": "worn",
+      "left": 51.470947265625,
+      "top": 8.916558159722223,
+      "width": 45,
+      "height": 22.9
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-packed-left",
+      "label": "Packed Gear Left Column",
+      "region": "packed-left",
+      "left": 5.6396484375,
+      "top": 34.93245442708333,
+      "width": 44.2,
+      "height": 48.6
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-packed-right",
+      "label": "Packed Gear Right Column",
+      "region": "packed-right",
+      "left": 50.7080078125,
+      "top": 35.01925998263889,
+      "width": 44.2,
+      "height": 48.6
+    }
+  ]
 }
