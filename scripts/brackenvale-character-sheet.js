@@ -130,6 +130,7 @@ Hooks.once("init", () => {
       this._activateWeaponControls(root);
       this._activateEquipmentDropZones(root);
       this._activateEquipmentControls(root);
+      this._activateEquipmentDragging(root);
     }
     _activateArtworkPageTabs(root) {
       const buttons = root.querySelectorAll(
@@ -479,7 +480,7 @@ Hooks.once("init", () => {
         zone.addEventListener("dragover", (event) => {
           if (this._calibrationMode || !this.isEditable) return;
           event.preventDefault();
-          if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+          if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
         });
 
         zone.addEventListener("dragleave", (event) => {
@@ -536,7 +537,8 @@ Hooks.once("init", () => {
         armor: "Armor & Shield",
         weapons: "Weapons",
         worn: "Worn Equipment",
-        packed: "Packed Gear"
+        "packed-left": "Packed Gear",
+        "packed-right": "Packed Gear"
       }[zoneType] ?? "Equipment";
 
       ui.notifications?.info(`${sourceItem.name} added to ${sectionName}.`);
@@ -544,6 +546,34 @@ Hooks.once("init", () => {
       this.render();
     }
 
+
+
+    _activateEquipmentDragging(root) {
+      for (const row of root.querySelectorAll("[data-equipment-item-id]")) {
+        row.addEventListener("dragstart", (event) => {
+          if (this._calibrationMode || !this.isEditable) {
+            event.preventDefault();
+            return;
+          }
+
+          const itemId = row.dataset.equipmentItemId;
+          const item = this.actor.items.get(itemId);
+          if (!item || !event.dataTransfer) {
+            event.preventDefault();
+            return;
+          }
+
+          const dragData = {
+            type: "Item",
+            uuid: item.uuid,
+            id: item.id
+          };
+
+          event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+          event.dataTransfer.effectAllowed = "move";
+        });
+      }
+    }
 
     _activateEquipmentControls(root) {
       for (const button of root.querySelectorAll("[data-action='delete-equipment-item']")) {

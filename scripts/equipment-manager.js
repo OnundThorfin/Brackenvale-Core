@@ -74,7 +74,12 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
     shield: equipped.find((entry) => entry.isShield)?.item ?? null,
     weapons: equipped.filter((entry) => entry.isWeapon).map((entry) => entry.item),
     worn: items.filter((entry) => entry.location === "worn").map((entry) => entry.item),
-    packed: items.filter((entry) => entry.location === "packed").map((entry) => entry.item)
+    packedLeft: items
+      .filter((entry) => entry.location === "packed" || entry.location === "packed-left")
+      .map((entry) => entry.item),
+    packedRight: items
+      .filter((entry) => entry.location === "packed-right")
+      .map((entry) => entry.item)
   };
 }
 
@@ -94,7 +99,9 @@ export async function placeEquipmentItem(
     throw new Error("Only armor or shields can be placed in the Armor & Shield section.");
   }
 
-  const location = ["armor", "weapons"].includes(zoneType) ? "equipped" : zoneType;
+  const location = ["armor", "weapons"].includes(zoneType)
+    ? "equipped"
+    : zoneType;
   const equipped = location === "equipped";
   const sourceIsArmor = isArmorItem(sourceItem);
   const sourceIsShield = isShieldItem(sourceItem);

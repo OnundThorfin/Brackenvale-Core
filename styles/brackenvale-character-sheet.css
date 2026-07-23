@@ -615,13 +615,11 @@
   padding: 10% 3% 0;
 }
 
-.equipment-region-packed {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-auto-rows: 22px;
-  column-gap: 5%;
+.equipment-region-packed-left,
+.equipment-region-packed-right {
+  display: block;
   align-content: start;
-  padding: 11% 2% 0;
+  padding: 11% 4% 0 2%;
 }
 
 .equipment-row {
@@ -711,4 +709,22 @@
 .brackenvale-art-sheet.calibration-mode .equipment-region * {
   pointer-events: none;
   visibility: hidden;
+}
+
+
+/* Equipment manager v2 */
+.equipment-region .equipment-row {
+  justify-content: flex-start;
+}
+
+.equipment-region .equipment-item-name {
+  text-align: left !important;
+}
+
+.equipment-row[draggable="true"] {
+  cursor: grab;
+}
+
+.equipment-row[draggable="true"]:active {
+  cursor: grabbing;
 }
