@@ -52,6 +52,7 @@ Hooks.once("init", () => {
     _workingLayouts = null;
     _calibrationMode = false;
     _selectedCalibrationField = null;
+    _activePage = 1;
 
     async _prepareContext(options) {
       const context = await super._prepareContext(options);
@@ -69,10 +70,34 @@ Hooks.once("init", () => {
       context.editable = editable;
       context.isGM = Boolean(game.user?.isGM);
       context.calibrationMode = this._calibrationMode;
-      context.pages = this._workingLayouts.map((layout, index) => ({
+
+      const equipmentItems = (this.actor.items ?? []).map((item) => {
+        const location =
+          foundry.utils.getProperty(item, `flags.${MODULE_ID}.location`)
+          ?? (foundry.utils.getProperty(item, "system.equipped") ? "equipped" : "packed");
+
+        return {
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          location,
+          isWeapon: item.type === "weapon",
+          isEquipment: item.type === "equipment"
+        };
+      });
+
+      context.equipment = {
+        armor: equipmentItems.filter((item) => item.location === "equipped" && item.isEquipment),
+        weapons: equipmentItems.filter((item) => item.location === "equipped" && item.isWeapon),
+        worn: equipmentItems.filter((item) => item.location === "worn"),
+        packed: equipmentItems.filter((item) => item.location === "packed")
+      };
+
+      context.pages = this._workingLayouts.map((layout) => ({
         ...layout,
-        active: index === 0,
+        active: Number(layout.page) === Number(this._activePage),
         isEquipmentPage: Number(layout.page) === 3,
+        equipment: Number(layout.page) === 3 ? context.equipment : null,
         components: layout.components.map((component) =>
           prepareSheetComponent(
             component,
@@ -137,6 +162,7 @@ Hooks.once("init", () => {
         button.addEventListener("click", (event) => {
           event.preventDefault();
           const selectedPage = button.dataset.page;
+          this._activePage = Number(selectedPage);
 
           for (const tabButton of buttons) {
             tabButton.classList.toggle("active", tabButton === button);
@@ -548,6 +574,7 @@ Hooks.once("init", () => {
       }[zoneType] ?? "Equipment";
 
       ui.notifications?.info(`${sourceItem.name} added to ${sectionName}.`);
+      this._activePage = 3;
       this.render();
     }
 
