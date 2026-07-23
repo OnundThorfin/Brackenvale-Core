@@ -491,7 +491,19 @@ function getWeaponAbilityModifier(item) {
       foundry.utils.getProperty(item, "system.type.value") ?? ""
     ).toLowerCase();
 
-    ability = weaponType.includes("ranged") && !hasProperty("fin")
+    const attackType = String(
+      foundry.utils.getProperty(activity, "attack.type.value")
+      ?? foundry.utils.getProperty(activity, "attack.type")
+      ?? ""
+    ).toLowerCase();
+
+    const isRangedWeapon =
+      attackType.includes("ranged")
+      || weaponType.includes("ranged")
+      || weaponType.endsWith("r")
+      || hasProperty("amm");
+
+    ability = isRangedWeapon && !hasProperty("fin")
       ? "dex"
       : "str";
 

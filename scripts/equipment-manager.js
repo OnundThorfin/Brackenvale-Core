@@ -5,6 +5,7 @@
 
 export const EQUIPMENT_LOCATION_FLAG = "location";
 const PREVIOUS_AC_FLAG = "previousArmorClass";
+const DISABLED_AC_EFFECTS_FLAG = "disabledArmorClassEffects";
 
 const INVENTORY_TYPES = new Set([
   "weapon",
@@ -179,28 +180,72 @@ async function applyArmorClass(actor, armor, moduleId) {
     });
   }
 
-  // Let D&D5e calculate AC from the equipped armor and shield.
-  // The item has already been marked system.equipped=true.
+  // Class features such as Barbarian or Monk Unarmored Defense can override
+  // system.attributes.ac.calc through an Active Effect. Temporarily disable
+  // only effects that change the AC calculation while armor is equipped.
+  const disabledEffectIds = [];
+
+  for (const effect of actor.effects ?? []) {
+    if (effect.disabled) continue;
+
+    const changes = Array.from(effect.changes ?? []);
+    const overridesArmorCalculation = changes.some((change) =>
+      change?.key === "system.attributes.ac.calc"
+    );
+
+    if (!overridesArmorCalculation) continue;
+
+    disabledEffectIds.push(effect.id);
+    await effect.update({disabled: true});
+  }
+
+  if (disabledEffectIds.length) {
+    await actor.setFlag(
+      moduleId,
+      DISABLED_AC_EFFECTS_FLAG,
+      disabledEffectIds
+    );
+  }
+
+  // Use D&D5e's equipped armor base and capped Dexterity modifier.
+  // Shield, bonuses, and cover are added by the system after this base.
   await actor.update({
-    "system.attributes.ac.calc": "default",
+    "system.attributes.ac.calc": "custom",
     "system.attributes.ac.flat": null,
-    "system.attributes.ac.formula": ""
+    "system.attributes.ac.formula":
+      "@attributes.ac.armor + @attributes.ac.dex"
   });
 }
 
-async function restoreArmorClassIfUnarmored(actor, moduleId) {
+async function restoreArmorClassIfUnarmored(
+  actor,
+  moduleId = "brackenvale-core"
+) {
   const state = getEquipmentState(actor, moduleId);
   if (state.armor) return;
 
-  const saved = foundry.utils.getProperty(actor, `flags.${moduleId}.${PREVIOUS_AC_FLAG}`);
-  if (!saved) return;
+  const saved = actor.getFlag(moduleId, PREVIOUS_AC_FLAG);
+  const disabledEffectIds =
+    actor.getFlag(moduleId, DISABLED_AC_EFFECTS_FLAG) ?? [];
 
-  await actor.update({
-    "system.attributes.ac.calc": saved.calc ?? "default",
-    "system.attributes.ac.flat": saved.flat ?? null,
-    "system.attributes.ac.formula": saved.formula ?? ""
-  });
-  await actor.unsetFlag(moduleId, PREVIOUS_AC_FLAG);
+  if (saved) {
+    await actor.update({
+      "system.attributes.ac.calc": saved.calc ?? "default",
+      "system.attributes.ac.flat": saved.flat ?? null,
+      "system.attributes.ac.formula": saved.formula ?? ""
+    });
+
+    await actor.unsetFlag(moduleId, PREVIOUS_AC_FLAG);
+  }
+
+  for (const effectId of disabledEffectIds) {
+    const effect = actor.effects?.get?.(effectId);
+    if (effect) await effect.update({disabled: false});
+  }
+
+  if (disabledEffectIds.length) {
+    await actor.unsetFlag(moduleId, DISABLED_AC_EFFECTS_FLAG);
+  }
 }
 
 function getEquipmentIdentityValues(item) {
