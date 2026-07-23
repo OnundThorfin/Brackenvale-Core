@@ -517,7 +517,12 @@ Hooks.once("init", () => {
               }
             }
 
-            await this._handleEquipmentDrop(data, zone.dataset.equipmentDropZone);
+            if (!data?.type) return;
+
+            await this._handleEquipmentDrop(
+              data,
+              zone.dataset.equipmentDropZone
+            );
           } catch (error) {
             console.error(`${MODULE_ID} | Could not process equipment drop`, error);
             ui.notifications?.error("Brackenvale could not add that item.");
@@ -574,39 +579,132 @@ Hooks.once("init", () => {
 
 
     _activateEquipmentDragging(root) {
-      for (const handle of root.querySelectorAll(".equipment-item-name[data-equipment-item-id]")) {
-        handle.addEventListener("dragstart", (event) => {
-          event.stopPropagation();
+      const handles = root.querySelectorAll(
+        ".equipment-item-name[data-equipment-item-id]"
+      );
 
-          if (this._calibrationMode || !this.isEditable || !event.dataTransfer) {
-            event.preventDefault();
+      for (const handle of handles) {
+        handle.draggable = false;
+
+        handle.addEventListener("pointerdown", (event) => {
+          if (
+            this._calibrationMode
+            || !this.isEditable
+            || event.button !== 0
+          ) {
             return;
           }
 
           const itemId = handle.dataset.equipmentItemId;
           const item = this.actor.items.get(itemId);
-          if (!item) {
-            event.preventDefault();
-            return;
-          }
+          if (!item) return;
 
-          const serialized = JSON.stringify({
-            type: "Item",
-            uuid: item.uuid,
-            id: item.id,
-            actorId: this.actor.id,
-            brackenvaleOwnedItem: true
-          });
+          const startX = event.clientX;
+          const startY = event.clientY;
+          let dragging = false;
+          let targetZone = null;
 
-          event.dataTransfer.clearData();
-          event.dataTransfer.setData("application/json", serialized);
-          event.dataTransfer.setData("text/plain", serialized);
-          event.dataTransfer.effectAllowed = "move";
-          handle.classList.add("dragging");
-        });
+          const ghost = document.createElement("div");
+          ghost.className = "brackenvale-equipment-drag-ghost";
+          ghost.textContent = item.name;
 
-        handle.addEventListener("dragend", () => {
-          handle.classList.remove("dragging");
+          const clearTarget = () => {
+            targetZone?.classList.remove("equipment-drag-target");
+            targetZone = null;
+          };
+
+          const findTarget = (clientX, clientY) => {
+            const element = document.elementFromPoint(clientX, clientY);
+            return element?.closest?.("[data-equipment-drop-zone]") ?? null;
+          };
+
+          const moveGhost = (clientX, clientY) => {
+            ghost.style.left = `${clientX + 12}px`;
+            ghost.style.top = `${clientY + 12}px`;
+          };
+
+          const onPointerMove = (moveEvent) => {
+            const distance = Math.hypot(
+              moveEvent.clientX - startX,
+              moveEvent.clientY - startY
+            );
+
+            if (!dragging && distance < 6) return;
+
+            if (!dragging) {
+              dragging = true;
+              handle.classList.add("dragging");
+              document.body.append(ghost);
+            }
+
+            moveEvent.preventDefault();
+            moveGhost(moveEvent.clientX, moveEvent.clientY);
+
+            const nextTarget = findTarget(
+              moveEvent.clientX,
+              moveEvent.clientY
+            );
+
+            if (nextTarget !== targetZone) {
+              clearTarget();
+              targetZone = nextTarget;
+              targetZone?.classList.add("equipment-drag-target");
+            }
+          };
+
+          const finish = async (upEvent) => {
+            window.removeEventListener("pointermove", onPointerMove, true);
+            window.removeEventListener("pointerup", finish, true);
+            window.removeEventListener("pointercancel", cancel, true);
+
+            handle.classList.remove("dragging");
+            ghost.remove();
+
+            const finalTarget = dragging
+              ? findTarget(upEvent.clientX, upEvent.clientY)
+              : null;
+
+            clearTarget();
+
+            if (!dragging || !finalTarget) return;
+
+            upEvent.preventDefault();
+            upEvent.stopPropagation();
+
+            try {
+              await this._handleEquipmentDrop(
+                {
+                  type: "Item",
+                  id: item.id,
+                  uuid: item.uuid,
+                  actorId: this.actor.id,
+                  brackenvaleOwnedItem: true
+                },
+                finalTarget.dataset.equipmentDropZone
+              );
+            } catch (error) {
+              console.error(
+                `${MODULE_ID} | Could not move owned equipment item`,
+                error
+              );
+              ui.notifications?.error(
+                `Brackenvale could not move ${item.name}.`
+              );
+            }
+          };
+
+          const cancel = () => {
+            window.removeEventListener("pointermove", onPointerMove, true);
+            window.removeEventListener("pointerup", finish, true);
+            window.removeEventListener("pointercancel", cancel, true);
+            handle.classList.remove("dragging");
+            clearTarget();
+            ghost.remove();
+          };
+
+          window.addEventListener("pointermove", onPointerMove, true);
+          window.addEventListener("pointerup", finish, true);
+          window.addEventListener("pointercancel", cancel, true);
         });
       }
     }

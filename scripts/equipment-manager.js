@@ -161,10 +161,17 @@ export async function deleteEquipmentItem(
 }
 
 async function applyArmorClass(actor, armor, moduleId) {
-  const saved = foundry.utils.getProperty(actor, `flags.${moduleId}.${PREVIOUS_AC_FLAG}`);
+  const saved = foundry.utils.getProperty(
+    actor,
+    `flags.${moduleId}.${PREVIOUS_AC_FLAG}`
+  );
 
   if (!saved) {
-    const ac = foundry.utils.getProperty(actor, "system.attributes.ac") ?? {};
+    const ac = foundry.utils.getProperty(
+      actor,
+      "system.attributes.ac"
+    ) ?? {};
+
     await actor.setFlag(moduleId, PREVIOUS_AC_FLAG, {
       calc: ac.calc ?? "default",
       flat: ac.flat ?? null,
@@ -172,26 +179,11 @@ async function applyArmorClass(actor, armor, moduleId) {
     });
   }
 
-  const dexterity = Number(
-    foundry.utils.getProperty(actor, "system.abilities.dex.mod") ?? 0
-  );
-  const armorValue = Number(
-    foundry.utils.getProperty(armor, "system.armor.value")
-    ?? foundry.utils.getProperty(armor, "system.armor.base")
-    ?? 10
-  );
-  const dexterityCap = foundry.utils.getProperty(armor, "system.armor.dex");
-  const allowedDexterity = dexterityCap === null || dexterityCap === undefined
-    ? dexterity
-    : Math.min(dexterity, Number(dexterityCap));
-  const armorBase = armorValue + allowedDexterity;
-
-  // D&D 5.3 exposes "natural" as a stable base-AC calculation that still
-  // adds the system's native shield and bonus values. This avoids characters
-  // remaining locked to an unarmored class formula after armor is equipped.
+  // Let D&D5e calculate AC from the equipped armor and shield.
+  // The item has already been marked system.equipped=true.
   await actor.update({
-    "system.attributes.ac.calc": "natural",
-    "system.attributes.ac.flat": armorBase,
+    "system.attributes.ac.calc": "default",
+    "system.attributes.ac.flat": null,
     "system.attributes.ac.formula": ""
   });
 }

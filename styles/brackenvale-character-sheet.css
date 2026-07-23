@@ -812,3 +812,39 @@
   opacity: 0.45 !important;
   cursor: grabbing !important;
 }
+
+
+/* Equipment movement — pointer-based drag between Page 3 zones */
+.equipment-region.equipment-drag-target {
+  outline: 2px dashed rgba(40, 80, 40, 0.9) !important;
+  outline-offset: -2px;
+  background: rgba(60, 100, 60, 0.16) !important;
+}
+
+.brackenvale-equipment-drag-ghost {
+  position: fixed;
+  z-index: 100000;
+  max-width: 260px;
+  padding: 4px 8px;
+  overflow: hidden;
+  color: #171612;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  background: rgba(247, 245, 238, 0.97);
+  border: 1px solid rgba(39, 36, 31, 0.75);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.3);
+}
+
+.equipment-item-name[data-equipment-item-id] {
+  cursor: grab !important;
+  touch-action: none;
+}
+
+.equipment-item-name[data-equipment-item-id].dragging {
+  cursor: grabbing !important;
+  opacity: 0.45 !important;
+}
