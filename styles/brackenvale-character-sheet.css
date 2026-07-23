@@ -728,3 +728,42 @@
 .equipment-row[draggable="true"]:active {
   cursor: grabbing;
 }
+
+
+/* Equipment manager v3 fixes */
+.equipped-defense-name,
+.equipped-defense-name:disabled {
+  display: block;
+  margin: 0;
+  padding: 0 3px;
+  overflow: hidden;
+  color: #171612;
+  opacity: 1;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(10px, 1.15vw, 14px);
+  font-weight: 600;
+  line-height: 1;
+  text-align: left !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.equipment-region,
+.equipment-region .equipment-row,
+.equipment-region .equipment-item-name {
+  text-align: left !important;
+}
+
+.equipment-region .equipment-row {
+  justify-content: flex-start !important;
+}
+
+.equipment-region .equipment-item-name {
+  display: block !important;
+  width: 100%;
+  justify-content: flex-start !important;
+}

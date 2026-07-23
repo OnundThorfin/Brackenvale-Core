@@ -255,7 +255,7 @@
                 <div class="equipment-row equipment-defense-row equipment-armor-row"
                   draggable="true"
                   data-equipment-item-id="{{armorItem.id}}">
-                  <button type="button" class="equipment-item-name" data-item-id="{{armorItem.id}}" title="Double-click to open item">
+                  <button type="button" class="equipment-item-name" style="text-align:left !important;justify-content:flex-start !important;" data-item-id="{{armorItem.id}}" title="Double-click to open item">
                     {{armorItem.name}}
                   </button>
                   {{#if editable}}
@@ -268,7 +268,7 @@
                 <div class="equipment-row equipment-defense-row equipment-shield-row"
                   draggable="true"
                   data-equipment-item-id="{{shieldItem.id}}">
-                  <button type="button" class="equipment-item-name" data-item-id="{{shieldItem.id}}" title="Double-click to open item">
+                  <button type="button" class="equipment-item-name" style="text-align:left !important;justify-content:flex-start !important;" data-item-id="{{shieldItem.id}}" title="Double-click to open item">
                     {{shieldItem.name}}
                   </button>
                   {{#if editable}}
@@ -281,7 +281,7 @@
                 <div class="equipment-row"
                   draggable="true"
                   data-equipment-item-id="{{id}}">
-                  <button type="button" class="equipment-item-name" data-item-id="{{id}}" title="Double-click to open item">
+                  <button type="button" class="equipment-item-name" style="text-align:left !important;justify-content:flex-start !important;" data-item-id="{{id}}" title="Double-click to open item">
                     {{name}}
                   </button>
                   {{#if ../editable}}
@@ -290,6 +290,20 @@
                 </div>
               {{/each}}
             </div>
+          {{/if}}
+
+          {{#if isEquippedDefenseName}}
+            <button
+              type="button"
+              class="overlay-field equipped-defense-name"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              data-item-id="{{itemId}}"
+              aria-label="{{label}}"
+              title="{{#if itemId}}Double-click to open item{{/if}}"
+              {{#unless itemId}}disabled{{/unless}}
+            >{{value}}</button>
           {{/if}}
 
           {{#if isAbilityScore}}
