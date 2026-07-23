@@ -5,6 +5,10 @@
  */
 
 import { prepareSheetComponent } from "./sheet-components.js";
+import {
+  isArmorOrShieldItem,
+  placeEquipmentItem
+} from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
 const TEMPLATE_PATH =
@@ -521,27 +525,12 @@ Hooks.once("init", () => {
         return;
       }
 
-      if (zoneType === "armor" && !this._isArmorOrShieldItem(sourceItem)) {
+      if (zoneType === "armor" && !isArmorOrShieldItem(sourceItem)) {
         ui.notifications?.warn("Only armor or shields can be dropped into the Armor & Shield section.");
         return;
       }
 
-      const location = ["armor", "weapons"].includes(zoneType) ? "equipped" : zoneType;
-      const equipped = location === "equipped";
-      const ownedItem = sourceItem.parent === this.actor ? sourceItem : null;
-
-      if (ownedItem) {
-        await ownedItem.update({
-          [`flags.${MODULE_ID}.location`]: location,
-          "system.equipped": equipped
-        });
-      } else {
-        const itemData = sourceItem.toObject();
-        foundry.utils.setProperty(itemData, `flags.${MODULE_ID}.location`, location);
-        foundry.utils.setProperty(itemData, "system.equipped", equipped);
-        delete itemData._id;
-        await this.actor.createEmbeddedDocuments("Item", [itemData]);
-      }
+      await placeEquipmentItem(this.actor, sourceItem, zoneType, MODULE_ID);
 
       const sectionName = {
         armor: "Armor & Shield",
@@ -576,26 +565,6 @@ Hooks.once("init", () => {
           this.render();
         });
       }
-    }
-
-    _isArmorOrShieldItem(item) {
-      if (item?.type !== "equipment") return false;
-
-      const values = [
-        foundry.utils.getProperty(item, "system.type.value"),
-        foundry.utils.getProperty(item, "system.type.baseItem"),
-        foundry.utils.getProperty(item, "system.armor.type"),
-        foundry.utils.getProperty(item, "system.identifier"),
-        item.name
-      ]
-        .filter(Boolean)
-        .map((value) => String(value).toLowerCase());
-
-      return values.some((value) =>
-        value.includes("armor")
-        || value.includes("shield")
-        || ["light", "medium", "heavy"].includes(value)
-      );
     }
 
     _activateCalibrationControls(root) {
