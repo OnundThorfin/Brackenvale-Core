@@ -71,33 +71,9 @@ Hooks.once("init", () => {
       context.isGM = Boolean(game.user?.isGM);
       context.calibrationMode = this._calibrationMode;
 
-      const equipmentItems = (this.actor.items ?? []).map((item) => {
-        const location =
-          foundry.utils.getProperty(item, `flags.${MODULE_ID}.location`)
-          ?? (foundry.utils.getProperty(item, "system.equipped") ? "equipped" : "packed");
-
-        return {
-          id: item.id,
-          name: item.name,
-          type: item.type,
-          location,
-          isWeapon: item.type === "weapon",
-          isEquipment: item.type === "equipment"
-        };
-      });
-
-      context.equipment = {
-        armor: equipmentItems.filter((item) => item.location === "equipped" && item.isEquipment),
-        weapons: equipmentItems.filter((item) => item.location === "equipped" && item.isWeapon),
-        worn: equipmentItems.filter((item) => item.location === "worn"),
-        packed: equipmentItems.filter((item) => item.location === "packed")
-      };
-
       context.pages = this._workingLayouts.map((layout) => ({
         ...layout,
         active: Number(layout.page) === Number(this._activePage),
-        isEquipmentPage: Number(layout.page) === 3,
-        equipment: Number(layout.page) === 3 ? context.equipment : null,
         components: layout.components.map((component) =>
           prepareSheetComponent(
             component,
@@ -149,6 +125,7 @@ Hooks.once("init", () => {
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
       this._activateEquipmentDropZones(root);
+      this._activateEquipmentControls(root);
     }
     _activateArtworkPageTabs(root) {
       const buttons = root.querySelectorAll(
@@ -544,7 +521,7 @@ Hooks.once("init", () => {
         return;
       }
 
-      if (zoneType === "armor" && sourceItem.type !== "equipment") {
+      if (zoneType === "armor" && !this._isArmorOrShieldItem(sourceItem)) {
         ui.notifications?.warn("Only armor or shields can be dropped into the Armor & Shield section.");
         return;
       }
@@ -576,6 +553,49 @@ Hooks.once("init", () => {
       ui.notifications?.info(`${sourceItem.name} added to ${sectionName}.`);
       this._activePage = 3;
       this.render();
+    }
+
+
+    _activateEquipmentControls(root) {
+      for (const button of root.querySelectorAll("[data-action='delete-equipment-item']")) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          const item = this.actor.items.get(itemId);
+          if (!item) return;
+
+          const confirmed = globalThis.confirm(`Delete ${item.name} from this character?`);
+          if (!confirmed) return;
+
+          await item.delete();
+          this._activePage = 3;
+          this.render();
+        });
+      }
+    }
+
+    _isArmorOrShieldItem(item) {
+      if (item?.type !== "equipment") return false;
+
+      const values = [
+        foundry.utils.getProperty(item, "system.type.value"),
+        foundry.utils.getProperty(item, "system.type.baseItem"),
+        foundry.utils.getProperty(item, "system.armor.type"),
+        foundry.utils.getProperty(item, "system.identifier"),
+        item.name
+      ]
+        .filter(Boolean)
+        .map((value) => String(value).toLowerCase());
+
+      return values.some((value) =>
+        value.includes("armor")
+        || value.includes("shield")
+        || ["light", "medium", "heavy"].includes(value)
+      );
     }
 
     _activateCalibrationControls(root) {
