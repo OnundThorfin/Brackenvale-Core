@@ -252,7 +252,9 @@
               title="Drop items here"
             >
               {{#if armorItem}}
-                <div class="equipment-row equipment-defense-row equipment-armor-row">
+                <div class="equipment-row equipment-defense-row equipment-armor-row"
+                  draggable="true"
+                  data-equipment-item-id="{{armorItem.id}}">
                   <button type="button" class="equipment-item-name" data-item-id="{{armorItem.id}}" title="Double-click to open item">
                     {{armorItem.name}}
                   </button>
@@ -263,7 +265,9 @@
               {{/if}}
 
               {{#if shieldItem}}
-                <div class="equipment-row equipment-defense-row equipment-shield-row">
+                <div class="equipment-row equipment-defense-row equipment-shield-row"
+                  draggable="true"
+                  data-equipment-item-id="{{shieldItem.id}}">
                   <button type="button" class="equipment-item-name" data-item-id="{{shieldItem.id}}" title="Double-click to open item">
                     {{shieldItem.name}}
                   </button>
@@ -274,7 +278,9 @@
               {{/if}}
 
               {{#each items}}
-                <div class="equipment-row">
+                <div class="equipment-row"
+                  draggable="true"
+                  data-equipment-item-id="{{id}}">
                   <button type="button" class="equipment-item-name" data-item-id="{{id}}" title="Double-click to open item">
                     {{name}}
                   </button>

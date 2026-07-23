@@ -34,12 +34,22 @@
     },
     {
       "component": "equipmentRegion",
-      "key": "equipment-packed",
-      "label": "Packed Gear",
-      "region": "packed",
+      "key": "equipment-packed-left",
+      "label": "Packed Gear Left Column",
+      "region": "packed-left",
       "left": 4.6,
       "top": 31.2,
-      "width": 90.7,
+      "width": 44.2,
+      "height": 48.6
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-packed-right",
+      "label": "Packed Gear Right Column",
+      "region": "packed-right",
+      "left": 51.1,
+      "top": 31.2,
+      "width": 44.2,
       "height": 48.6
     }
   ]

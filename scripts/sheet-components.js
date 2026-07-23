@@ -305,8 +305,10 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
     regionItems = state.weapons.map(summarize);
   } else if (region === "worn") {
     regionItems = state.worn.map(summarize);
-  } else if (region === "packed") {
-    regionItems = state.packed.map(summarize);
+  } else if (region === "packed-left") {
+    regionItems = state.packedLeft.map(summarize);
+  } else if (region === "packed-right") {
+    regionItems = state.packedRight.map(summarize);
   }
 
   return {

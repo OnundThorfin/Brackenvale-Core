@@ -668,6 +668,26 @@
       "width": 92.45,
       "height": 12.25,
       "maxRows": 4
+    },
+    {
+      "component": "equippedDefenseName",
+      "key": "equippedArmor",
+      "label": "Equipped Armor",
+      "defenseType": "armor",
+      "left": 63.4,
+      "top": 32.0,
+      "width": 29.2,
+      "height": 2.0
+    },
+    {
+      "component": "equippedDefenseName",
+      "key": "equippedShield",
+      "label": "Equipped Shield",
+      "defenseType": "shield",
+      "left": 63.4,
+      "top": 41.7,
+      "width": 29.2,
+      "height": 2.0
     }
   ]
 }
