@@ -785,3 +785,30 @@
   justify-content: flex-start !important;
   padding-left: 0 !important;
 }
+
+
+/* Equipment repository repair */
+.equipment-region .equipment-row {
+  justify-content: flex-start !important;
+}
+
+.equipment-region .equipment-item-name,
+.equipment-region .equipment-item-name:disabled {
+  display: block !important;
+  flex: 1 1 auto;
+  width: auto !important;
+  min-width: 0;
+  padding: 0 16px 0 0 !important;
+  color: #111 !important;
+  opacity: 1 !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  cursor: grab !important;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.equipment-region .equipment-item-name.dragging {
+  opacity: 0.45 !important;
+  cursor: grabbing !important;
+}
