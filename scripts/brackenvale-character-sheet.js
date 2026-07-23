@@ -496,7 +496,16 @@ Hooks.once("init", () => {
           event.stopPropagation();
 
           try {
-            const data = TextEditor.getDragEventData(event);
+            let data = TextEditor.getDragEventData(event);
+
+            if (!data?.type && event.dataTransfer) {
+              const raw =
+                event.dataTransfer.getData("application/json")
+                || event.dataTransfer.getData("text/plain");
+
+              if (raw) data = JSON.parse(raw);
+            }
+
             await this._handleEquipmentDrop(data, zone.dataset.equipmentDropZone);
           } catch (error) {
             console.error(`${MODULE_ID} | Could not process equipment drop`, error);
@@ -563,13 +572,17 @@ Hooks.once("init", () => {
             return;
           }
 
-          const dragData = {
-            type: "Item",
-            uuid: item.uuid,
-            id: item.id
-          };
+          const dragData = typeof item.toDragData === "function"
+            ? item.toDragData()
+            : {
+                type: "Item",
+                uuid: item.uuid,
+                id: item.id
+              };
 
-          event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+          const serialized = JSON.stringify(dragData);
+          event.dataTransfer.setData("text/plain", serialized);
+          event.dataTransfer.setData("application/json", serialized);
           event.dataTransfer.effectAllowed = "move";
         });
       }
