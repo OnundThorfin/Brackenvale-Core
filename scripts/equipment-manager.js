@@ -58,9 +58,49 @@ export function getItemSlotValue(item, moduleId = "brackenvale-core") {
     return override;
   }
 
-  // Initial Brackenvale slot model:
-  // armor occupies 2 slots; every other carried item occupies 1.
-  return isArmorItem(item) ? 2 : 1;
+  const quantity = Math.max(
+    1,
+    Number(foundry.utils.getProperty(item, "system.quantity") ?? 1)
+  );
+  const identity = getEquipmentIdentityValues(item);
+  const name = String(item?.name ?? "").trim().toLowerCase();
+
+  // Containers
+  if (name.includes("belt pouch")) return 0;
+  if (name.includes("backpack") || name === "sack" || name.endsWith(" sack")) {
+    return quantity;
+  }
+
+  // Armor and shields
+  if (isShieldItem(item)) return quantity;
+  if (isArmorItem(item)) {
+    if (identity.some((value) => value.includes("heavy"))) return 3 * quantity;
+    if (identity.some((value) => value.includes("medium"))) return 2 * quantity;
+    return quantity;
+  }
+
+  // Weapons
+  if (item?.type === "weapon") {
+    return (isTwoHandedWeapon(item) ? 2 : 1) * quantity;
+  }
+
+  // Tiny items are negligible unless a specific item override says otherwise.
+  if (isNegligibleItem(item)) return 0;
+
+  // Coins and gems are tracked in groups of 100 when represented as Items.
+  if (isCoinOrGemItem(item)) return Math.ceil(quantity / 100);
+
+  // Five days of provisions occupy one slot.
+  if (isProvisionItem(item)) return Math.ceil(quantity / 5);
+
+  // One gallon of water occupies one slot.
+  if (isWaterItem(item)) return quantity;
+
+  // A Supply Die occupies one slot regardless of its current die size.
+  if (isSupplyDieItem(item, moduleId)) return quantity;
+
+  // Most adventuring gear, tools, loot, and other carried objects.
+  return quantity;
 }
 
 export function getActorSlotCapacity(actor, moduleId = "brackenvale-core") {
@@ -68,7 +108,138 @@ export function getActorSlotCapacity(actor, moduleId = "brackenvale-core") {
     foundry.utils.getProperty(actor, `flags.${moduleId}.totalSlots`)
   );
 
-  return Number.isFinite(override) && override >= 0 ? override : 10;
+  if (Number.isFinite(override) && override >= 0) {
+    return override;
+  }
+
+  const strength = Number(
+    foundry.utils.getProperty(actor, "system.abilities.str.value") ?? 0
+  );
+  const bonus = Number(
+    foundry.utils.getProperty(actor, `flags.${moduleId}.bonusSlots`) ?? 0
+  );
+
+  return Math.max(0, strength + (Number.isFinite(bonus) ? bonus : 0));
+}
+
+export function getEncumbranceState(slotsUsed, slotCapacity) {
+  const excess = Math.max(0, Number(slotsUsed) - Number(slotCapacity));
+
+  if (excess === 0) {
+    return {
+      key: "normal",
+      label: "Unencumbered",
+      speedEffect: "No penalty"
+    };
+  }
+
+  if (excess <= 5) {
+    return {
+      key: "encumbered",
+      label: "Encumbered",
+      speedEffect: "Speed reduced by 10 feet"
+    };
+  }
+
+  if (excess <= 10) {
+    return {
+      key: "heavily-encumbered",
+      label: "Heavily Encumbered",
+      speedEffect: "Speed halved"
+    };
+  }
+
+  return {
+    key: "immobile",
+    label: "Overloaded",
+    speedEffect: "Cannot willingly travel"
+  };
+}
+
+function isTwoHandedWeapon(item) {
+  const properties = foundry.utils.getProperty(item, "system.properties");
+  const values = [];
+
+  if (properties instanceof Set) {
+    values.push(...properties);
+  } else if (Array.isArray(properties)) {
+    values.push(...properties);
+  } else if (properties && typeof properties === "object") {
+    for (const [key, value] of Object.entries(properties)) {
+      if (value === true || value === 1 || value === "true") values.push(key);
+      else if (typeof value === "string") values.push(value);
+    }
+  }
+
+  const normalized = values.map((value) =>
+    String(value).trim().toLowerCase().replace(/[\s_-]+/g, "")
+  );
+
+  return normalized.some((value) =>
+    ["two", "twohanded", "2h"].includes(value)
+  );
+}
+
+function isNegligibleItem(item) {
+  if (!item || isArmorOrShieldItem(item) || item.type === "weapon") return false;
+
+  const name = String(item.name ?? "").trim().toLowerCase();
+  const negligibleNames = [
+    "ring",
+    "whistle",
+    "quill",
+    "ink pen",
+    "needle",
+    "fishhook",
+    "locket",
+    "brooch",
+    "button",
+    "key",
+    "seal",
+    "signet",
+    "holy symbol",
+    "arcane focus",
+    "druidic focus"
+  ];
+
+  return negligibleNames.some((entry) =>
+    name === entry || name.startsWith(`${entry} `) || name.endsWith(` ${entry}`)
+  );
+}
+
+function isCoinOrGemItem(item) {
+  const name = String(item?.name ?? "").toLowerCase();
+  return item?.type === "loot"
+    && (name.includes("coin") || name.includes("gem"));
+}
+
+function isProvisionItem(item) {
+  const name = String(item?.name ?? "").toLowerCase();
+  return [
+    "ration",
+    "rations",
+    "provision",
+    "provisions",
+    "hardtack",
+    "jerky",
+    "dried fruit",
+    "salted meat",
+    "smoked fish"
+  ].some((term) => name.includes(term));
+}
+
+function isWaterItem(item) {
+  const name = String(item?.name ?? "").toLowerCase();
+  return name === "water"
+    || name.includes("gallon of water")
+    || name.includes("water ration");
+}
+
+function isSupplyDieItem(item, moduleId) {
+  return Boolean(
+    foundry.utils.getProperty(item, `flags.${moduleId}.supplyDie`)
+    ?? foundry.utils.getProperty(item, `flags.${moduleId}.supplyDieSize`)
+  );
 }
 
 export function getItemLocation(item, moduleId = "brackenvale-core") {
@@ -94,11 +265,15 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const equipped = items.filter((entry) => entry.location === "equipped");
+  const slotCapacity = getActorSlotCapacity(actor, moduleId);
+  const slotsUsed = items.reduce((total, entry) => total + entry.slots, 0);
+  const encumbrance = getEncumbranceState(slotsUsed, slotCapacity);
 
   return {
     items,
-    slotCapacity: getActorSlotCapacity(actor, moduleId),
-    slotsUsed: items.reduce((total, entry) => total + entry.slots, 0),
+    slotCapacity,
+    slotsUsed,
+    encumbrance,
     armor: equipped.find((entry) => entry.isArmor)?.item ?? null,
     shield: equipped.find((entry) => entry.isShield)?.item ?? null,
     weapons: equipped.filter((entry) => entry.isWeapon).map((entry) => entry.item),

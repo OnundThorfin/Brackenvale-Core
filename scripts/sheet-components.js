@@ -43,6 +43,10 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareWeaponTable(component, actor);
     case "equipmentRegion":
       return prepareEquipmentRegion(component, actor, moduleId, editable);
+    case "equipmentSlotColumn":
+      return prepareEquipmentSlotColumn(component, actor, moduleId);
+    case "equipmentSlotSummary":
+      return prepareEquipmentSlotSummary(component, actor, moduleId);
     case "equippedDefenseName":
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
@@ -320,11 +324,51 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
     items: regionItems,
     armorItem,
     shieldItem,
+    editable,
+    style: createPositionStyle(component)
+  };
+}
+
+
+function getEquipmentRegionItems(state, region) {
+  if (region === "armor") {
+    return [state.armor, state.shield].filter(Boolean);
+  }
+  if (region === "weapons") return state.weapons;
+  if (region === "worn") return state.worn;
+  if (region === "packed-left") return state.packedLeft;
+  if (region === "packed-right") return state.packedRight;
+  return [];
+}
+
+function prepareEquipmentSlotColumn(component, actor, moduleId) {
+  const state = getEquipmentState(actor, moduleId);
+  const rows = getEquipmentRegionItems(state, component.region).map((item) => ({
+    id: item.id,
+    slots: getItemSlotValue(item, moduleId)
+  }));
+
+  return {
+    ...component,
+    isEquipmentSlotColumn: true,
+    region: component.region,
+    rows,
+    isArmorSlotColumn: component.region === "armor",
+    style: createPositionStyle(component)
+  };
+}
+
+function prepareEquipmentSlotSummary(component, actor, moduleId) {
+  const state = getEquipmentState(actor, moduleId);
+
+  return {
+    ...component,
+    isEquipmentSlotSummary: true,
     slotsUsed: state.slotsUsed,
     slotCapacity: state.slotCapacity,
-    slotsOverCapacity: state.slotsUsed > state.slotCapacity,
-    showSlotSummary: region === "packed-left",
-    editable,
+    encumbranceKey: state.encumbrance.key,
+    encumbranceLabel: state.encumbrance.label,
+    speedEffect: state.encumbrance.speedEffect,
     style: createPositionStyle(component)
   };
 }
