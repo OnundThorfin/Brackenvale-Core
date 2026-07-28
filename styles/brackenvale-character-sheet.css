@@ -946,3 +946,20 @@
   outline: 3px solid #155fc2 !important;
   background: rgba(88, 157, 255, 0.48) !important;
 }
+
+
+/* The slot overlays receive an explicit top-level hit surface in calibration. */
+.brackenvale-art-sheet.calibration-mode .equipment-slot-only-region::after,
+.brackenvale-art-sheet.calibration-mode .slot-summary-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  cursor: move;
+  pointer-events: none;
+}
+
+.brackenvale-art-sheet.calibration-mode .equipment-slot-only-region {
+  cursor: move !important;
+}
