@@ -7,8 +7,8 @@
       "key": "equipment-armor",
       "label": "Armor and Shield",
       "region": "armor",
-      "left": 4.6,
-      "top": 6.4,
+      "left": 4.8583984375,
+      "top": 6.138780381944445,
       "width": 44.1,
       "height": 8.4
     },
@@ -17,8 +17,8 @@
       "key": "equipment-weapons",
       "label": "Weapons",
       "region": "weapons",
-      "left": 4.6,
-      "top": 14.8,
+      "left": 6.551106770833333,
+      "top": 16.187879774305554,
       "width": 44.1,
       "height": 14.5
     },
@@ -27,9 +27,9 @@
       "key": "equipment-worn",
       "label": "Worn Equipment",
       "region": "worn",
-      "left": 50.3,
-      "top": 6.4,
-      "width": 45.0,
+      "left": 51.470947265625,
+      "top": 8.916558159722223,
+      "width": 45,
       "height": 22.9
     },
     {
@@ -37,8 +37,8 @@
       "key": "equipment-packed-left",
       "label": "Packed Gear Left Column",
       "region": "packed-left",
-      "left": 4.6,
-      "top": 31.2,
+      "left": 5.6396484375,
+      "top": 34.93245442708333,
       "width": 44.2,
       "height": 48.6
     },
@@ -47,8 +47,8 @@
       "key": "equipment-packed-right",
       "label": "Packed Gear Right Column",
       "region": "packed-right",
-      "left": 51.1,
-      "top": 31.2,
+      "left": 50.7080078125,
+      "top": 35.01925998263889,
       "width": 44.2,
       "height": 48.6
     }

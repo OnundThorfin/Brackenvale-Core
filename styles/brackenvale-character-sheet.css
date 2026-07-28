@@ -848,3 +848,69 @@
   cursor: grabbing !important;
   opacity: 0.45 !important;
 }
+
+
+/* Equipment slot tracking */
+.equipment-row .equipment-item-name,
+.equipment-row .equipment-item-name:disabled {
+  padding-right: 4px !important;
+}
+
+.equipment-slot-value {
+  flex: 0 0 12%;
+  min-width: 24px;
+  padding-right: 1%;
+  color: #171612;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(10px, 1.1vw, 14px);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  pointer-events: none;
+}
+
+.equipment-defense-row .equipment-slot-value {
+  flex-basis: 14%;
+}
+
+.equipment-delete {
+  position: absolute;
+  right: 0;
+  z-index: 2;
+}
+
+.equipment-slot-summary {
+  position: absolute;
+  top: 1.1%;
+  left: 39%;
+  width: 61%;
+  height: 7%;
+  color: #171612;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(10px, 1.15vw, 14px);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.equipment-slots-used,
+.equipment-slot-capacity {
+  position: absolute;
+  top: 0;
+  display: block;
+  width: 20%;
+  text-align: center;
+}
+
+.equipment-slots-used {
+  left: 2%;
+}
+
+.equipment-slot-capacity {
+  left: 62%;
+}
+
+.equipment-slot-summary.over-capacity {
+  color: #8a1919;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.85);
+}

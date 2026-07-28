@@ -48,6 +48,29 @@ export function isNativeEquipped(item) {
   return false;
 }
 
+
+export function getItemSlotValue(item, moduleId = "brackenvale-core") {
+  const override = Number(
+    foundry.utils.getProperty(item, `flags.${moduleId}.slots`)
+  );
+
+  if (Number.isFinite(override) && override >= 0) {
+    return override;
+  }
+
+  // Initial Brackenvale slot model:
+  // armor occupies 2 slots; every other carried item occupies 1.
+  return isArmorItem(item) ? 2 : 1;
+}
+
+export function getActorSlotCapacity(actor, moduleId = "brackenvale-core") {
+  const override = Number(
+    foundry.utils.getProperty(actor, `flags.${moduleId}.totalSlots`)
+  );
+
+  return Number.isFinite(override) && override >= 0 ? override : 10;
+}
+
 export function getItemLocation(item, moduleId = "brackenvale-core") {
   return foundry.utils.getProperty(item, `flags.${moduleId}.${EQUIPMENT_LOCATION_FLAG}`)
     ?? (isNativeEquipped(item) ? "equipped" : "packed");
@@ -65,7 +88,8 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
       nativeEquipped: isNativeEquipped(item),
       isWeapon: item.type === "weapon",
       isArmor: isArmorItem(item),
-      isShield: isShieldItem(item)
+      isShield: isShieldItem(item),
+      slots: getItemSlotValue(item, moduleId)
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -73,6 +97,8 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
 
   return {
     items,
+    slotCapacity: getActorSlotCapacity(actor, moduleId),
+    slotsUsed: items.reduce((total, entry) => total + entry.slots, 0),
     armor: equipped.find((entry) => entry.isArmor)?.item ?? null,
     shield: equipped.find((entry) => entry.isShield)?.item ?? null,
     weapons: equipped.filter((entry) => entry.isWeapon).map((entry) => entry.item),
