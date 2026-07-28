@@ -336,6 +336,30 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
   };
 }
 
+function getMasteryDetails(item) {
+  const raw = foundry.utils.getProperty(item, "system.mastery")
+    ?? foundry.utils.getProperty(item, "system.properties.mastery")
+    ?? "";
+  const key = typeof raw === "string"
+    ? raw
+    : (raw?.value ?? raw?.identifier ?? "");
+
+  if (!key) return {label: "", reference: ""};
+
+  const config = CONFIG.DND5E?.weaponMasteries?.[key]
+    ?? CONFIG.DND5E?.weaponMastery?.[key]
+    ?? CONFIG.DND5E?.masteries?.[key]
+    ?? null;
+
+  const label = config?.label ?? config?.name ?? key;
+  const text = String(label);
+
+  return {
+    label: game.i18n?.has?.(text) ? game.i18n.localize(text) : text,
+    reference: String(config?.reference ?? "")
+  };
+}
+
 function prepareEquippedDefenseName(component, actor) {
   const state = getEquipmentState(actor);
   const item = component.defenseType === "shield" ? state.shield : state.armor;
