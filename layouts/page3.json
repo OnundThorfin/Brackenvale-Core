@@ -51,6 +51,65 @@
       "top": 35.01925998263889,
       "width": 44.2,
       "height": 48.6
+    },
+    {
+      "component": "equipmentSlotColumn",
+      "key": "equipment-slots-armor",
+      "label": "Armor and Shield Slots",
+      "region": "armor",
+      "left": 45.2,
+      "top": 6.138780381944445,
+      "width": 3.7,
+      "height": 8.4
+    },
+    {
+      "component": "equipmentSlotColumn",
+      "key": "equipment-slots-weapons",
+      "label": "Weapon Slots",
+      "region": "weapons",
+      "left": 45.2,
+      "top": 16.187879774305554,
+      "width": 3.7,
+      "height": 14.5
+    },
+    {
+      "component": "equipmentSlotColumn",
+      "key": "equipment-slots-worn",
+      "label": "Worn Equipment Slots",
+      "region": "worn",
+      "left": 92.6,
+      "top": 8.916558159722223,
+      "width": 3.7,
+      "height": 22.9
+    },
+    {
+      "component": "equipmentSlotColumn",
+      "key": "equipment-slots-packed-left",
+      "label": "Packed Gear Left Slots",
+      "region": "packed-left",
+      "left": 45.8,
+      "top": 34.93245442708333,
+      "width": 3.7,
+      "height": 48.6
+    },
+    {
+      "component": "equipmentSlotColumn",
+      "key": "equipment-slots-packed-right",
+      "label": "Packed Gear Right Slots",
+      "region": "packed-right",
+      "left": 91.7,
+      "top": 35.01925998263889,
+      "width": 3.7,
+      "height": 48.6
+    },
+    {
+      "component": "equipmentSlotSummary",
+      "key": "equipment-slot-summary",
+      "label": "Gear Slots Used and Capacity",
+      "left": 42.5,
+      "top": 32.4,
+      "width": 15.0,
+      "height": 2.2
     }
   ]
 }
