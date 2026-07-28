@@ -759,6 +759,24 @@ Hooks.once("init", () => {
       this._setCalibrationFieldState(root);
       this._activateCalibrationDragging(root);
       this._activateCalibrationKeyboard(root);
+
+      root.addEventListener("pointerdown", (event) => {
+        if (!this._calibrationMode) return;
+
+        const field = event.target.closest(
+          ".brackenvale-page-fields .overlay-field[data-component-key]"
+        );
+        if (!field || !root.contains(field)) return;
+
+        // The normal per-field handler performs dragging. This capture
+        // listener only guarantees that the intended overlay is selected.
+        if (
+          field.classList.contains("equipment-slot-only-region")
+          || field.classList.contains("slot-summary-field")
+        ) {
+          this._selectCalibrationField(root, field);
+        }
+      }, true);
     }
 
     _setCalibrationFieldState(root) {
@@ -770,15 +788,32 @@ Hooks.once("init", () => {
         if (this._calibrationMode) {
           field.dataset.wasDisabled = String(field.disabled);
           field.dataset.wasReadonly = String(field.readOnly);
+          field.dataset.wasZIndex = field.style.zIndex ?? "";
+          field.dataset.wasPointerEvents = field.style.pointerEvents ?? "";
           field.disabled = false;
           field.readOnly = true;
           field.tabIndex = 0;
+
+          // Slot columns are narrow overlays that sit inside the larger
+          // equipment regions. Raise them explicitly while calibrating so
+          // pointer targeting cannot be intercepted by a drop zone.
+          if (
+            field.classList.contains("equipment-slot-only-region")
+            || field.classList.contains("slot-summary-field")
+          ) {
+            field.style.zIndex = "1000";
+            field.style.pointerEvents = "auto";
+          }
         } else {
           field.disabled = field.dataset.wasDisabled === "true";
           field.readOnly = field.dataset.wasReadonly === "true";
+          field.style.zIndex = field.dataset.wasZIndex ?? "";
+          field.style.pointerEvents = field.dataset.wasPointerEvents ?? "";
           field.classList.remove("calibration-selected");
           delete field.dataset.wasDisabled;
           delete field.dataset.wasReadonly;
+          delete field.dataset.wasZIndex;
+          delete field.dataset.wasPointerEvents;
         }
       }
     }
