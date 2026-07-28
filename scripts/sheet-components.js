@@ -1,6 +1,7 @@
 import {
   getEquipmentState,
   getItemLocation,
+  getItemSlotValue,
   isArmorItem,
   isInventoryItem,
   isNativeEquipped,
@@ -295,7 +296,8 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
   const summarize = (item) => ({
     id: item.id,
     name: item.name,
-    type: item.type
+    type: item.type,
+    slots: getItemSlotValue(item, moduleId)
   });
 
   if (region === "armor") {
@@ -318,6 +320,10 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
     items: regionItems,
     armorItem,
     shieldItem,
+    slotsUsed: state.slotsUsed,
+    slotCapacity: state.slotCapacity,
+    slotsOverCapacity: state.slotsUsed > state.slotCapacity,
+    showSlotSummary: region === "packed-left",
     editable,
     style: createPositionStyle(component)
   };

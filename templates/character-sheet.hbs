@@ -251,6 +251,13 @@
               aria-label="{{label}}"
               title="Drop items here"
             >
+              {{#if showSlotSummary}}
+                <div class="equipment-slot-summary {{#if slotsOverCapacity}}over-capacity{{/if}}">
+                  <span class="equipment-slots-used">{{slotsUsed}}</span>
+                  <span class="equipment-slot-capacity">{{slotCapacity}}</span>
+                </div>
+              {{/if}}
+
               {{#if armorItem}}
                 <div class="equipment-row equipment-defense-row equipment-armor-row">
                   <button
@@ -261,6 +268,7 @@
                     data-item-id="{{armorItem.id}}"
                     title="Double-click to open item"
                   >{{armorItem.name}}</button>
+                  <span class="equipment-slot-value">{{armorItem.slots}}</span>
                   {{#if editable}}
                     <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{armorItem.id}}" title="Delete {{armorItem.name}}">×</button>
                   {{/if}}
@@ -277,6 +285,7 @@
                     data-item-id="{{shieldItem.id}}"
                     title="Double-click to open item"
                   >{{shieldItem.name}}</button>
+                  <span class="equipment-slot-value">{{shieldItem.slots}}</span>
                   {{#if editable}}
                     <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{shieldItem.id}}" title="Delete {{shieldItem.name}}">×</button>
                   {{/if}}
@@ -293,6 +302,7 @@
                     data-item-id="{{id}}"
                     title="Double-click to open item"
                   >{{name}}</button>
+                  <span class="equipment-slot-value">{{slots}}</span>
                   {{#if ../editable}}
                     <button type="button" class="equipment-delete" data-action="delete-equipment-item" data-item-id="{{id}}" title="Delete {{name}}">×</button>
                   {{/if}}
