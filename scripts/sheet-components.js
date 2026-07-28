@@ -43,10 +43,6 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareWeaponTable(component, actor);
     case "equipmentRegion":
       return prepareEquipmentRegion(component, actor, moduleId, editable);
-    case "equipmentSlotColumn":
-      return prepareEquipmentSlotColumn(component, actor, moduleId);
-    case "equipmentSlotSummary":
-      return prepareEquipmentSlotSummary(component, actor, moduleId);
     case "equippedDefenseName":
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
@@ -98,6 +94,11 @@ function prepareDerivedField(component, actor) {
     case "proficiency":
       value = formatSignedNumber(foundry.utils.getProperty(actor, "system.attributes.prof") ?? 0);
       break;
+    case "gearSlotSummary": {
+      const state = getEquipmentState(actor);
+      value = `${state.slotsUsed} / ${state.slotCapacity}`;
+      break;
+    }
     default:
       value = foundry.utils.getProperty(actor, component.path) ?? "";
   }
@@ -292,10 +293,8 @@ function prepareWeaponTable(component, actor) {
 
 function prepareEquipmentRegion(component, actor, moduleId, editable) {
   const state = getEquipmentState(actor, moduleId);
-  const region = component.region;
-  let regionItems = [];
-  let armorItem = null;
-  let shieldItem = null;
+  const region = component.sourceRegion ?? component.region;
+  const slotOnly = component.displayMode === "slots";
 
   const summarize = (item) => ({
     id: item.id,
@@ -304,129 +303,36 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
     slots: getItemSlotValue(item, moduleId)
   });
 
+  let items = [];
+  let armorItem = null;
+  let shieldItem = null;
+
   if (region === "armor") {
     armorItem = state.armor ? summarize(state.armor) : null;
     shieldItem = state.shield ? summarize(state.shield) : null;
   } else if (region === "weapons") {
-    regionItems = state.weapons.map(summarize);
+    items = state.weapons.map(summarize);
   } else if (region === "worn") {
-    regionItems = state.worn.map(summarize);
+    items = state.worn.map(summarize);
   } else if (region === "packed-left") {
-    regionItems = state.packedLeft.map(summarize);
+    items = state.packedLeft.map(summarize);
   } else if (region === "packed-right") {
-    regionItems = state.packedRight.map(summarize);
+    items = state.packedRight.map(summarize);
   }
 
   return {
     ...component,
     isEquipmentRegion: true,
     region,
-    items: regionItems,
+    slotOnly,
+    items,
+    slotRows: region === "armor"
+      ? [armorItem, shieldItem].filter(Boolean)
+      : items,
     armorItem,
     shieldItem,
     editable,
     style: createPositionStyle(component)
-  };
-}
-
-
-function getEquipmentRegionItems(state, region) {
-  if (region === "armor") {
-    return [state.armor, state.shield].filter(Boolean);
-  }
-  if (region === "weapons") return state.weapons;
-  if (region === "worn") return state.worn;
-  if (region === "packed-left") return state.packedLeft;
-  if (region === "packed-right") return state.packedRight;
-  return [];
-}
-
-function prepareEquipmentSlotColumn(component, actor, moduleId) {
-  const state = getEquipmentState(actor, moduleId);
-  const rows = getEquipmentRegionItems(state, component.region).map((item) => ({
-    id: item.id,
-    slots: getItemSlotValue(item, moduleId)
-  }));
-
-  return {
-    ...component,
-    isEquipmentSlotColumn: true,
-    region: component.region,
-    rows,
-    isArmorSlotColumn: component.region === "armor",
-    style: createPositionStyle(component)
-  };
-}
-
-function prepareEquipmentSlotSummary(component, actor, moduleId) {
-  const state = getEquipmentState(actor, moduleId);
-
-  return {
-    ...component,
-    isEquipmentSlotSummary: true,
-    slotsUsed: state.slotsUsed,
-    slotCapacity: state.slotCapacity,
-    encumbranceKey: state.encumbrance.key,
-    encumbranceLabel: state.encumbrance.label,
-    speedEffect: state.encumbrance.speedEffect,
-    style: createPositionStyle(component)
-  };
-}
-
-function applyNumericPenalty(value, penalty) {
-  if (!penalty || value === "") return value;
-  const numeric = Number(value);
-  if (Number.isFinite(numeric)) return formatSignedNumber(numeric - penalty);
-  const match = String(value).trim().match(/^([+-]?\d+)$/);
-  if (match) return formatSignedNumber(Number(match[1]) - penalty);
-  return `${value} − ${penalty}`;
-}
-
-function applyFormulaPenalty(value, penalty) {
-  if (!penalty || !value) return value;
-  return `${value} − ${penalty}`;
-}
-
-function getMasteryDetails(item) {
-  const raw = foundry.utils.getProperty(item, "system.mastery")
-    ?? foundry.utils.getProperty(item, "system.properties.mastery")
-    ?? "";
-
-  const rawKey = typeof raw === "string"
-    ? raw
-    : (raw?.value ?? raw?.identifier ?? raw?.name ?? "");
-
-  const key = String(rawKey).trim().toLowerCase();
-  if (!key) return {label: "", reference: ""};
-
-  const collections = [
-    CONFIG.DND5E?.weaponMasteries,
-    CONFIG.DND5E?.weaponMastery,
-    CONFIG.DND5E?.masteries
-  ].filter(Boolean);
-
-  let config = null;
-  for (const collection of collections) {
-    config =
-      collection?.[key]
-      ?? collection?.[rawKey]
-      ?? Object.values(collection).find((entry) => {
-        const label = String(entry?.label ?? entry?.name ?? "").toLowerCase();
-        return label === key;
-      })
-      ?? null;
-
-    if (config) break;
-  }
-
-  const labelValue = config?.label ?? config?.name ?? rawKey;
-  const labelText = String(labelValue);
-
-  return {
-    label: game.i18n?.has?.(labelText)
-      ? game.i18n.localize(labelText)
-      : labelText,
-    reference: String(config?.reference ?? "")
   };
 }
 

@@ -65,13 +65,11 @@ export function getItemSlotValue(item, moduleId = "brackenvale-core") {
   const identity = getEquipmentIdentityValues(item);
   const name = String(item?.name ?? "").trim().toLowerCase();
 
-  // Containers
   if (name.includes("belt pouch")) return 0;
   if (name.includes("backpack") || name === "sack" || name.endsWith(" sack")) {
     return quantity;
   }
 
-  // Armor and shields
   if (isShieldItem(item)) return quantity;
   if (isArmorItem(item)) {
     if (identity.some((value) => value.includes("heavy"))) return 3 * quantity;
@@ -79,27 +77,16 @@ export function getItemSlotValue(item, moduleId = "brackenvale-core") {
     return quantity;
   }
 
-  // Weapons
   if (item?.type === "weapon") {
     return (isTwoHandedWeapon(item) ? 2 : 1) * quantity;
   }
 
-  // Tiny items are negligible unless a specific item override says otherwise.
   if (isNegligibleItem(item)) return 0;
-
-  // Coins and gems are tracked in groups of 100 when represented as Items.
   if (isCoinOrGemItem(item)) return Math.ceil(quantity / 100);
-
-  // Five days of provisions occupy one slot.
   if (isProvisionItem(item)) return Math.ceil(quantity / 5);
-
-  // One gallon of water occupies one slot.
   if (isWaterItem(item)) return quantity;
-
-  // A Supply Die occupies one slot regardless of its current die size.
   if (isSupplyDieItem(item, moduleId)) return quantity;
 
-  // Most adventuring gear, tools, loot, and other carried objects.
   return quantity;
 }
 
@@ -126,18 +113,14 @@ export function getEncumbranceState(slotsUsed, slotCapacity) {
   const excess = Math.max(0, Number(slotsUsed) - Number(slotCapacity));
 
   if (excess === 0) {
-    return {
-      key: "normal",
-      label: "Unencumbered",
-      speedEffect: "No penalty"
-    };
+    return {key: "normal", label: "Unencumbered", effect: "No penalty"};
   }
 
   if (excess <= 5) {
     return {
       key: "encumbered",
       label: "Encumbered",
-      speedEffect: "Speed reduced by 10 feet"
+      effect: "Speed reduced by 10 feet"
     };
   }
 
@@ -145,14 +128,14 @@ export function getEncumbranceState(slotsUsed, slotCapacity) {
     return {
       key: "heavily-encumbered",
       label: "Heavily Encumbered",
-      speedEffect: "Speed halved"
+      effect: "Speed halved"
     };
   }
 
   return {
-    key: "immobile",
+    key: "overloaded",
     label: "Overloaded",
-    speedEffect: "Cannot willingly travel"
+    effect: "Cannot willingly travel"
   };
 }
 
@@ -197,9 +180,7 @@ function isNegligibleItem(item) {
     "key",
     "seal",
     "signet",
-    "holy symbol",
-    "arcane focus",
-    "druidic focus"
+    "belt pouch"
   ];
 
   return negligibleNames.some((entry) =>
@@ -265,15 +246,15 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const equipped = items.filter((entry) => entry.location === "equipped");
+
   const slotCapacity = getActorSlotCapacity(actor, moduleId);
   const slotsUsed = items.reduce((total, entry) => total + entry.slots, 0);
-  const encumbrance = getEncumbranceState(slotsUsed, slotCapacity);
 
   return {
     items,
     slotCapacity,
     slotsUsed,
-    encumbrance,
+    encumbrance: getEncumbranceState(slotsUsed, slotCapacity),
     armor: equipped.find((entry) => entry.isArmor)?.item ?? null,
     shield: equipped.find((entry) => entry.isShield)?.item ?? null,
     weapons: equipped.filter((entry) => entry.isWeapon).map((entry) => entry.item),
