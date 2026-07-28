@@ -963,3 +963,51 @@
 .brackenvale-art-sheet.calibration-mode .equipment-slot-only-region {
   cursor: move !important;
 }
+
+
+/* Explicit slot-row positioning.
+   This prevents slot values from drifting toward the middle of a tall
+   calibrated column and guarantees both armor and shield rows remain visible. */
+.equipment-slot-only-region {
+  padding: 0 !important;
+}
+
+.equipment-slot-only-row {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Match the starting line of each corresponding equipment list. */
+.equipment-slot-only-region.equipment-region-weapons
+  .equipment-slot-only-row {
+  top: calc(10% + (var(--slot-row) * 22px));
+}
+
+.equipment-slot-only-region.equipment-region-worn
+  .equipment-slot-only-row {
+  top: calc(10% + (var(--slot-row) * 22px));
+}
+
+.equipment-slot-only-region.equipment-region-packed-left
+  .equipment-slot-only-row,
+.equipment-slot-only-region.equipment-region-packed-right
+  .equipment-slot-only-row {
+  top: calc(11% + (var(--slot-row) * 22px));
+}
+
+/* Armor and shield use fixed printed rows rather than the generic list rhythm. */
+.equipment-slot-only-region.equipment-region-armor
+  .equipment-slot-only-row:nth-child(1) {
+  top: 22%;
+  height: 24%;
+}
+
+.equipment-slot-only-region.equipment-region-armor
+  .equipment-slot-only-row:nth-child(2) {
+  top: 58%;
+  height: 24%;
+}

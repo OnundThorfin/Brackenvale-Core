@@ -253,7 +253,7 @@
             >
               {{#if slotOnly}}
                 {{#each slotRows}}
-                  <div class="equipment-slot-only-row">{{slots}}</div>
+                  <div class="equipment-slot-only-row" style="--slot-row: {{@index}};">{{slots}}</div>
                 {{/each}}
               {{else}}
                 {{#if armorItem}}
