@@ -908,3 +908,41 @@
   z-index: 40;
   pointer-events: auto;
 }
+
+
+/* Slot columns must sit above the larger equipment regions during calibration. */
+.brackenvale-art-sheet.calibration-mode .equipment-slot-only-region {
+  z-index: 46 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  outline: 2px dashed rgba(34, 91, 170, 0.96) !important;
+  background: rgba(88, 157, 255, 0.32) !important;
+}
+
+/* Keep the slot values visible so the column can be aligned directly
+   against the item rows while calibrating. */
+.brackenvale-art-sheet.calibration-mode
+  .equipment-slot-only-region
+  .equipment-slot-only-row {
+  visibility: visible !important;
+  pointer-events: none !important;
+}
+
+/* Give the separate total box the same unmistakable calibration treatment. */
+.brackenvale-art-sheet.calibration-mode .slot-summary-field {
+  z-index: 46 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  outline: 2px dashed rgba(34, 91, 170, 0.96) !important;
+  background: rgba(88, 157, 255, 0.32) !important;
+}
+
+/* Selected slot overlays should clearly rise above every equipment box. */
+.brackenvale-art-sheet.calibration-mode
+  .equipment-slot-only-region.calibration-selected,
+.brackenvale-art-sheet.calibration-mode
+  .slot-summary-field.calibration-selected {
+  z-index: 55 !important;
+  outline: 3px solid #155fc2 !important;
+  background: rgba(88, 157, 255, 0.48) !important;
+}

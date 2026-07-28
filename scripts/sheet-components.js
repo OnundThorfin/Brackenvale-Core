@@ -336,6 +336,63 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
   };
 }
 
+function applyNumericPenalty(value, penalty) {
+  if (!penalty || value === "") return value;
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return formatSignedNumber(numeric - penalty);
+  const match = String(value).trim().match(/^([+-]?\d+)$/);
+  if (match) return formatSignedNumber(Number(match[1]) - penalty);
+  return `${value} − ${penalty}`;
+}
+
+function applyFormulaPenalty(value, penalty) {
+  if (!penalty || !value) return value;
+  return `${value} − ${penalty}`;
+}
+
+function getMasteryDetails(item) {
+  const raw = foundry.utils.getProperty(item, "system.mastery")
+    ?? foundry.utils.getProperty(item, "system.properties.mastery")
+    ?? "";
+
+  const rawKey = typeof raw === "string"
+    ? raw
+    : (raw?.value ?? raw?.identifier ?? raw?.name ?? "");
+
+  const key = String(rawKey).trim().toLowerCase();
+  if (!key) return {label: "", reference: ""};
+
+  const collections = [
+    CONFIG.DND5E?.weaponMasteries,
+    CONFIG.DND5E?.weaponMastery,
+    CONFIG.DND5E?.masteries
+  ].filter(Boolean);
+
+  let config = null;
+  for (const collection of collections) {
+    config =
+      collection?.[key]
+      ?? collection?.[rawKey]
+      ?? Object.values(collection).find((entry) => {
+        const label = String(entry?.label ?? entry?.name ?? "").toLowerCase();
+        return label === key;
+      })
+      ?? null;
+
+    if (config) break;
+  }
+
+  const labelValue = config?.label ?? config?.name ?? rawKey;
+  const labelText = String(labelValue);
+
+  return {
+    label: game.i18n?.has?.(labelText)
+      ? game.i18n.localize(labelText)
+      : labelText,
+    reference: String(config?.reference ?? "")
+  };
+}
+
 function prepareEquippedDefenseName(component, actor) {
   const state = getEquipmentState(actor);
   const item = component.defenseType === "shield" ? state.shield : state.armor;
