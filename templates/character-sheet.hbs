@@ -242,29 +242,20 @@
           {{/if}}
 
           {{#if isEquipmentRegion}}
-            {{#if slotOnly}}
-              <div
-                class="overlay-field equipment-region equipment-region-{{region}} equipment-slot-only-region"
-                style="{{style}}"
-                data-component-key="{{key}}"
-                data-layout-part="root"
-                aria-label="{{label}}"
-                title="Slot values"
-              >
+            <div
+              class="overlay-field equipment-region equipment-region-{{region}} {{#if slotOnly}}equipment-slot-only-region{{/if}}"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              {{#unless slotOnly}}data-equipment-drop-zone="{{region}}"{{/unless}}
+              aria-label="{{label}}"
+              title="{{#if slotOnly}}Slot values{{else}}Drop items here{{/if}}"
+            >
+              {{#if slotOnly}}
                 {{#each slotRows}}
                   <div class="equipment-slot-only-row">{{slots}}</div>
                 {{/each}}
-              </div>
-            {{else}}
-              <div
-                class="overlay-field equipment-region equipment-region-{{region}}"
-                style="{{style}}"
-                data-component-key="{{key}}"
-                data-layout-part="root"
-                data-equipment-drop-zone="{{region}}"
-                aria-label="{{label}}"
-                title="Drop items here"
-              >
+              {{else}}
                 {{#if armorItem}}
                   <div class="equipment-row equipment-defense-row equipment-armor-row">
                     <button
@@ -312,8 +303,8 @@
                     {{/if}}
                   </div>
                 {{/each}}
-              </div>
-            {{/if}}
+              {{/if}}
+            </div>
           {{/if}}
 
           {{#if isEquippedDefenseName}}
