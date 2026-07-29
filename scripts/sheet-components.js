@@ -46,6 +46,10 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareWeaponTable(component, actor);
     case "equipmentRegion":
       return prepareEquipmentRegion(component, actor, moduleId, editable);
+    case "supplyWidget":
+      return prepareSupplyWidget(component, actor, moduleId, editable);
+    case "flagTextArea":
+      return prepareFlagTextArea(component, actor, moduleId, editable);
     case "equippedDefenseName":
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
@@ -54,6 +58,57 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       console.warn(`${moduleId} | Unknown sheet component: ${component.component}`, component);
       return {...component, unsupported: true};
   }
+}
+
+
+function prepareSupplyWidget(component, actor, moduleId, editable) {
+  const stored = foundry.utils.getProperty(
+    actor,
+    `flags.${moduleId}.supplyDice`
+  );
+
+  const rows = Array.from({length: component.rows ?? 5}, (_, index) => {
+    const row = Array.isArray(stored) ? stored[index] ?? {} : {};
+    const die = ["d12", "d10", "d8", "d6", "d4", "empty"].includes(row.die)
+      ? row.die
+      : "empty";
+
+    return {
+      index,
+      name: String(row.name ?? ""),
+      die,
+      isEmpty: die === "empty",
+      options: [
+        {value: "empty", label: "Empty", selected: die === "empty"},
+        {value: "d4", label: "d4", selected: die === "d4"},
+        {value: "d6", label: "d6", selected: die === "d6"},
+        {value: "d8", label: "d8", selected: die === "d8"},
+        {value: "d10", label: "d10", selected: die === "d10"},
+        {value: "d12", label: "d12", selected: die === "d12"}
+      ]
+    };
+  });
+
+  return {
+    ...component,
+    isSupplyWidget: true,
+    rows,
+    editable,
+    style: createPositionStyle(component)
+  };
+}
+
+function prepareFlagTextArea(component, actor, moduleId, editable) {
+  return {
+    ...component,
+    isFlagTextArea: true,
+    value: String(
+      foundry.utils.getProperty(actor, `flags.${moduleId}.${component.flag}`)
+        ?? ""
+    ),
+    editable,
+    style: createPositionStyle(component)
+  };
 }
 
 function prepareTextField(component, actor, flags, editable) {

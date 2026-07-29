@@ -1186,3 +1186,136 @@
   opacity: 1 !important;
   pointer-events: none !important;
 }
+
+
+/* =========================================================
+   Page 3 lower section: currency, trade goods, and supplies
+   ========================================================= */
+
+.currency-field {
+  z-index: 14 !important;
+  padding: 0 3px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #4b4b43 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
+}
+
+.flag-text-area.trade-goods-field {
+  z-index: 14 !important;
+  resize: none;
+  overflow: hidden;
+  padding: 2px 4px;
+  border: 0 !important;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 20px,
+      rgba(50, 50, 45, 0.35) 20px,
+      rgba(50, 50, 45, 0.35) 21px
+    ),
+    #ffffff !important;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  line-height: 21px;
+}
+
+.supply-widget {
+  z-index: 14 !important;
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  overflow: hidden;
+  padding: 0;
+  background: #ffffff !important;
+}
+
+.supply-widget-row {
+  display: grid;
+  grid-template-columns: 1fr 76px;
+  align-items: center;
+  min-height: 0;
+  border-bottom: 1px solid rgba(50, 50, 45, 0.38);
+}
+
+.supply-widget-row:last-child {
+  border-bottom: 0;
+}
+
+.supply-roll-name {
+  display: none;
+}
+
+.supply-name-input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.supply-die-select {
+  width: 100%;
+  height: 100%;
+  padding: 0 2px;
+  border: 0;
+  border-left: 1px solid rgba(50, 50, 45, 0.38);
+  border-radius: 0;
+  background: #ffffff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Clicking the written supply name rolls it. The invisible roll button
+   is stretched over the name cell while the text field remains usable
+   by double-clicking/focusing it. */
+.supply-widget-row {
+  position: relative;
+}
+
+.supply-roll-name {
+  position: absolute;
+  inset: 0 76px 0 0;
+  z-index: 2;
+  display: block;
+  overflow: hidden;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+}
+
+.supply-name-input {
+  position: relative;
+  z-index: 1;
+}
+
+.supply-name-input:focus {
+  z-index: 3;
+  background: #ffffff;
+  outline: 1px solid rgba(80, 80, 70, 0.45);
+}
+
+/* Calibration visibility. */
+.brackenvale-art-sheet.calibration-mode .supply-widget,
+.brackenvale-art-sheet.calibration-mode .flag-text-area {
+  z-index: 1000 !important;
+  outline: 3px dashed rgba(155, 32, 32, 0.98) !important;
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  cursor: move !important;
+}
+
+.brackenvale-art-sheet.calibration-mode .supply-widget *,
+.brackenvale-art-sheet.calibration-mode .flag-text-area {
+  pointer-events: none !important;
+}
