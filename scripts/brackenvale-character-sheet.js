@@ -718,11 +718,16 @@ Hooks.once("init", () => {
           const item = this.actor.items.get(itemId);
           if (!item) return;
 
-          if (typeof item.use === "function") {
-            await item.use();
-          } else {
-            item.sheet?.render(true);
-          }
+          const displayed = String(button.textContent ?? "").trim();
+          const normalized = displayed.replace(/−/g, "-");
+          const modifierMatch = normalized.match(/[+-]?\d+/);
+          const modifier = modifierMatch ? Number(modifierMatch[0]) : 0;
+          const roll = await (new Roll(`1d20 + ${modifier}`)).evaluate();
+
+          await roll.toMessage({
+            speaker: ChatMessage.getSpeaker({actor: this.actor}),
+            flavor: `<strong>${foundry.utils.escapeHTML(item.name)} Attack</strong><br>Condition-adjusted attack roll`
+          });
         });
       }
 
@@ -756,15 +761,31 @@ Hooks.once("init", () => {
             ) ?? null;
           }
 
-          if (typeof attackActivity?.rollDamage === "function") {
-            await attackActivity.rollDamage({event});
+          const displayed = String(button.textContent ?? "").trim();
+          const formula = displayed
+            .replace(/−/g, "-")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          if (!formula) {
+            ui.notifications?.warn(`${item.name} does not expose a damage formula.`);
+            item.sheet?.render(true);
             return;
           }
 
-          ui.notifications?.warn(
-            `${item.name} does not expose a damage activity. Open the weapon item to review its activities.`
-          );
-          item.sheet?.render(true);
+          try {
+            const roll = await (new Roll(formula)).evaluate();
+            await roll.toMessage({
+              speaker: ChatMessage.getSpeaker({actor: this.actor}),
+              flavor: `<strong>${foundry.utils.escapeHTML(item.name)} Damage</strong><br>Condition-adjusted damage roll`
+            });
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not roll condition-adjusted damage`, error);
+            ui.notifications?.warn(
+              `${item.name}'s displayed damage formula could not be rolled.`
+            );
+            item.sheet?.render(true);
+          }
         });
       }
     }

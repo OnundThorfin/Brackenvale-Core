@@ -697,8 +697,8 @@
       "sourceRegion": "weapons",
       "displayMode": "damage",
       "opaquePanel": true,
-      "left": 82.0,
-      "top": 84.9365234375,
+      "left": 79.72081032018514,
+      "top": 84.8075,
       "width": 13.7,
       "height": 12.25
     },
@@ -711,9 +711,9 @@
       "displayMode": "damage",
       "itemRole": "armor",
       "opaquePanel": true,
-      "left": 84.0,
-      "top": 34.0,
-      "width": 14.0,
+      "left": 72.93049515526054,
+      "top": 34.650141571014395,
+      "width": 18.0,
       "height": 3.2
     },
     {
@@ -725,9 +725,9 @@
       "displayMode": "damage",
       "itemRole": "shield",
       "opaquePanel": true,
-      "left": 84.0,
-      "top": 43.1,
-      "width": 14.0,
+      "left": 72.76773225502912,
+      "top": 43.96670114104542,
+      "width": 18.0,
       "height": 3.2
     }
   ]

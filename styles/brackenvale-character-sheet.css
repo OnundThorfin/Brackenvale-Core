@@ -1397,3 +1397,24 @@
 .supply-roll-name {
   right: 84px !important;
 }
+
+
+/* 0.5.4-test.49: Page 1 defense-condition masks.
+   These alter only overlay panels; sheet artwork remains untouched. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"],
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"] {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 6px #ffffff !important;
+}
+
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"]
+  .equipment-damage-only-row,
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"]
+  .equipment-damage-only-row {
+  justify-content: flex-start !important;
+  padding-left: 9% !important;
+}
