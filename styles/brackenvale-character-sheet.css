@@ -1182,3 +1182,45 @@
     0 0 0 6px rgba(176, 0, 0, 0.92),
     0 0 18px 7px rgba(176, 0, 0, 0.42) !important;
 }
+
+
+/* Page 3: cover the printed inventory lines with clean white equipment areas. */
+.page[data-page="3"] [data-component-key="equipment-weapons"],
+.page[data-page="3"] [data-component-key="equipment-worn"],
+.page[data-page="3"] [data-component-key="equipment-packed-left"],
+.page[data-page="3"] [data-component-key="equipment-packed-right"] {
+  background: #ffffff !important;
+}
+
+/* Keep Page 1 Armor and Shield condition controls aligned with the printed rows. */
+.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"] {
+  z-index: 12;
+  background: transparent !important;
+}
+
+.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
+  .equipment-damage-only-row:nth-child(1) {
+  top: 5%;
+  height: 24%;
+}
+
+.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
+  .equipment-damage-only-row:nth-child(2) {
+  top: 78%;
+  height: 24%;
+}
+
+/* Printed boxes on Page 1 are rectangular, so use square hit areas there. */
+.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
+  .equipment-damage-pip {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
+  .equipment-damage-pip.filled {
+  background: #171612;
+}
