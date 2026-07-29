@@ -1319,3 +1319,30 @@
 .brackenvale-art-sheet.calibration-mode .flag-text-area {
   pointer-events: none !important;
 }
+
+
+/* 0.5.4-test.45: linked Supply Dice drop target */
+.supply-widget.supply-drag-target,
+.supply-widget.equipment-drag-target {
+  outline: 2px dashed rgba(40, 80, 40, 0.85) !important;
+  background: rgba(238, 248, 238, 0.98) !important;
+}
+
+.supply-widget-row.linked-supply .supply-name-input {
+  font-weight: 700;
+}
+
+.supply-widget-row.linked-supply .supply-name-input[readonly] {
+  cursor: default;
+}
+
+/* Widened Page 1 opaque condition panels retain compact pip placement. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"]
+  .equipment-damage-only-row,
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"]
+  .equipment-damage-only-row {
+  justify-content: flex-start;
+  padding-left: 12%;
+}

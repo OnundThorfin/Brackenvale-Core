@@ -17,9 +17,9 @@
       "key": "equipment-weapons",
       "label": "Weapons",
       "region": "weapons",
-      "left": 6.551106770833333,
-      "top": 16.187879774305554,
-      "width": 44.1,
+      "left": 6.71142646423031,
+      "top": 15.969549515945813,
+      "width": 39.69,
       "height": 10.2,
       "opaquePanel": true
     },
@@ -30,7 +30,7 @@
       "region": "worn",
       "left": 51.470947265625,
       "top": 8.916558159722223,
-      "width": 45,
+      "width": 40.5,
       "height": 18.6,
       "opaquePanel": true
     },
@@ -39,8 +39,8 @@
       "key": "equipment-packed-left",
       "label": "Packed Gear Left Column",
       "region": "packed-left",
-      "left": 6.160481770833334,
-      "top": 35.01925998263889,
+      "left": 5.834032705170265,
+      "top": 33.38871840084095,
       "width": 44.2,
       "height": 43.5,
       "opaquePanel": true
@@ -50,8 +50,8 @@
       "key": "equipment-packed-right",
       "label": "Packed Gear Right Column",
       "region": "packed-right",
-      "left": 50.7080078125,
-      "top": 35.01925998263889,
+      "left": 50.21489789171181,
+      "top": 33.387022939590715,
       "width": 44.2,
       "height": 43.5,
       "opaquePanel": true
@@ -87,8 +87,8 @@
       "region": "worn",
       "sourceRegion": "worn",
       "displayMode": "slots",
-      "left": 92.6,
-      "top": 8.916558159722223,
+      "left": 88.5303,
+      "top": 6.963262383988064,
       "width": 3.7,
       "height": 18.6
     },
@@ -99,8 +99,8 @@
       "region": "packed-left",
       "sourceRegion": "packed-left",
       "displayMode": "slots",
-      "left": 42.15291341145833,
-      "top": 29.55050998263889,
+      "left": 41.49945321838204,
+      "top": 28.35658941014903,
       "width": 3.7,
       "height": 43.5
     },
@@ -111,8 +111,8 @@
       "region": "packed-right",
       "sourceRegion": "packed-right",
       "displayMode": "slots",
-      "left": 91.7,
-      "top": 35.01925998263889,
+      "left": 89.58317438518858,
+      "top": 28.6159949814347,
       "width": 3.7,
       "height": 43.5
     },
@@ -158,8 +158,8 @@
       "path": "system.currency.cp",
       "inputType": "number",
       "className": "currency-field currency-cp",
-      "left": 10.0,
-      "top": 86.5,
+      "left": 12.278426286208386,
+      "top": 79.8799613434835,
       "width": 8.5,
       "height": 2.6
     },
@@ -170,8 +170,8 @@
       "path": "system.currency.sp",
       "inputType": "number",
       "className": "currency-field currency-sp",
-      "left": 24.7,
-      "top": 86.5,
+      "left": 24.536507209887844,
+      "top": 79.98847086349842,
       "width": 8.5,
       "height": 2.6
     },
@@ -182,8 +182,8 @@
       "path": "system.currency.gp",
       "inputType": "number",
       "className": "currency-field currency-gp",
-      "left": 39.1,
-      "top": 86.5,
+      "left": 36.657256936497035,
+      "top": 79.8799613434835,
       "width": 8.5,
       "height": 2.6
     },
@@ -193,9 +193,9 @@
       "label": "Trade Goods",
       "flag": "tradeGoods",
       "className": "trade-goods-field",
-      "left": 6.2,
-      "top": 90.5,
-      "width": 42.0,
+      "left": 5.872180259912006,
+      "top": 86.59229243315643,
+      "width": 42,
       "height": 5.8
     },
     {
@@ -203,8 +203,8 @@
       "key": "supply-dice",
       "label": "Supplies",
       "rows": 5,
-      "left": 52.2,
-      "top": 83.7,
+      "left": 51.54751913735662,
+      "top": 80.98709753988572,
       "width": 42.8,
       "height": 12.6
     }
