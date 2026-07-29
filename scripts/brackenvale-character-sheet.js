@@ -719,10 +719,15 @@ Hooks.once("init", () => {
           if (!item) return;
 
           const displayed = String(button.textContent ?? "").trim();
-          const normalized = displayed.replace(/−/g, "-");
-          const modifierMatch = normalized.match(/[+-]?\d+/);
-          const modifier = modifierMatch ? Number(modifierMatch[0]) : 0;
-          const roll = await (new Roll(`1d20 + ${modifier}`)).evaluate();
+          const modifierExpression = displayed
+            .replace(/−/g, "-")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          const rollFormula = modifierExpression
+            ? `1d20 + (${modifierExpression})`
+            : "1d20";
+          const roll = await (new Roll(rollFormula)).evaluate();
 
           await roll.toMessage({
             speaker: ChatMessage.getSpeaker({actor: this.actor}),

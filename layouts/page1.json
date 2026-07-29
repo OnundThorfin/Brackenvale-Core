@@ -711,9 +711,9 @@
       "displayMode": "damage",
       "itemRole": "armor",
       "opaquePanel": true,
-      "left": 72.93049515526054,
+      "left": 70.5,
       "top": 34.650141571014395,
-      "width": 18.0,
+      "width": 22.5,
       "height": 3.2
     },
     {
@@ -725,9 +725,9 @@
       "displayMode": "damage",
       "itemRole": "shield",
       "opaquePanel": true,
-      "left": 72.76773225502912,
+      "left": 70.5,
       "top": 43.96670114104542,
-      "width": 18.0,
+      "width": 22.5,
       "height": 3.2
     }
   ]

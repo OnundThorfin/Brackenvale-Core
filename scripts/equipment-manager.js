@@ -255,6 +255,8 @@ export function getEquipmentDamage(item, moduleId = "brackenvale-core") {
 export function getEquipmentDamageCapacity(item) {
   if (!item) return 0;
 
+  // A shield provides +2 AC, so its two condition boxes remove
+  // one point of that bonus each. At 2 damage it is broken.
   if (isShieldItem(item)) return 2;
 
   if (isArmorItem(item)) {
@@ -590,10 +592,6 @@ async function applyArmorClass(actor, armor, moduleId) {
           const shieldDamage = state.shield
             ? getEquipmentDamage(state.shield, moduleId)
             : 0;
-          const shieldBase = state.shield
-            ? Number(foundry.utils.getProperty(state.shield, "system.armor.value") ?? 2)
-            : 0;
-          const shieldBonus = Math.max(0, shieldBase - shieldDamage);
           const armorBroken = state.armor
             ? isEquipmentBroken(state.armor, moduleId)
             : false;
@@ -601,7 +599,7 @@ async function applyArmorClass(actor, armor, moduleId) {
             ? Number(foundry.utils.getProperty(state.armor, "system.armor.value") ?? 10)
             : 10;
 
-          if (armorBroken) return `10 + @abilities.dex.mod + ${shieldBonus}`;
+          if (armorBroken) return `10 + @abilities.dex.mod - ${shieldDamage}`;
 
           const armorType = String(
             foundry.utils.getProperty(state.armor, "system.type.value")
@@ -615,7 +613,7 @@ async function applyArmorClass(actor, armor, moduleId) {
               ? "min(@abilities.dex.mod, 2)"
               : "@abilities.dex.mod";
 
-          return `${armorBase} + ${dexTerm} - ${armorDamage} + ${shieldBonus}`;
+          return `${armorBase} + ${dexTerm} - ${armorDamage} - ${shieldDamage}`;
         })(),
         priority: 100
       }
