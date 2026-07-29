@@ -223,15 +223,15 @@
                     {{#unless id}}disabled{{/unless}}
                   >{{mastery}}</button>
 
-                  <div class="weapon-condition-overlay" aria-label="{{#if id}}Weapon condition{{/if}}">
+                  <div class="weapon-condition-overlay {{#if broken}}broken{{/if}}" aria-label="{{#if id}}Equipment damage{{/if}}">
                     {{#each conditionDots}}
                       <button
                         type="button"
                         class="weapon-condition-hitbox {{#if filled}}filled{{/if}}"
-                        data-action="set-weapon-condition"
+                        data-action="set-equipment-damage"
                         data-item-id="{{../id}}"
                         data-value="{{value}}"
-                        aria-label="Set weapon condition to {{value}}"
+                        aria-label="Set equipment damage to {{value}}"
                         {{#unless ../id}}disabled{{/unless}}
                       ></button>
                     {{/each}}
@@ -243,17 +243,33 @@
 
           {{#if isEquipmentRegion}}
             <div
-              class="overlay-field equipment-region equipment-region-{{region}} {{#if slotOnly}}equipment-slot-only-region{{/if}}"
+              class="overlay-field equipment-region equipment-region-{{region}} {{#if slotOnly}}equipment-slot-only-region{{/if}} {{#if damageOnly}}equipment-damage-only-region{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
-              {{#unless slotOnly}}data-equipment-drop-zone="{{region}}"{{/unless}}
+              {{#unless slotOnly}}{{#unless damageOnly}}data-equipment-drop-zone="{{region}}"{{/unless}}{{/unless}}
               aria-label="{{label}}"
-              title="{{#if slotOnly}}Slot values{{else}}Drop items here{{/if}}"
+              title="{{#if slotOnly}}Slot values{{else}}{{#if damageOnly}}Equipment damage{{else}}Drop items here{{/if}}{{/if}}"
             >
               {{#if slotOnly}}
                 {{#each slotRows}}
                   <div class="equipment-slot-only-row" style="--slot-row: {{@index}};">{{slots}}</div>
+                {{/each}}
+              {{else}}
+              {{#if damageOnly}}
+                {{#each damageRows}}
+                  <div class="equipment-damage-only-row {{#if broken}}broken{{/if}}" style="--damage-row: {{@index}};">
+                    {{#each damageDots}}
+                      <button
+                        type="button"
+                        class="equipment-damage-pip {{#if filled}}filled{{/if}}"
+                        data-action="set-equipment-damage"
+                        data-item-id="{{../id}}"
+                        data-value="{{value}}"
+                        aria-label="Set equipment damage to {{value}}"
+                      ></button>
+                    {{/each}}
+                  </div>
                 {{/each}}
               {{else}}
                 {{#if armorItem}}
@@ -303,6 +319,7 @@
                     {{/if}}
                   </div>
                 {{/each}}
+              {{/if}}
               {{/if}}
             </div>
           {{/if}}

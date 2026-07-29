@@ -2,6 +2,9 @@ import {
   getEquipmentState,
   getItemLocation,
   getItemSlotValue,
+  getEquipmentDamage,
+  getEquipmentDamageCapacity,
+  isEquipmentBroken,
   isArmorItem,
   isInventoryItem,
   isNativeEquipped,
@@ -251,8 +254,6 @@ function prepareDeathSaveBubble(component, actor, editable) {
 }
 
 function prepareWeaponTable(component, actor) {
-  const conditionMap =
-    foundry.utils.getProperty(actor, "flags.brackenvale-core.weaponConditions") ?? {};
 
   const weapons = actor.items
     ?.filter((item) => item.type === "weapon")
@@ -264,7 +265,9 @@ function prepareWeaponTable(component, actor) {
     })
     .slice(0, component.maxRows ?? 4)
     .map((item) => {
-      const penalty = Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0)));
+      const penalty = getEquipmentDamage(item);
+      const capacity = getEquipmentDamageCapacity(item);
+      const broken = isEquipmentBroken(item);
       const mastery = getMasteryDetails(item);
       return {
         id: item.id,
@@ -274,8 +277,12 @@ function prepareWeaponTable(component, actor) {
         mastery: mastery.label,
         masteryReference: mastery.reference,
         equipped: isWeaponEquipped(item),
+        broken,
         conditionPenalty: penalty,
-        conditionDots: [1,2,3,4,5].map((value) => ({value, filled: value <= penalty}))
+        conditionDots: Array.from({length: capacity}, (_, index) => {
+          const value = index + 1;
+          return {value, filled: value <= penalty};
+        })
       };
     }) ?? [];
 
@@ -295,12 +302,23 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
   const state = getEquipmentState(actor, moduleId);
   const region = component.sourceRegion ?? component.region;
   const slotOnly = component.displayMode === "slots";
+  const damageOnly = component.displayMode === "damage";
 
   const summarize = (item) => ({
     id: item.id,
     name: item.name,
     type: item.type,
-    slots: getItemSlotValue(item, moduleId)
+    slots: getItemSlotValue(item, moduleId),
+    damage: getEquipmentDamage(item, moduleId),
+    damageCapacity: getEquipmentDamageCapacity(item),
+    damageDots: Array.from(
+      {length: getEquipmentDamageCapacity(item)},
+      (_, index) => {
+        const value = index + 1;
+        return {value, filled: value <= getEquipmentDamage(item, moduleId)};
+      }
+    ),
+    broken: isEquipmentBroken(item, moduleId)
   });
 
   let items = [];
@@ -325,8 +343,12 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
     isEquipmentRegion: true,
     region,
     slotOnly,
+    damageOnly,
     items,
     slotRows: region === "armor"
+      ? [armorItem, shieldItem].filter(Boolean)
+      : items,
+    damageRows: region === "armor"
       ? [armorItem, shieldItem].filter(Boolean)
       : items,
     armorItem,
