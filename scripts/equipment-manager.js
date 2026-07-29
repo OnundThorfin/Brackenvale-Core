@@ -246,7 +246,7 @@ export function getEquipmentDamageCapacity(item) {
 
   if (item.type === "weapon") {
     if (hasWeaponProperty(item, ["light", "lgt"])) return 2;
-    if (hasWeaponProperty(item, ["heavy", "hvy"])) return 4;
+    if (hasWeaponProperty(item, ["heavy", "hvy"]) && !isRangedWeapon(item)) return 4;
     return 3;
   }
 
@@ -279,6 +279,53 @@ export async function setEquipmentDamage(
   if (isArmorOrShieldItem(item) && getItemLocation(item, moduleId) === "equipped") {
     await refreshEquippedArmorClass(item.actor, moduleId);
   }
+}
+
+function isRangedWeapon(item) {
+  const actionType = String(
+    foundry.utils.getProperty(item, "system.actionType")
+      ?? foundry.utils.getProperty(item, "system.activities.contents.0.attack.type.value")
+      ?? ""
+  ).toLowerCase();
+
+  if (["rwak", "ranged", "rangedweapon"].includes(actionType)) return true;
+
+  const weaponType = String(
+    foundry.utils.getProperty(item, "system.type.value") ?? ""
+  ).toLowerCase();
+
+  if (weaponType.includes("ranged")) return true;
+
+  const rangeValue = Number(
+    foundry.utils.getProperty(item, "system.range.value")
+      ?? foundry.utils.getProperty(item, "system.activities.contents.0.range.value")
+      ?? 0
+  );
+
+  const rangeUnits = String(
+    foundry.utils.getProperty(item, "system.range.units")
+      ?? foundry.utils.getProperty(item, "system.activities.contents.0.range.units")
+      ?? ""
+  ).toLowerCase();
+
+  if (rangeValue > 5 && rangeUnits !== "touch") return true;
+
+  const identifier = String(
+    foundry.utils.getProperty(item, "system.identifier")
+      ?? foundry.utils.getProperty(item, "system.type.baseItem")
+      ?? item.name
+      ?? ""
+  ).toLowerCase();
+
+  return [
+    "bow",
+    "crossbow",
+    "sling",
+    "blowgun",
+    "firearm",
+    "pistol",
+    "musket"
+  ].some((term) => identifier.includes(term));
 }
 
 function hasWeaponProperty(item, candidates) {
