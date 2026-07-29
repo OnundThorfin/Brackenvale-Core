@@ -20,7 +20,8 @@
       "left": 6.551106770833333,
       "top": 16.187879774305554,
       "width": 44.1,
-      "height": 14.5
+      "height": 14.5,
+      "opaquePanel": true
     },
     {
       "component": "equipmentRegion",
@@ -30,7 +31,8 @@
       "left": 51.470947265625,
       "top": 8.916558159722223,
       "width": 45,
-      "height": 22.9
+      "height": 22.9,
+      "opaquePanel": true
     },
     {
       "component": "equipmentRegion",
@@ -40,7 +42,8 @@
       "left": 6.160481770833334,
       "top": 35.01925998263889,
       "width": 44.2,
-      "height": 48.6
+      "height": 48.6,
+      "opaquePanel": true
     },
     {
       "component": "equipmentRegion",
@@ -50,7 +53,8 @@
       "left": 50.7080078125,
       "top": 35.01925998263889,
       "width": 44.2,
-      "height": 48.6
+      "height": 48.6,
+      "opaquePanel": true
     },
     {
       "component": "equipmentRegion",

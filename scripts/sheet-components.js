@@ -277,20 +277,14 @@ function prepareWeaponTable(component, actor) {
         mastery: mastery.label,
         masteryReference: mastery.reference,
         equipped: isWeaponEquipped(item),
-        broken,
-        conditionPenalty: penalty,
-        conditionDots: Array.from({length: capacity}, (_, index) => {
-          const value = index + 1;
-          return {value, filled: value <= penalty};
-        })
+        broken
       };
     }) ?? [];
 
   while (weapons.length < (component.maxRows ?? 4)) {
     weapons.push({
       id: "", name: "", attack: "", damage: "", mastery: "",
-      masteryReference: "", equipped: false, conditionPenalty: 0,
-      conditionDots: []
+      masteryReference: "", equipped: false, broken: false
     });
   }
 
@@ -344,6 +338,8 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
     region,
     slotOnly,
     damageOnly,
+    opaquePanel: Boolean(component.opaquePanel),
+    itemRole: component.itemRole ?? "",
     items,
     slotRows: region === "armor"
       ? [armorItem, shieldItem].filter(Boolean)

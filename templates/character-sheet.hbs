@@ -222,20 +222,6 @@
                     title="{{#if masteryReference}}Open {{mastery}} rules{{else}}No mastery rules entry available{{/if}}"
                     {{#unless id}}disabled{{/unless}}
                   >{{mastery}}</button>
-
-                  <div class="weapon-condition-overlay {{#if broken}}broken{{/if}}" aria-label="{{#if id}}Equipment damage{{/if}}">
-                    {{#each conditionDots}}
-                      <button
-                        type="button"
-                        class="weapon-condition-hitbox {{#if filled}}filled{{/if}}"
-                        data-action="set-equipment-damage"
-                        data-item-id="{{../id}}"
-                        data-value="{{value}}"
-                        aria-label="Set equipment damage to {{value}}"
-                        {{#unless ../id}}disabled{{/unless}}
-                      ></button>
-                    {{/each}}
-                  </div>
                 </div>
               {{/each}}
             </div>
@@ -243,7 +229,7 @@
 
           {{#if isEquipmentRegion}}
             <div
-              class="overlay-field equipment-region equipment-region-{{region}} {{#if slotOnly}}equipment-slot-only-region{{/if}} {{#if damageOnly}}equipment-damage-only-region{{/if}}"
+              class="overlay-field equipment-region equipment-region-{{region}} {{#if slotOnly}}equipment-slot-only-region{{/if}} {{#if damageOnly}}equipment-damage-only-region{{/if}} {{#if opaquePanel}}equipment-opaque-panel{{/if}} {{#if itemRole}}equipment-role-{{itemRole}}{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
