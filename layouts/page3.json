@@ -20,7 +20,7 @@
       "left": 6.551106770833333,
       "top": 16.187879774305554,
       "width": 44.1,
-      "height": 14.5,
+      "height": 10.2,
       "opaquePanel": true
     },
     {
@@ -31,7 +31,7 @@
       "left": 51.470947265625,
       "top": 8.916558159722223,
       "width": 45,
-      "height": 22.9,
+      "height": 18.6,
       "opaquePanel": true
     },
     {
@@ -42,7 +42,7 @@
       "left": 6.160481770833334,
       "top": 35.01925998263889,
       "width": 44.2,
-      "height": 48.6,
+      "height": 43.5,
       "opaquePanel": true
     },
     {
@@ -53,7 +53,7 @@
       "left": 50.7080078125,
       "top": 35.01925998263889,
       "width": 44.2,
-      "height": 48.6,
+      "height": 43.5,
       "opaquePanel": true
     },
     {
@@ -78,7 +78,7 @@
       "left": 41.81315104166667,
       "top": 14.798990885416666,
       "width": 3.7,
-      "height": 14.5
+      "height": 10.2
     },
     {
       "component": "equipmentRegion",
@@ -90,7 +90,7 @@
       "left": 92.6,
       "top": 8.916558159722223,
       "width": 3.7,
-      "height": 22.9
+      "height": 18.6
     },
     {
       "component": "equipmentRegion",
@@ -102,7 +102,7 @@
       "left": 42.15291341145833,
       "top": 29.55050998263889,
       "width": 3.7,
-      "height": 48.6
+      "height": 43.5
     },
     {
       "component": "equipmentRegion",
@@ -114,7 +114,7 @@
       "left": 91.7,
       "top": 35.01925998263889,
       "width": 3.7,
-      "height": 48.6
+      "height": 43.5
     },
     {
       "component": "derivedField",
@@ -149,7 +149,64 @@
       "left": 29.768880208333332,
       "top": 14.71218532986111,
       "width": 9.4,
-      "height": 14.5
+      "height": 10.2
+    },
+    {
+      "component": "nativeField",
+      "key": "currency-cp",
+      "label": "Copper Pieces",
+      "path": "system.currency.cp",
+      "inputType": "number",
+      "className": "currency-field currency-cp",
+      "left": 10.0,
+      "top": 86.5,
+      "width": 8.5,
+      "height": 2.6
+    },
+    {
+      "component": "nativeField",
+      "key": "currency-sp",
+      "label": "Silver Pieces",
+      "path": "system.currency.sp",
+      "inputType": "number",
+      "className": "currency-field currency-sp",
+      "left": 24.7,
+      "top": 86.5,
+      "width": 8.5,
+      "height": 2.6
+    },
+    {
+      "component": "nativeField",
+      "key": "currency-gp",
+      "label": "Gold Pieces",
+      "path": "system.currency.gp",
+      "inputType": "number",
+      "className": "currency-field currency-gp",
+      "left": 39.1,
+      "top": 86.5,
+      "width": 8.5,
+      "height": 2.6
+    },
+    {
+      "component": "flagTextArea",
+      "key": "trade-goods",
+      "label": "Trade Goods",
+      "flag": "tradeGoods",
+      "className": "trade-goods-field",
+      "left": 6.2,
+      "top": 90.5,
+      "width": 42.0,
+      "height": 5.8
+    },
+    {
+      "component": "supplyWidget",
+      "key": "supply-dice",
+      "label": "Supplies",
+      "rows": 5,
+      "left": 52.2,
+      "top": 83.7,
+      "width": 42.8,
+      "height": 12.6
     }
   ]
 }

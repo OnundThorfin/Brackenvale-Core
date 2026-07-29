@@ -408,11 +408,21 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
   const equipped = items.filter((entry) => entry.location === "equipped");
 
   const slotCapacity = getActorSlotCapacity(actor, moduleId);
-  const slotsUsed = items.reduce((total, entry) => total + entry.slots, 0);
+  const supplyRows = foundry.utils.getProperty(
+    actor,
+    `flags.${moduleId}.supplyDice`
+  ) ?? [];
+  const supplySlots = Array.isArray(supplyRows)
+    ? supplyRows.filter((row) => row?.name && row?.die && row.die !== "empty").length
+    : 0;
+  const itemSlots = items.reduce((total, entry) => total + entry.slots, 0);
+  const slotsUsed = itemSlots + supplySlots;
 
   return {
     items,
     slotCapacity,
+    itemSlots,
+    supplySlots,
     slotsUsed,
     encumbrance: getEncumbranceState(slotsUsed, slotCapacity),
     armor: equipped.find((entry) => entry.isArmor)?.item ?? null,

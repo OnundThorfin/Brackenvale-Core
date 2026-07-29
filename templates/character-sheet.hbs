@@ -310,6 +310,63 @@
             </div>
           {{/if}}
 
+
+          {{#if isSupplyWidget}}
+            <div
+              class="overlay-field supply-widget"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              aria-label="{{label}}"
+            >
+              {{#each rows}}
+                <div class="supply-widget-row" data-supply-index="{{index}}">
+                  <button
+                    type="button"
+                    class="supply-roll-name"
+                    data-action="roll-supply-die"
+                    data-supply-index="{{index}}"
+                    title="Roll this Supply Die"
+                    {{#unless ../editable}}disabled{{/unless}}
+                  >{{#if name}}{{name}}{{else}}Supply{{/if}}</button>
+                  <input
+                    type="text"
+                    class="supply-name-input"
+                    value="{{name}}"
+                    data-action="edit-supply-name"
+                    data-supply-index="{{index}}"
+                    aria-label="Supply name"
+                    placeholder="Supply"
+                    {{#unless ../editable}}disabled{{/unless}}
+                  >
+                  <select
+                    class="supply-die-select"
+                    data-action="set-supply-die"
+                    data-supply-index="{{index}}"
+                    aria-label="{{#if name}}{{name}}{{else}}Supply{{/if}} die"
+                    {{#unless ../editable}}disabled{{/unless}}
+                  >
+                    {{#each options}}
+                      <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+
+          {{#if isFlagTextArea}}
+            <textarea
+              class="overlay-field flag-text-area {{className}}"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              data-flag-name="{{flag}}"
+              aria-label="{{label}}"
+              {{#unless editable}}disabled{{/unless}}
+            >{{value}}</textarea>
+          {{/if}}
+
           {{#if isEquippedDefenseName}}
             <button
               type="button"

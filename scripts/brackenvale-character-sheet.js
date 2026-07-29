@@ -132,7 +132,125 @@ Hooks.once("init", () => {
       this._activateEquipmentDropZones(root);
       this._activateEquipmentControls(root);
       this._activateEquipmentDragging(root);
+      this._activateSupplyControls(root);
+      this._activateFlagTextAreas(root);
     }
+    _activateSupplyControls(root) {
+      const getRows = () => {
+        const stored = foundry.utils.getProperty(
+          this.actor,
+          `flags.${MODULE_ID}.supplyDice`
+        );
+        return Array.from({length: 5}, (_, index) => ({
+          name: String(stored?.[index]?.name ?? ""),
+          die: ["d12", "d10", "d8", "d6", "d4", "empty"].includes(stored?.[index]?.die)
+            ? stored[index].die
+            : "empty"
+        }));
+      };
+
+      const saveRows = async (rows) => {
+        await this.actor.update({
+          [`flags.${MODULE_ID}.supplyDice`]: rows
+        });
+        this.render();
+      };
+
+      for (const input of root.querySelectorAll(
+        "[data-action='edit-supply-name']"
+      )) {
+        input.addEventListener("change", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+
+          const rows = getRows();
+          rows[index].name = event.currentTarget.value.trim();
+          await saveRows(rows);
+        });
+      }
+
+      for (const select of root.querySelectorAll(
+        "[data-action='set-supply-die']"
+      )) {
+        select.addEventListener("change", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+
+          const rows = getRows();
+          rows[index].die = event.currentTarget.value;
+          await saveRows(rows);
+        });
+      }
+
+      for (const button of root.querySelectorAll(
+        "[data-action='roll-supply-die']"
+      )) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+
+          const rows = getRows();
+          const row = rows[index];
+          const supplyName = row.name || "Supply";
+
+          if (row.die === "empty") {
+            ui.notifications.warn(`${supplyName} is exhausted.`);
+            return;
+          }
+
+          const faces = Number(row.die.slice(1));
+          const roll = await (new Roll(`1d${faces}`)).evaluate();
+          const result = Number(roll.total);
+          const steps = ["d12", "d10", "d8", "d6", "d4", "empty"];
+          const currentIndex = steps.indexOf(row.die);
+          let nextDie = row.die;
+
+          if (result <= 2) {
+            nextDie = steps[Math.min(currentIndex + 1, steps.length - 1)];
+            rows[index].die = nextDie;
+            await this.actor.update({
+              [`flags.${MODULE_ID}.supplyDice`]: rows
+            });
+          }
+
+          const outcome = result <= 2
+            ? nextDie === "empty"
+              ? `${supplyName} is exhausted.`
+              : `${supplyName} decreases to ${nextDie}.`
+            : `${supplyName} remains at ${row.die}.`;
+
+          await roll.toMessage({
+            speaker: ChatMessage.getSpeaker({actor: this.actor}),
+            flavor: `<strong>${supplyName} Supply Die</strong><br>${outcome}`
+          });
+
+          this.render();
+        });
+      }
+    }
+
+    _activateFlagTextAreas(root) {
+      for (const field of root.querySelectorAll(
+        "textarea[data-flag-name]"
+      )) {
+        field.addEventListener("change", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          const flagName = event.currentTarget.dataset.flagName;
+          if (!flagName) return;
+
+          await this.actor.update({
+            [`flags.${MODULE_ID}.${flagName}`]: event.currentTarget.value
+          });
+        });
+      }
+    }
+
     _activateArtworkPageTabs(root) {
       const buttons = root.querySelectorAll(
         ".brackenvale-page-tabs [data-page]"
@@ -825,6 +943,8 @@ Hooks.once("init", () => {
           if (
             field.classList.contains("equipment-slot-only-region")
             || field.classList.contains("equipment-damage-only-region")
+            || field.classList.contains("supply-widget")
+            || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
           ) {
             field.style.zIndex = "1000";
