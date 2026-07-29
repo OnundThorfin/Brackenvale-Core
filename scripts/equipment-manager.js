@@ -246,7 +246,14 @@ export function getEquipmentDamageCapacity(item) {
 
   if (item.type === "weapon") {
     if (hasWeaponProperty(item, ["light", "lgt"])) return 2;
-    if (hasWeaponProperty(item, ["heavy", "hvy"]) && !isRangedWeapon(item)) return 4;
+
+    // Brackenvale treats heavy melee weapons as the most durable.
+    // Ranged weapons remain at 3 even when the D&D item also carries
+    // the Heavy property (for example, a Longbow).
+    if (hasWeaponProperty(item, ["heavy", "hvy"]) && !isRangedWeapon(item)) {
+      return 4;
+    }
+
     return 3;
   }
 
@@ -282,42 +289,15 @@ export async function setEquipmentDamage(
 }
 
 function isRangedWeapon(item) {
-  const actionType = String(
-    foundry.utils.getProperty(item, "system.actionType")
-      ?? foundry.utils.getProperty(item, "system.activities.contents.0.attack.type.value")
-      ?? ""
-  ).toLowerCase();
-
-  if (["rwak", "ranged", "rangedweapon"].includes(actionType)) return true;
-
-  const weaponType = String(
-    foundry.utils.getProperty(item, "system.type.value") ?? ""
-  ).toLowerCase();
-
-  if (weaponType.includes("ranged")) return true;
-
-  const rangeValue = Number(
-    foundry.utils.getProperty(item, "system.range.value")
-      ?? foundry.utils.getProperty(item, "system.activities.contents.0.range.value")
-      ?? 0
-  );
-
-  const rangeUnits = String(
-    foundry.utils.getProperty(item, "system.range.units")
-      ?? foundry.utils.getProperty(item, "system.activities.contents.0.range.units")
-      ?? ""
-  ).toLowerCase();
-
-  if (rangeValue > 5 && rangeUnits !== "touch") return true;
-
+  const normalizedName = String(item?.name ?? "").trim().toLowerCase();
   const identifier = String(
     foundry.utils.getProperty(item, "system.identifier")
       ?? foundry.utils.getProperty(item, "system.type.baseItem")
-      ?? item.name
       ?? ""
-  ).toLowerCase();
+  ).trim().toLowerCase();
 
-  return [
+  const identity = `${normalizedName} ${identifier}`;
+  if ([
     "bow",
     "crossbow",
     "sling",
@@ -325,7 +305,51 @@ function isRangedWeapon(item) {
     "firearm",
     "pistol",
     "musket"
-  ].some((term) => identifier.includes(term));
+  ].some((term) => identity.includes(term))) {
+    return true;
+  }
+
+  if (hasWeaponProperty(item, ["ammunition", "amm", "loading"])) return true;
+
+  const weaponType = String(
+    foundry.utils.getProperty(item, "system.type.value") ?? ""
+  ).toLowerCase();
+  if (weaponType.includes("ranged") || /(^|[^a-z])r([^a-z]|$)/.test(weaponType)) {
+    return true;
+  }
+
+  const activities = foundry.utils.getProperty(item, "system.activities");
+  const activityList =
+    activities?.contents
+      ?? (Array.isArray(activities) ? activities : [])
+      ?? [];
+
+  for (const activity of activityList) {
+    const attackType = String(
+      foundry.utils.getProperty(activity, "attack.type.value")
+        ?? foundry.utils.getProperty(activity, "attack.type")
+        ?? ""
+    ).toLowerCase();
+
+    if (attackType.includes("ranged") || attackType === "rwak") return true;
+
+    const rangeValue = Number(
+      foundry.utils.getProperty(activity, "range.value")
+        ?? foundry.utils.getProperty(activity, "range.reach")
+        ?? 0
+    );
+    if (rangeValue > 10) return true;
+  }
+
+  const legacyActionType = String(
+    foundry.utils.getProperty(item, "system.actionType") ?? ""
+  ).toLowerCase();
+  if (legacyActionType === "rwak") return true;
+
+  const legacyRange = Number(
+    foundry.utils.getProperty(item, "system.range.value") ?? 0
+  );
+  return legacyRange > 10;
 }
 
 function hasWeaponProperty(item, candidates) {
