@@ -72,10 +72,14 @@ function prepareSupplyWidget(component, actor, moduleId, editable) {
     const die = ["d12", "d10", "d8", "d6", "d4", "empty"].includes(row.die)
       ? row.die
       : "empty";
+    const linkedItem = row.itemId ? actor.items?.get(row.itemId) ?? null : null;
+    const name = linkedItem?.name ?? String(row.name ?? "");
 
     return {
       index,
-      name: String(row.name ?? ""),
+      name,
+      itemId: linkedItem?.id ?? "",
+      linked: Boolean(linkedItem),
       die,
       isEmpty: die === "empty",
       options: [

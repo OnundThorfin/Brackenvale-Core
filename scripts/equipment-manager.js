@@ -413,7 +413,13 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
     `flags.${moduleId}.supplyDice`
   ) ?? [];
   const supplySlots = Array.isArray(supplyRows)
-    ? supplyRows.filter((row) => row?.name && row?.die && row.die !== "empty").length
+    ? supplyRows.filter(
+        (row) =>
+          row?.name
+          && row?.die
+          && row.die !== "empty"
+          && !row?.itemId
+      ).length
     : 0;
   const itemSlots = items.reduce((total, entry) => total + entry.slots, 0);
   const slotsUsed = itemSlots + supplySlots;

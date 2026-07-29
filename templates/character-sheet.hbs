@@ -124,6 +124,8 @@
               data-component-key="{{key}}"
               data-layout-part="root"
               aria-label="{{label}}"
+              data-supply-drop-zone="true"
+              title="Drop an owned supply item here to track it"
             >
               <button
                 type="button"
@@ -318,9 +320,11 @@
               data-component-key="{{key}}"
               data-layout-part="root"
               aria-label="{{label}}"
+              data-supply-drop-zone="true"
+              title="Drop an owned supply item here to track it"
             >
               {{#each rows}}
-                <div class="supply-widget-row" data-supply-index="{{index}}">
+                <div class="supply-widget-row {{#if linked}}linked-supply{{/if}}" data-supply-index="{{index}}" data-linked-item-id="{{itemId}}">
                   <button
                     type="button"
                     class="supply-roll-name"
@@ -337,6 +341,7 @@
                     data-supply-index="{{index}}"
                     aria-label="Supply name"
                     placeholder="Supply"
+                    {{#if linked}}readonly title="Linked to an owned item"{{/if}}
                     {{#unless ../editable}}disabled{{/unless}}
                   >
                   <select

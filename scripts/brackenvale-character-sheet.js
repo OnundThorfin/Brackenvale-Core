@@ -143,6 +143,7 @@ Hooks.once("init", () => {
         );
         return Array.from({length: 5}, (_, index) => ({
           name: String(stored?.[index]?.name ?? ""),
+          itemId: String(stored?.[index]?.itemId ?? ""),
           die: ["d12", "d10", "d8", "d6", "d4", "empty"].includes(stored?.[index]?.die)
             ? stored[index].die
             : "empty"
@@ -156,6 +157,49 @@ Hooks.once("init", () => {
         this.render();
       };
 
+      const supplyZone = root.querySelector("[data-supply-drop-zone]");
+      if (supplyZone) {
+        const clearSupplyHighlight = () => {
+          supplyZone.classList.remove("supply-drag-target");
+        };
+
+        supplyZone.addEventListener("dragenter", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          supplyZone.classList.add("supply-drag-target");
+        });
+
+        supplyZone.addEventListener("dragover", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = "link";
+        });
+
+        supplyZone.addEventListener("dragleave", (event) => {
+          if (supplyZone.contains(event.relatedTarget)) return;
+          clearSupplyHighlight();
+        });
+
+        supplyZone.addEventListener("drop", async (event) => {
+          clearSupplyHighlight();
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          let data = null;
+          const raw = event.dataTransfer?.getData("application/json")
+            || event.dataTransfer?.getData("text/plain");
+          if (raw) {
+            try {
+              data = JSON.parse(raw);
+            } catch (_error) {
+              data = null;
+            }
+          }
+          if (data) await this._handleSupplyDrop(data);
+        });
+      }
+
       for (const input of root.querySelectorAll(
         "[data-action='edit-supply-name']"
       )) {
@@ -165,6 +209,7 @@ Hooks.once("init", () => {
           if (!Number.isInteger(index)) return;
 
           const rows = getRows();
+          if (rows[index].itemId) return;
           rows[index].name = event.currentTarget.value.trim();
           await saveRows(rows);
         });
@@ -232,6 +277,70 @@ Hooks.once("init", () => {
           this.render();
         });
       }
+    }
+
+    async _handleSupplyDrop(data) {
+      if (!data || data.type !== "Item") {
+        ui.notifications?.warn("Only items can be tracked as supplies.");
+        return;
+      }
+
+      let item = data.id ? this.actor.items.get(data.id) ?? null : null;
+      if (!item && data.uuid) {
+        const source = await fromUuid(data.uuid);
+        if (source?.parent === this.actor) {
+          item = source;
+        } else if (source?.documentName === "Item") {
+          const itemData = source.toObject();
+          delete itemData._id;
+          [item] = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        }
+      }
+
+      if (!item) {
+        ui.notifications?.warn("Brackenvale could not find that supply item.");
+        return;
+      }
+
+      const stored = foundry.utils.getProperty(
+        this.actor,
+        `flags.${MODULE_ID}.supplyDice`
+      );
+      const rows = Array.from({length: 5}, (_, index) => ({
+        name: String(stored?.[index]?.name ?? ""),
+        itemId: String(stored?.[index]?.itemId ?? ""),
+        die: ["d12", "d10", "d8", "d6", "d4", "empty"].includes(stored?.[index]?.die)
+          ? stored[index].die
+          : "empty"
+      }));
+
+      const existingIndex = rows.findIndex((row) => row.itemId === item.id);
+      if (existingIndex >= 0) {
+        ui.notifications?.info(`${item.name} is already tracked as a Supply Die.`);
+        return;
+      }
+
+      const emptyIndex = rows.findIndex(
+        (row) => !row.itemId && !row.name && row.die === "empty"
+      );
+      if (emptyIndex < 0) {
+        ui.notifications?.warn("All Supply rows are currently in use.");
+        return;
+      }
+
+      rows[emptyIndex] = {
+        name: item.name,
+        itemId: item.id,
+        die: "d12"
+      };
+
+      await this.actor.update({
+        [`flags.${MODULE_ID}.supplyDice`]: rows
+      });
+
+      ui.notifications?.info(`${item.name} is now tracked as a d12 Supply Die.`);
+      this._activePage = 3;
+      this.render();
     }
 
     _activateFlagTextAreas(root) {
@@ -758,7 +867,9 @@ Hooks.once("init", () => {
 
           const findTarget = (clientX, clientY) => {
             const element = document.elementFromPoint(clientX, clientY);
-            return element?.closest?.("[data-equipment-drop-zone]") ?? null;
+            return element?.closest?.(
+              "[data-equipment-drop-zone], [data-supply-drop-zone]"
+            ) ?? null;
           };
 
           const moveGhost = (clientX, clientY) => {
@@ -815,16 +926,22 @@ Hooks.once("init", () => {
             upEvent.stopPropagation();
 
             try {
-              await this._handleEquipmentDrop(
-                {
-                  type: "Item",
-                  id: item.id,
-                  uuid: item.uuid,
-                  actorId: this.actor.id,
-                  brackenvaleOwnedItem: true
-                },
-                finalTarget.dataset.equipmentDropZone
-              );
+              const dropData = {
+                type: "Item",
+                id: item.id,
+                uuid: item.uuid,
+                actorId: this.actor.id,
+                brackenvaleOwnedItem: true
+              };
+
+              if (finalTarget.dataset.supplyDropZone) {
+                await this._handleSupplyDrop(dropData);
+              } else {
+                await this._handleEquipmentDrop(
+                  dropData,
+                  finalTarget.dataset.equipmentDropZone
+                );
+              }
             } catch (error) {
               console.error(
                 `${MODULE_ID} | Could not move owned equipment item`,
