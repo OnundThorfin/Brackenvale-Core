@@ -718,21 +718,61 @@ Hooks.once("init", () => {
           const item = this.actor.items.get(itemId);
           if (!item) return;
 
-          const displayed = String(button.textContent ?? "").trim();
-          const modifierExpression = displayed
-            .replace(/−/g, "-")
-            .replace(/\s+/g, " ")
-            .trim();
+          const conditionPenalty = Number(
+            foundry.utils.getProperty(
+              item,
+              `flags.${MODULE_ID}.equipmentDamage`
+            ) ?? 0
+          );
 
-          const rollFormula = modifierExpression
-            ? `1d20 + (${modifierExpression})`
-            : "1d20";
-          const roll = await (new Roll(rollFormula)).evaluate();
+          let penaltyEffect = null;
 
-          await roll.toMessage({
-            speaker: ChatMessage.getSpeaker({actor: this.actor}),
-            flavor: `<strong>${foundry.utils.escapeHTML(item.name)} Attack</strong><br>Condition-adjusted attack roll`
-          });
+          try {
+            if (conditionPenalty > 0) {
+              [penaltyEffect] = await this.actor.createEmbeddedDocuments(
+                "ActiveEffect",
+                [{
+                  name: `${item.name} Condition Penalty`,
+                  icon: item.img ?? "icons/svg/sword.svg",
+                  disabled: false,
+                  transfer: false,
+                  changes: [
+                    {
+                      key: "system.bonuses.mwak.attack",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: `-${conditionPenalty}`,
+                      priority: 100
+                    },
+                    {
+                      key: "system.bonuses.rwak.attack",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: `-${conditionPenalty}`,
+                      priority: 100
+                    }
+                  ],
+                  flags: {
+                    [MODULE_ID]: {
+                      temporaryWeaponCondition: true,
+                      itemId: item.id
+                    }
+                  }
+                }]
+              );
+            }
+
+            if (typeof item.use === "function") {
+              await item.use();
+            } else {
+              item.sheet?.render(true);
+            }
+          } finally {
+            if (penaltyEffect?.id && this.actor.effects?.get(penaltyEffect.id)) {
+              await this.actor.deleteEmbeddedDocuments(
+                "ActiveEffect",
+                [penaltyEffect.id]
+              );
+            }
+          }
         });
       }
 

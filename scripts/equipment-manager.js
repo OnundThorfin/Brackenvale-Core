@@ -126,7 +126,33 @@ export function getActorSlotCapacity(actor, moduleId = "brackenvale-core") {
     foundry.utils.getProperty(actor, `flags.${moduleId}.bonusSlots`) ?? 0
   );
 
-  return Math.max(0, strength + (Number.isFinite(bonus) ? bonus : 0));
+  let backpackCount = 0;
+  let sackCount = 0;
+
+  for (const item of actor?.items ?? []) {
+    const name = String(item?.name ?? "").trim().toLowerCase();
+    const quantity = Math.max(
+      1,
+      Number(foundry.utils.getProperty(item, "system.quantity") ?? 1)
+    );
+
+    if (name === "backpack") {
+      backpackCount += quantity;
+    } else if (name === "sack" || name.endsWith(" sack")) {
+      sackCount += quantity;
+    }
+  }
+
+  const containerCapacity =
+    (Math.min(1, backpackCount) * 10)
+    + (Math.min(2, sackCount) * 5);
+
+  return Math.max(
+    0,
+    strength
+      + (Number.isFinite(bonus) ? bonus : 0)
+      + containerCapacity
+  );
 }
 
 export function getEncumbranceState(slotsUsed, slotCapacity) {
