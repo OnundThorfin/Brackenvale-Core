@@ -223,6 +223,92 @@ function isSupplyDieItem(item, moduleId) {
   );
 }
 
+
+export function getEquipmentDamage(item, moduleId = "brackenvale-core") {
+  const value = Number(
+    foundry.utils.getProperty(item, `flags.${moduleId}.equipmentDamage`) ?? 0
+  );
+  const capacity = getEquipmentDamageCapacity(item);
+  return Math.max(0, Math.min(capacity, Number.isFinite(value) ? value : 0));
+}
+
+export function getEquipmentDamageCapacity(item) {
+  if (!item) return 0;
+
+  if (isShieldItem(item)) return 3;
+
+  if (isArmorItem(item)) {
+    const identity = getEquipmentIdentityValues(item);
+    if (identity.some((value) => value.includes("heavy"))) return 4;
+    if (identity.some((value) => value.includes("medium"))) return 3;
+    return 2;
+  }
+
+  if (item.type === "weapon") {
+    if (hasWeaponProperty(item, ["light", "lgt"])) return 2;
+    if (isTwoHandedWeapon(item)) return 4;
+    return 3;
+  }
+
+  return 0;
+}
+
+export function isEquipmentBroken(item, moduleId = "brackenvale-core") {
+  const capacity = getEquipmentDamageCapacity(item);
+  return capacity > 0 && getEquipmentDamage(item, moduleId) >= capacity;
+}
+
+export async function setEquipmentDamage(
+  item,
+  requestedDamage,
+  moduleId = "brackenvale-core"
+) {
+  const capacity = getEquipmentDamageCapacity(item);
+  if (!capacity) return;
+
+  const current = getEquipmentDamage(item, moduleId);
+  const requested = Number(requestedDamage);
+  const next = requested === current
+    ? Math.max(0, requested - 1)
+    : Math.max(0, Math.min(capacity, requested));
+
+  await item.update({
+    [`flags.${moduleId}.equipmentDamage`]: next
+  });
+
+  if (isArmorOrShieldItem(item) && getItemLocation(item, moduleId) === "equipped") {
+    await refreshEquippedArmorClass(item.actor, moduleId);
+  }
+}
+
+function hasWeaponProperty(item, candidates) {
+  const properties = foundry.utils.getProperty(item, "system.properties");
+  const values = [];
+
+  if (properties instanceof Set) values.push(...properties);
+  else if (Array.isArray(properties)) values.push(...properties);
+  else if (properties && typeof properties === "object") {
+    for (const [key, value] of Object.entries(properties)) {
+      if (value === true || value === 1 || value === "true") values.push(key);
+      else if (typeof value === "string") values.push(value);
+    }
+  }
+
+  const normalized = values.map((value) =>
+    String(value).trim().toLowerCase().replace(/[\s_-]+/g, "")
+  );
+
+  return candidates.some((candidate) =>
+    normalized.includes(String(candidate).toLowerCase().replace(/[\s_-]+/g, ""))
+  );
+}
+
+async function refreshEquippedArmorClass(actor, moduleId = "brackenvale-core") {
+  if (!actor) return;
+  const state = getEquipmentState(actor, moduleId);
+  if (state.armor) await applyArmorClass(actor, state.armor, moduleId);
+}
+
 export function getItemLocation(item, moduleId = "brackenvale-core") {
   return foundry.utils.getProperty(item, `flags.${moduleId}.${EQUIPMENT_LOCATION_FLAG}`)
     ?? (isNativeEquipped(item) ? "equipped" : "packed");
@@ -241,7 +327,10 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
       isWeapon: item.type === "weapon",
       isArmor: isArmorItem(item),
       isShield: isShieldItem(item),
-      slots: getItemSlotValue(item, moduleId)
+      slots: getItemSlotValue(item, moduleId),
+      damage: getEquipmentDamage(item, moduleId),
+      damageCapacity: getEquipmentDamageCapacity(item),
+      broken: isEquipmentBroken(item, moduleId)
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -386,7 +475,24 @@ async function applyArmorClass(actor, armor, moduleId) {
       {
         key: "system.attributes.ac.formula",
         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
-        value: "@attributes.ac.armor + @attributes.ac.dex",
+        value: (() => {
+          const state = getEquipmentState(actor, moduleId);
+          const armorDamage = state.armor
+            ? getEquipmentDamage(state.armor, moduleId)
+            : 0;
+          const shieldDamage = state.shield
+            ? getEquipmentDamage(state.shield, moduleId)
+            : 0;
+          const shieldBonus = state.shield
+            ? Math.max(0, Number(foundry.utils.getProperty(state.shield, "system.armor.value") ?? 2) - shieldDamage)
+            : 0;
+          const armorBroken = state.armor
+            ? isEquipmentBroken(state.armor, moduleId)
+            : false;
+
+          if (armorBroken) return `10 + @abilities.dex.mod + ${shieldBonus}`;
+          return `@attributes.ac.armor + @attributes.ac.dex - ${armorDamage} + ${shieldBonus}`;
+        })(),
         priority: 100
       }
     ],

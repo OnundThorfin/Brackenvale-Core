@@ -8,7 +8,8 @@ import { prepareSheetComponent } from "./sheet-components.js";
 import {
   deleteEquipmentItem,
   isArmorOrShieldItem,
-  placeEquipmentItem
+  placeEquipmentItem,
+  setEquipmentDamage
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
@@ -127,6 +128,7 @@ Hooks.once("init", () => {
       this._activateDeathSaveControls(root);
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
+      this._activateEquipmentDamageControls(root);
       this._activateEquipmentDropZones(root);
       this._activateEquipmentControls(root);
       this._activateEquipmentDragging(root);
@@ -459,6 +461,29 @@ Hooks.once("init", () => {
       }
     }
 
+
+    _activateEquipmentDamageControls(root) {
+      for (const button of root.querySelectorAll(
+        "[data-action='set-equipment-damage']"
+      )) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const item = this.actor.items.get(button.dataset.itemId);
+          if (!item) return;
+
+          await setEquipmentDamage(
+            item,
+            Number(button.dataset.value),
+            MODULE_ID
+          );
+          this.render();
+        });
+      }
+    }
 
     _activateEquipmentDropZones(root) {
       const zones = root.querySelectorAll("[data-equipment-drop-zone]");
@@ -799,6 +824,7 @@ Hooks.once("init", () => {
           // pointer targeting cannot be intercepted by a drop zone.
           if (
             field.classList.contains("equipment-slot-only-region")
+            || field.classList.contains("equipment-damage-only-region")
             || field.classList.contains("slot-summary-field")
           ) {
             field.style.zIndex = "1000";

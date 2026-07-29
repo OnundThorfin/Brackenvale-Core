@@ -122,6 +122,30 @@
       "top": 32.4,
       "width": 15.0,
       "height": 2.2
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-damage-armor",
+      "label": "Armor and Shield Damage",
+      "region": "armor",
+      "sourceRegion": "armor",
+      "displayMode": "damage",
+      "left": 35.5,
+      "top": 6.138780381944445,
+      "width": 9.4,
+      "height": 8.4
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "equipment-damage-weapons",
+      "label": "Weapon Damage",
+      "region": "weapons",
+      "sourceRegion": "weapons",
+      "displayMode": "damage",
+      "left": 35.5,
+      "top": 16.187879774305554,
+      "width": 9.4,
+      "height": 14.5
     }
   ]
 }
