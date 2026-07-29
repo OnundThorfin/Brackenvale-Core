@@ -290,7 +290,7 @@ function prepareWeaponTable(component, actor) {
     weapons.push({
       id: "", name: "", attack: "", damage: "", mastery: "",
       masteryReference: "", equipped: false, conditionPenalty: 0,
-      conditionDots: [1,2,3,4,5].map((value) => ({value, filled: false}))
+      conditionDots: []
     });
   }
 

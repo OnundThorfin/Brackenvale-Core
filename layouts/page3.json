@@ -37,8 +37,8 @@
       "key": "equipment-packed-left",
       "label": "Packed Gear Left Column",
       "region": "packed-left",
-      "left": 5.6396484375,
-      "top": 34.93245442708333,
+      "left": 6.160481770833334,
+      "top": 35.01925998263889,
       "width": 44.2,
       "height": 48.6
     },
@@ -59,8 +59,8 @@
       "region": "armor",
       "sourceRegion": "armor",
       "displayMode": "slots",
-      "left": 45.2,
-      "top": 6.138780381944445,
+      "left": 41.81315104166667,
+      "top": 6.2255859375,
       "width": 3.7,
       "height": 8.4
     },
@@ -71,8 +71,8 @@
       "region": "weapons",
       "sourceRegion": "weapons",
       "displayMode": "slots",
-      "left": 45.2,
-      "top": 16.187879774305554,
+      "left": 41.81315104166667,
+      "top": 14.798990885416666,
       "width": 3.7,
       "height": 14.5
     },
@@ -95,8 +95,8 @@
       "region": "packed-left",
       "sourceRegion": "packed-left",
       "displayMode": "slots",
-      "left": 45.8,
-      "top": 34.93245442708333,
+      "left": 42.15291341145833,
+      "top": 29.55050998263889,
       "width": 3.7,
       "height": 48.6
     },
@@ -118,9 +118,9 @@
       "label": "Gear Slots Used and Capacity",
       "derive": "gearSlotSummary",
       "className": "slot-summary-field",
-      "left": 42.5,
-      "top": 32.4,
-      "width": 15.0,
+      "left": 25.050862630208332,
+      "top": 30.92312282986111,
+      "width": 15,
       "height": 2.2
     },
     {
@@ -130,7 +130,7 @@
       "region": "armor",
       "sourceRegion": "armor",
       "displayMode": "damage",
-      "left": 35.5,
+      "left": 30.029296875,
       "top": 6.138780381944445,
       "width": 9.4,
       "height": 8.4
@@ -142,8 +142,8 @@
       "region": "weapons",
       "sourceRegion": "weapons",
       "displayMode": "damage",
-      "left": 35.5,
-      "top": 16.187879774305554,
+      "left": 29.768880208333332,
+      "top": 14.71218532986111,
       "width": 9.4,
       "height": 14.5
     }

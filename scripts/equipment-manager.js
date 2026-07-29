@@ -246,7 +246,7 @@ export function getEquipmentDamageCapacity(item) {
 
   if (item.type === "weapon") {
     if (hasWeaponProperty(item, ["light", "lgt"])) return 2;
-    if (isTwoHandedWeapon(item)) return 4;
+    if (hasWeaponProperty(item, ["heavy", "hvy"])) return 4;
     return 3;
   }
 
