@@ -1184,43 +1184,108 @@
 }
 
 
-/* Page 3: cover the printed inventory lines with clean white equipment areas. */
-.page[data-page="3"] [data-component-key="equipment-weapons"],
-.page[data-page="3"] [data-component-key="equipment-worn"],
-.page[data-page="3"] [data-component-key="equipment-packed-left"],
-.page[data-page="3"] [data-component-key="equipment-packed-right"] {
-  background: #ffffff !important;
+/* =========================================================
+   Equipment condition tracker refinement
+   ========================================================= */
+
+/* Page 3 main equipment regions cover the printed background lines. */
+.brackenvale-art-page[data-page="3"]
+  .equipment-region[data-component-key="equipment-weapons"],
+.brackenvale-art-page[data-page="3"]
+  .equipment-region[data-component-key="equipment-worn"],
+.brackenvale-art-page[data-page="3"]
+  .equipment-region[data-component-key="equipment-packed-left"],
+.brackenvale-art-page[data-page="3"]
+  .equipment-region[data-component-key="equipment-packed-right"] {
+  z-index: 2 !important;
+  background-color: #ffffff !important;
+  opacity: 1 !important;
 }
 
-/* Keep Page 1 Armor and Shield condition controls aligned with the printed rows. */
-.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"] {
-  z-index: 12;
+/* Keep slot and condition overlays above the opaque equipment panels. */
+.brackenvale-art-page[data-page="3"]
+  .equipment-slot-only-region,
+.brackenvale-art-page[data-page="3"]
+  .equipment-damage-only-region,
+.brackenvale-art-page[data-page="3"]
+  .slot-summary-field {
+  z-index: 6 !important;
+}
+
+/* Armor and shield remain transparent on Page 3. */
+.brackenvale-art-page[data-page="3"]
+  .equipment-region[data-component-key="equipment-armor"] {
   background: transparent !important;
 }
 
-.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
-  .equipment-damage-only-row:nth-child(1) {
-  top: 5%;
-  height: 24%;
+/* The original weapon-table condition pips are replaced by a standalone
+   calibratable overlay on Page 1. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="weaponTable"]
+  .weapon-condition-overlay {
+  display: none !important;
 }
 
-.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
-  .equipment-damage-only-row:nth-child(2) {
-  top: 78%;
-  height: 24%;
+/* Page 1 standalone condition panels are opaque and independently calibratable. */
+.brackenvale-art-page[data-page="1"]
+  .equipment-damage-only-region[data-component-key="page1-weapon-condition"],
+.brackenvale-art-page[data-page="1"]
+  .equipment-damage-only-region[data-component-key="page1-armor-condition"],
+.brackenvale-art-page[data-page="1"]
+  .equipment-damage-only-region[data-component-key="page1-shield-condition"] {
+  z-index: 12 !important;
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  overflow: hidden;
 }
 
-/* Printed boxes on Page 1 are rectangular, so use square hit areas there. */
-.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
+/* Weapon condition rows align to the four visible weapon rows. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-weapon-condition"]
+  .equipment-damage-only-row {
+  top: calc((var(--damage-row) * 25%));
+  height: 25%;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Armor and shield are now separate components, each with one centered row. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"]
+  .equipment-damage-only-row,
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"]
+  .equipment-damage-only-row {
+  top: 0 !important;
+  height: 100% !important;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Square printed-style condition boxes on Page 1. */
+.brackenvale-art-page[data-page="1"]
+  .equipment-damage-only-region
   .equipment-damage-pip {
-  width: 14px;
-  height: 14px;
-  min-width: 14px;
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid #171612;
+  background: #ffffff;
 }
 
-.page[data-page="1"] [data-component-key="page1-equipment-damage-armor"]
+.brackenvale-art-page[data-page="1"]
+  .equipment-damage-only-region
   .equipment-damage-pip.filled {
   background: #171612;
+}
+
+/* Calibration visibility for each independent Page 1 tracker. */
+.brackenvale-art-sheet.calibration-mode
+  .brackenvale-art-page[data-page="1"]
+  .equipment-damage-only-region {
+  visibility: visible !important;
+  opacity: 1 !important;
+  outline: 3px dashed rgba(155, 32, 32, 0.98) !important;
+  background-color: rgba(255, 255, 255, 0.94) !important;
 }

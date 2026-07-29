@@ -691,15 +691,41 @@
     },
     {
       "component": "equipmentRegion",
-      "key": "page1-equipment-damage-armor",
-      "label": "Armor and Shield Condition",
+      "key": "page1-weapon-condition",
+      "label": "Weapon Conditions",
+      "region": "weapons",
+      "sourceRegion": "weapons",
+      "displayMode": "damage",
+      "left": 82.0,
+      "top": 84.9365234375,
+      "width": 13.7,
+      "height": 12.25
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "page1-armor-condition",
+      "label": "Armor Condition",
       "region": "armor",
       "sourceRegion": "armor",
       "displayMode": "damage",
-      "left": 76.4,
-      "top": 33.3,
-      "width": 18.0,
-      "height": 12.7
+      "itemRole": "armor",
+      "left": 84.0,
+      "top": 34.0,
+      "width": 10.0,
+      "height": 3.2
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "page1-shield-condition",
+      "label": "Shield Condition",
+      "region": "armor",
+      "sourceRegion": "armor",
+      "displayMode": "damage",
+      "itemRole": "shield",
+      "left": 84.0,
+      "top": 43.1,
+      "width": 10.0,
+      "height": 3.2
     }
   ]
 }

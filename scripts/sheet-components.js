@@ -349,7 +349,13 @@ function prepareEquipmentRegion(component, actor, moduleId, editable) {
       ? [armorItem, shieldItem].filter(Boolean)
       : items,
     damageRows: region === "armor"
-      ? [armorItem, shieldItem].filter(Boolean)
+      ? (
+          component.itemRole === "armor"
+            ? [armorItem].filter(Boolean)
+            : component.itemRole === "shield"
+              ? [shieldItem].filter(Boolean)
+              : [armorItem, shieldItem].filter(Boolean)
+        )
       : items,
     armorItem,
     shieldItem,
