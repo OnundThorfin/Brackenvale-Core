@@ -157,6 +157,55 @@ Hooks.once("init", () => {
         this.render();
       };
 
+      const clearSupplyRow = () => ({
+        name: "",
+        itemId: "",
+        die: "empty"
+      });
+
+      const deleteSupply = async (index, {confirm = true} = {}) => {
+        const rows = getRows();
+        const row = rows[index];
+        if (!row) return false;
+
+        const supplyName = row.name || "this supply";
+        if (confirm) {
+          let approved = false;
+          const DialogV2 = foundry.applications?.api?.DialogV2;
+          if (DialogV2?.confirm) {
+            approved = await DialogV2.confirm({
+              window: {title: "Delete Supply Item"},
+              content: `<p>Delete <strong>${foundry.utils.escapeHTML(supplyName)}</strong> from Supplies and from the character's inventory?</p>`,
+              yes: {label: "Delete"},
+              no: {label: "Cancel"},
+              modal: true
+            });
+          } else {
+            approved = window.confirm(
+              `Delete ${supplyName} from Supplies and from the character's inventory?`
+            );
+          }
+          if (!approved) return false;
+        }
+
+        const linkedItem = row.itemId
+          ? this.actor.items.get(row.itemId) ?? null
+          : null;
+
+        rows[index] = clearSupplyRow();
+
+        if (linkedItem) {
+          await linkedItem.delete();
+        }
+
+        await this.actor.update({
+          [`flags.${MODULE_ID}.supplyDice`]: rows
+        });
+
+        this.render();
+        return true;
+      };
+
       const supplyZone = root.querySelector("[data-supply-drop-zone]");
       if (supplyZone) {
         const clearSupplyHighlight = () => {
@@ -224,8 +273,29 @@ Hooks.once("init", () => {
           if (!Number.isInteger(index)) return;
 
           const rows = getRows();
-          rows[index].die = event.currentTarget.value;
+          const nextDie = event.currentTarget.value;
+
+          if (nextDie === "empty") {
+            await deleteSupply(index, {confirm: false});
+            return;
+          }
+
+          rows[index].die = nextDie;
           await saveRows(rows);
+        });
+      }
+
+      for (const button of root.querySelectorAll(
+        "[data-action='delete-supply']"
+      )) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+          await deleteSupply(index, {confirm: true});
         });
       }
 
@@ -258,14 +328,16 @@ Hooks.once("init", () => {
           if (result <= 2) {
             nextDie = steps[Math.min(currentIndex + 1, steps.length - 1)];
             rows[index].die = nextDie;
-            await this.actor.update({
-              [`flags.${MODULE_ID}.supplyDice`]: rows
-            });
+            if (nextDie !== "empty") {
+              await this.actor.update({
+                [`flags.${MODULE_ID}.supplyDice`]: rows
+              });
+            }
           }
 
           const outcome = result <= 2
             ? nextDie === "empty"
-              ? `${supplyName} is exhausted.`
+              ? `${supplyName} is exhausted and has been removed from inventory.`
               : `${supplyName} decreases to ${nextDie}.`
             : `${supplyName} remains at ${row.die}.`;
 
@@ -274,7 +346,11 @@ Hooks.once("init", () => {
             flavor: `<strong>${supplyName} Supply Die</strong><br>${outcome}`
           });
 
-          this.render();
+          if (nextDie === "empty") {
+            await deleteSupply(index, {confirm: false});
+          } else {
+            this.render();
+          }
         });
       }
     }
@@ -333,6 +409,11 @@ Hooks.once("init", () => {
         itemId: item.id,
         die: "d12"
       };
+
+      await item.update({
+        [`flags.${MODULE_ID}.supplyTracked`]: true,
+        [`flags.${MODULE_ID}.slots`]: 1
+      });
 
       await this.actor.update({
         [`flags.${MODULE_ID}.supplyDice`]: rows

@@ -70,6 +70,26 @@ export function getItemSlotValue(item, moduleId = "brackenvale-core") {
     return quantity;
   }
 
+  const trackedSupply = Boolean(
+    foundry.utils.getProperty(item, `flags.${moduleId}.supplyTracked`)
+  );
+  const commonSupplyNames = [
+    "arrow", "arrows",
+    "bolt", "bolts", "crossbow bolt", "crossbow bolts",
+    "sling bullet", "sling bullets",
+    "torch", "torches",
+    "lantern oil", "oil flask", "flask of oil",
+    "candle", "candles",
+    "chalk",
+    "firewood",
+    "bandage", "bandages"
+  ];
+  const isCommonSupply = commonSupplyNames.some(
+    (entry) => name === entry || name.includes(entry)
+  );
+
+  if (trackedSupply || isCommonSupply) return 1;
+
   if (isShieldItem(item)) return quantity;
   if (isArmorItem(item)) {
     if (identity.some((value) => value.includes("heavy"))) return 3 * quantity;
@@ -85,7 +105,7 @@ export function getItemSlotValue(item, moduleId = "brackenvale-core") {
   if (isCoinOrGemItem(item)) return Math.ceil(quantity / 100);
   if (isProvisionItem(item)) return Math.ceil(quantity / 5);
   if (isWaterItem(item)) return quantity;
-  if (isSupplyDieItem(item, moduleId)) return quantity;
+  if (isSupplyDieItem(item, moduleId)) return 1;
 
   return quantity;
 }

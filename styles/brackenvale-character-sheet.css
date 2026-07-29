@@ -1346,3 +1346,54 @@
   justify-content: flex-start;
   padding-left: 12%;
 }
+
+
+/* 0.5.4-test.48: readable linked supplies and destructive controls */
+.supply-widget-row {
+  grid-template-columns: minmax(0, 1fr) 64px 20px !important;
+}
+
+.supply-widget-row.linked-supply .supply-name-input,
+.supply-name-input,
+.supply-name-input[readonly],
+.supply-name-input:disabled {
+  color: #171612 !important;
+  -webkit-text-fill-color: #171612 !important;
+  opacity: 1 !important;
+}
+
+.supply-die-select,
+.supply-die-select:focus,
+.supply-die-select option {
+  color: #171612 !important;
+  background: #ffffff !important;
+  -webkit-text-fill-color: #171612 !important;
+  opacity: 1 !important;
+  color-scheme: light !important;
+}
+
+.supply-delete {
+  width: 20px;
+  height: 100%;
+  min-width: 20px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid rgba(50, 50, 45, 0.38);
+  border-radius: 0;
+  background: #ffffff;
+  color: #a51414;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.supply-delete:hover,
+.supply-delete:focus {
+  background: #f7e8e8;
+  color: #7e0000;
+}
+
+.supply-roll-name {
+  right: 84px !important;
+}

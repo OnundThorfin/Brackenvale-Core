@@ -355,6 +355,17 @@
                       <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
                     {{/each}}
                   </select>
+                  {{#if name}}
+                    <button
+                      type="button"
+                      class="supply-delete"
+                      data-action="delete-supply"
+                      data-supply-index="{{index}}"
+                      aria-label="Delete {{name}}"
+                      title="Delete {{name}} from Supplies and inventory"
+                      {{#unless ../editable}}disabled{{/unless}}
+                    >×</button>
+                  {{/if}}
                 </div>
               {{/each}}
             </div>
