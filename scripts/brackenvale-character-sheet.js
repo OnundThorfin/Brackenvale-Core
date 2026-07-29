@@ -652,6 +652,102 @@ Hooks.once("init", () => {
       }
     }
 
+    _buildBrackenvaleCriticalFormula(formula) {
+      const normalized = String(formula ?? "")
+        .replace(/−/g, "-")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (!normalized) return "";
+
+      let maximumDice = 0;
+      normalized.replace(/(\d*)d(\d+)/gi, (_match, rawCount, rawFaces) => {
+        const count = rawCount ? Number(rawCount) : 1;
+        const faces = Number(rawFaces);
+        if (Number.isFinite(count) && Number.isFinite(faces)) {
+          maximumDice += count * faces;
+        }
+        return _match;
+      });
+
+      return maximumDice > 0
+        ? `${normalized} + ${maximumDice}`
+        : normalized;
+    }
+
+    async _promptBrackenvaleDamageRoll(item, baseFormula) {
+      const DialogV2 = foundry.applications?.api?.DialogV2;
+      const safeName = foundry.utils.escapeHTML(item.name);
+      let result = null;
+
+      if (DialogV2?.wait) {
+        result = await DialogV2.wait({
+          window: {title: `${item.name} Damage`},
+          content: `
+            <form class="brackenvale-damage-dialog">
+              <p><strong>${safeName}</strong></p>
+              <div class="form-group">
+                <label>Base Damage</label>
+                <input type="text" name="baseFormula" value="${foundry.utils.escapeHTML(baseFormula)}" readonly>
+              </div>
+              <div class="form-group">
+                <label>Extra Damage Dice</label>
+                <input type="text" name="extraFormula" placeholder="For example: 3d6 or 3d8">
+                <p class="hint">Sneak Attack, Divine Smite, spell, magic-item, or other attack damage dice.</p>
+              </div>
+            </form>
+          `,
+          buttons: [
+            {
+              action: "normal",
+              label: "Normal Damage",
+              default: true,
+              callback: (_event, button) => ({
+                mode: "normal",
+                extra: button.form?.elements?.extraFormula?.value ?? ""
+              })
+            },
+            {
+              action: "critical",
+              label: "Critical Damage",
+              callback: (_event, button) => ({
+                mode: "critical",
+                extra: button.form?.elements?.extraFormula?.value ?? ""
+              })
+            },
+            {
+              action: "cancel",
+              label: "Cancel",
+              callback: () => null
+            }
+          ],
+          close: () => null,
+          modal: true
+        });
+      } else {
+        const critical = window.confirm(
+          `Roll ${item.name} as critical damage?\n\nChoose OK for Critical or Cancel for Normal.`
+        );
+        result = {mode: critical ? "critical" : "normal", extra: ""};
+      }
+
+      if (!result) return null;
+
+      const extra = String(result.extra ?? "")
+        .replace(/−/g, "-")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const combined = extra
+        ? `(${baseFormula}) + (${extra})`
+        : baseFormula;
+
+      return result.mode === "critical"
+        ? this._buildBrackenvaleCriticalFormula(combined)
+        : combined;
+    }
+
+
     _activateWeaponControls(root) {
       for (const button of root.querySelectorAll("[data-action='show-weapon-mastery']")) {
         button.addEventListener("click", async (event) => {
@@ -787,47 +883,37 @@ Hooks.once("init", () => {
           const item = this.actor.items.get(itemId);
           if (!item) return;
 
-          const activities = foundry.utils.getProperty(item, "system.activities");
-          let attackActivity = null;
-
-          if (typeof activities?.getByType === "function") {
-            attackActivity = activities.getByType("attack")?.[0] ?? null;
-          }
-
-          if (!attackActivity && typeof activities?.values === "function") {
-            attackActivity = Array.from(activities.values()).find(
-              (activity) => typeof activity?.rollDamage === "function"
-            ) ?? null;
-          }
-
-          if (!attackActivity && activities && typeof activities === "object") {
-            attackActivity = Object.values(activities).find(
-              (activity) => typeof activity?.rollDamage === "function"
-            ) ?? null;
-          }
-
           const displayed = String(button.textContent ?? "").trim();
-          const formula = displayed
+          const baseFormula = displayed
             .replace(/−/g, "-")
             .replace(/\s+/g, " ")
             .trim();
 
-          if (!formula) {
+          if (!baseFormula) {
             ui.notifications?.warn(`${item.name} does not expose a damage formula.`);
             item.sheet?.render(true);
             return;
           }
 
+          const formula = await this._promptBrackenvaleDamageRoll(
+            item,
+            baseFormula
+          );
+          if (!formula) return;
+
           try {
             const roll = await (new Roll(formula)).evaluate();
+            const isCritical = formula !== baseFormula
+              && formula.includes(this._buildBrackenvaleCriticalFormula(baseFormula).split("+").at(-1)?.trim() ?? "");
+
             await roll.toMessage({
               speaker: ChatMessage.getSpeaker({actor: this.actor}),
-              flavor: `<strong>${foundry.utils.escapeHTML(item.name)} Damage</strong><br>Condition-adjusted damage roll`
+              flavor: `<strong>${foundry.utils.escapeHTML(item.name)} Damage</strong><br>${isCritical ? "Brackenvale critical damage" : "Damage roll"}`
             });
           } catch (error) {
-            console.error(`${MODULE_ID} | Could not roll condition-adjusted damage`, error);
+            console.error(`${MODULE_ID} | Could not roll Brackenvale damage`, error);
             ui.notifications?.warn(
-              `${item.name}'s displayed damage formula could not be rolled.`
+              `${item.name}'s damage formula could not be rolled.`
             );
             item.sheet?.render(true);
           }
