@@ -255,7 +255,9 @@ export function getEquipmentDamage(item, moduleId = "brackenvale-core") {
 export function getEquipmentDamageCapacity(item) {
   if (!item) return 0;
 
-  if (isShieldItem(item)) return 3;
+  // A shield provides +2 AC, so its two condition boxes remove
+  // one point of that bonus each. At 2 damage it is broken.
+  if (isShieldItem(item)) return 2;
 
   if (isArmorItem(item)) {
     const identity = getEquipmentIdentityValues(item);
@@ -590,15 +592,28 @@ async function applyArmorClass(actor, armor, moduleId) {
           const shieldDamage = state.shield
             ? getEquipmentDamage(state.shield, moduleId)
             : 0;
-          const shieldBonus = state.shield
-            ? Math.max(0, Number(foundry.utils.getProperty(state.shield, "system.armor.value") ?? 2) - shieldDamage)
-            : 0;
           const armorBroken = state.armor
             ? isEquipmentBroken(state.armor, moduleId)
             : false;
+          const armorBase = state.armor
+            ? Number(foundry.utils.getProperty(state.armor, "system.armor.value") ?? 10)
+            : 10;
 
-          if (armorBroken) return `10 + @abilities.dex.mod + ${shieldBonus}`;
-          return `@attributes.ac.armor + @attributes.ac.dex - ${armorDamage} + ${shieldBonus}`;
+          if (armorBroken) return `10 + @abilities.dex.mod - ${shieldDamage}`;
+
+          const armorType = String(
+            foundry.utils.getProperty(state.armor, "system.type.value")
+              ?? foundry.utils.getProperty(state.armor, "system.armor.type")
+              ?? ""
+          ).toLowerCase();
+
+          const dexTerm = armorType.includes("heavy")
+            ? "0"
+            : armorType.includes("medium")
+              ? "min(@abilities.dex.mod, 2)"
+              : "@abilities.dex.mod";
+
+          return `${armorBase} + ${dexTerm} - ${armorDamage} - ${shieldDamage}`;
         })(),
         priority: 100
       }
