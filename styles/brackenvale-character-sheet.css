@@ -1441,3 +1441,19 @@
   justify-content: center !important;
   padding: 0 !important;
 }
+
+
+/* 0.5.4-test.52: Brackenvale critical-damage dialog */
+.brackenvale-damage-dialog .form-group {
+  margin: 0.65rem 0;
+}
+
+.brackenvale-damage-dialog input {
+  width: 100%;
+}
+
+.brackenvale-damage-dialog .hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.8em;
+  opacity: 0.8;
+}
