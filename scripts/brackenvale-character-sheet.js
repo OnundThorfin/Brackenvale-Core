@@ -471,7 +471,7 @@ Hooks.once("init", () => {
     }
 
     _activateClassIntegration(root) {
-      const field = root.querySelector('[data-component-key="classLevel"]');
+      const field = root.querySelector('[data-action="class-level"]');
       if (!field) return;
 
       const clearHighlight = () => {
@@ -555,7 +555,13 @@ Hooks.once("init", () => {
         }
 
         if (!this.isEditable) return;
-        await this._openBrackenvaleClassPicker();
+
+        field.classList.add("class-picker-loading");
+        try {
+          await this._openBrackenvaleClassPicker();
+        } finally {
+          field.classList.remove("class-picker-loading");
+        }
       });
     }
 

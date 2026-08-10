@@ -1490,3 +1490,35 @@
   font-size: 0.82em;
   opacity: 0.8;
 }
+
+
+/* 0.5.4-test.55: Class & Level is a real clickable control, not an input. */
+.class-level-button {
+  display: block;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #171612;
+  font: inherit;
+  line-height: 1.1;
+  text-align: left;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.class-level-button:hover,
+.class-level-button:focus {
+  background: rgba(255, 255, 240, 0.7);
+  outline: 1px solid rgba(70, 70, 55, 0.35);
+}
+
+.class-level-button.empty {
+  font-style: italic;
+}
+
+.class-level-button.class-picker-loading {
+  opacity: 0.65;
+  cursor: wait;
+}
