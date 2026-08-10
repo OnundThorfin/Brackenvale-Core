@@ -637,75 +637,131 @@ Hooks.once("init", () => {
 
       ui.notifications?.info("Loading available D&D classes…");
 
-      const entries = [];
+      const allowedClassNames = new Set([
+        "barbarian",
+        "bard",
+        "cleric",
+        "druid",
+        "fighter",
+        "monk",
+        "paladin",
+        "ranger",
+        "rogue",
+        "sorcerer",
+        "warlock",
+        "wizard"
+      ]);
 
-      // Brackenvale uses only the modern 2024 / 5.5e PHB class compendium.
-      // The D&D system may also expose SRD or legacy class packs; those remain
-      // installed, but they are intentionally hidden from this picker.
-      const classPacks = Array.from(game.packs ?? []).filter((pack) => {
-        if (pack.documentName !== "Item") return false;
+      const candidates = [];
 
-        const collection = String(pack.collection ?? "").toLowerCase();
+      // Read all browseable Item packs, but enforce Brackenvale's class list
+      // ourselves instead of trusting Foundry's package labels.
+      for (const pack of game.packs ?? []) {
+        if (pack.documentName !== "Item") continue;
+
+        const label = String(
+          pack.metadata?.label
+            ?? pack.title
+            ?? pack.collection
+            ?? ""
+        ).trim();
+
+        const collection = String(pack.collection ?? "").trim();
         const packageName = String(
           pack.metadata?.packageName
             ?? pack.metadata?.package
             ?? pack.metadata?.packageId
             ?? ""
-        ).toLowerCase();
-        const label = String(
-          pack.metadata?.label
-            ?? pack.title
-            ?? ""
         ).trim();
 
-        const isPlayersHandbook =
-          collection.startsWith("dnd-players-handbook.")
-          || packageName === "dnd-players-handbook";
+        const sourceText = `${label} ${collection} ${packageName}`.toLowerCase();
 
-        return isPlayersHandbook && label === "Character Classes";
-      });
+        // Never allow SRD, legacy, or explicitly 2014 class sources into the
+        // Brackenvale picker.
+        if (
+          sourceText.includes("srd")
+          || sourceText.includes("legacy")
+          || sourceText.includes("2014")
+        ) {
+          continue;
+        }
 
-      for (const pack of classPacks) {
         try {
           const index = await pack.getIndex({fields: ["type"]});
+
           for (const entry of index) {
             if (entry.type !== "class") continue;
-            entries.push({
+
+            const key = String(entry.name ?? "").trim().toLowerCase();
+            if (!allowedClassNames.has(key)) continue;
+
+            let score = 0;
+
+            // Strongly prefer the modern PHB Character Classes pack.
+            if (label === "Character Classes") score += 100;
+            if (collection.toLowerCase().startsWith("dnd-players-handbook.")) score += 50;
+            if (packageName.toLowerCase() === "dnd-players-handbook") score += 50;
+
+            candidates.push({
+              key,
               name: entry.name,
               uuid: `Compendium.${pack.collection}.${entry._id}`,
-              source: "Player's Handbook"
+              source: label || "Character Classes",
+              score
             });
           }
         } catch (error) {
           console.debug(
-            `${MODULE_ID} | Could not read modern Character Classes compendium ${pack.collection}`,
+            `${MODULE_ID} | Skipping unavailable class compendium ${pack.collection}`,
             error
           );
         }
       }
 
-      // Deduplicate by class name in case the same PHB pack is exposed twice.
-      const unique = new Map();
-      for (const entry of entries) {
-        const key = String(entry.name ?? "").trim().toLowerCase();
-        if (!key || unique.has(key)) continue;
-        unique.set(key, entry);
+      // Exactly one entry per Brackenvale class. Highest-scoring modern source
+      // wins; ties are stable by source name/UUID.
+      const selectedByClass = new Map();
+
+      for (const candidate of candidates.sort((a, b) =>
+        b.score - a.score
+        || a.source.localeCompare(b.source)
+        || a.uuid.localeCompare(b.uuid)
+      )) {
+        if (!selectedByClass.has(candidate.key)) {
+          selectedByClass.set(candidate.key, candidate);
+        }
       }
 
-      const classes = Array.from(unique.values()).sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+      const canonicalOrder = [
+        "barbarian",
+        "bard",
+        "cleric",
+        "druid",
+        "fighter",
+        "monk",
+        "paladin",
+        "ranger",
+        "rogue",
+        "sorcerer",
+        "warlock",
+        "wizard"
+      ];
+
+      const classes = canonicalOrder
+        .map((key) => selectedByClass.get(key))
+        .filter(Boolean);
+
 
       if (!classes.length) {
         ui.notifications?.warn(
-          "No Character Classes pack from the dnd-players-handbook package was found. Make sure the Player's Handbook premium content is enabled."
+          "No modern 2024 / 5.5e class items were found after excluding SRD, legacy, and 2014 sources."
         );
         return;
       }
 
       const options = classes.map((entry) => `
         <option value="${foundry.utils.escapeHTML(entry.uuid)}">
-          ${foundry.utils.escapeHTML(entry.name)} — ${foundry.utils.escapeHTML(entry.source)}
+          ${foundry.utils.escapeHTML(entry.name)}
         </option>
       `).join("");
 
@@ -718,9 +774,9 @@ Hooks.once("init", () => {
               ${options}
             </select>
             <p class="hint">
-              Only the modern 2024 / 5.5e Player's Handbook classes are shown here.
-              Brackenvale stores the normal D&D Class item on the actor so class levels,
-              features, and advancement data remain system-managed.
+              Brackenvale shows one modern entry for each of the twelve 2024 / 5.5e classes.
+              SRD, legacy, and 2014 class sources are excluded.
+              Class levels, features, and advancement data remain D&D system-managed.
             </p>
           </form>
         `,
