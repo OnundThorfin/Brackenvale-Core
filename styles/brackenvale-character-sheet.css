@@ -70,8 +70,8 @@
   position: absolute;
   inset: 0;
   display: block;
-  width: 72%;
-  height: 72%;
+  width: 100%;
+  height: 100%;
   border: 0;
   object-fit: fill;
   pointer-events: none;
@@ -550,12 +550,11 @@
 .weapon-condition-overlay {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  align-items: center;
-  justify-items: center;
-  gap: 7%;
+  align-items: stretch;
+  gap: 0;
   min-width: 0;
   min-height: 0;
-  padding: 16% 7%;
+  padding: 5% 2%;
 }
 
 .weapon-condition-hitbox,
@@ -593,48 +592,880 @@
 }
 
 
-.equipped-defense-name,
-.equipped-defense-name:disabled {
-  appearance: none;
-  -webkit-appearance: none;
+/* =========================================================
+   Page 3 Equipment Regions
+   ========================================================= */
+
+.equipment-region {
+  z-index: 8;
+  overflow: hidden;
   padding: 0;
-  color: #171612;
-  font: inherit;
-  font-size: clamp(9px, 1vw, 13px);
-  font-style: italic;
+  pointer-events: auto;
+}
+
+.equipment-region-armor {
+  padding: 6.5% 2% 0 21%;
+}
+
+.equipment-region-weapons {
+  padding: 10% 2% 0 2%;
+}
+
+.equipment-region-worn {
+  padding: 10% 3% 0;
+}
+
+.equipment-region-packed-left,
+.equipment-region-packed-right {
+  display: block;
+  align-content: start;
+  padding: 11% 4% 0 2%;
+}
+
+.equipment-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 22px;
+}
+
+.equipment-defense-row {
+  position: absolute;
+  left: 21%;
+  right: 2%;
+  height: 24%;
+}
+
+.equipment-armor-row {
+  top: 22%;
+}
+
+.equipment-shield-row {
+  top: 58%;
+}
+
+.equipment-item-name,
+.equipment-item-name:disabled {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 16px 0 0;
+  overflow: hidden;
+  color: #111;
+  opacity: 1;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(10px, 1.15vw, 14px);
+  font-weight: 600;
+  line-height: 1;
   text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-  opacity: 1;
+}
+
+.equipment-item-name:hover,
+.equipment-item-name:focus-visible {
+  background: rgba(142, 114, 45, 0.14) !important;
+  outline: 1px solid rgba(95, 69, 22, 0.55);
+  outline-offset: -1px;
+}
+
+.equipment-delete {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  color: #6d1c1c;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 14px;
+  background: rgba(255, 255, 255, 0.68) !important;
+  border: 1px solid rgba(109, 28, 28, 0.45) !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  opacity: 0;
   cursor: pointer;
 }
 
-.defense-condition-bubble,
-.defense-condition-bubble:disabled {
-  appearance: none;
-  -webkit-appearance: none;
+.equipment-row:hover .equipment-delete,
+.equipment-delete:focus-visible {
+  opacity: 1;
+}
+
+.equipment-region[data-equipment-drop-zone] {
+  transition: background 100ms ease, outline 100ms ease;
+}
+
+.brackenvale-art-sheet.calibration-mode .equipment-region {
+  z-index: 40;
+  pointer-events: auto;
+}
+
+.brackenvale-art-sheet.calibration-mode .equipment-region * {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+
+/* Equipment manager v2 */
+.equipment-region .equipment-row {
+  justify-content: flex-start;
+}
+
+.equipment-region .equipment-item-name {
+  text-align: left !important;
+}
+
+.equipment-row[draggable="true"] {
+  cursor: grab;
+}
+
+.equipment-row[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+
+/* Equipment manager v3 fixes */
+.equipped-defense-name,
+.equipped-defense-name:disabled {
   display: block;
-  padding: 0;
-  box-sizing: border-box;
+  margin: 0;
+  padding: 0 3px;
+  overflow: hidden;
+  color: #171612;
+  opacity: 1;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(10px, 1.15vw, 14px);
+  font-weight: 600;
+  line-height: 1;
+  text-align: left !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  opacity: 1;
-  cursor: pointer;
 }
 
-.defense-condition-bubble.filled {
-  background: #171612 !important;
+.equipment-region,
+.equipment-region .equipment-row,
+.equipment-region .equipment-item-name {
+  text-align: left !important;
 }
 
-.brackenvale-art-sheet.calibration-mode .defense-condition-bubble,
-.brackenvale-art-sheet.calibration-mode .equipped-defense-name {
+.equipment-region .equipment-row {
+  justify-content: flex-start !important;
+}
+
+.equipment-region .equipment-item-name {
+  display: block !important;
+  width: 100%;
+  justify-content: flex-start !important;
+}
+
+
+/* Equipment manager v4 drag reliability */
+.equipment-item-name[draggable="true"] {
+  cursor: grab !important;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.equipment-item-name[draggable="true"]:active {
+  cursor: grabbing !important;
+}
+
+.equipment-region .equipment-item-name {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  padding-left: 0 !important;
+}
+
+
+/* Equipment repository repair */
+.equipment-region .equipment-row {
+  justify-content: flex-start !important;
+}
+
+.equipment-region .equipment-item-name,
+.equipment-region .equipment-item-name:disabled {
+  display: block !important;
+  flex: 1 1 auto;
+  width: auto !important;
+  min-width: 0;
+  padding: 0 16px 0 0 !important;
+  color: #111 !important;
+  opacity: 1 !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  cursor: grab !important;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.equipment-region .equipment-item-name.dragging {
+  opacity: 0.45 !important;
+  cursor: grabbing !important;
+}
+
+
+/* Equipment movement — pointer-based drag between Page 3 zones */
+.equipment-region.equipment-drag-target {
+  outline: 2px dashed rgba(40, 80, 40, 0.9) !important;
+  outline-offset: -2px;
+  background: rgba(60, 100, 60, 0.16) !important;
+}
+
+.brackenvale-equipment-drag-ghost {
+  position: fixed;
+  z-index: 100000;
+  max-width: 260px;
+  padding: 4px 8px;
+  overflow: hidden;
+  color: #171612;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  background: rgba(247, 245, 238, 0.97);
+  border: 1px solid rgba(39, 36, 31, 0.75);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.3);
+}
+
+.equipment-item-name[data-equipment-item-id] {
+  cursor: grab !important;
+  touch-action: none;
+}
+
+.equipment-item-name[data-equipment-item-id].dragging {
+  cursor: grabbing !important;
+  opacity: 0.45 !important;
+}
+
+
+
+
+/* Calibratable gear-slot overlays */
+.equipment-slot-only-region {
+  z-index: 9;
+  overflow: hidden;
+  padding: 0;
+  color: #171612;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(10px, 1.1vw, 14px);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
   pointer-events: none;
 }
 
-.brackenvale-mastery-dialog {
-  max-width: 34rem;
-  line-height: 1.5;
+.equipment-slot-only-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+}
+
+.equipment-slot-only-region.equipment-region-armor {
+  padding-top: 10%;
+}
+
+.equipment-slot-only-region.equipment-region-weapons {
+  padding-top: 11%;
+}
+
+.equipment-slot-only-region.equipment-region-worn {
+  padding-top: 10%;
+}
+
+.equipment-slot-only-region.equipment-region-packed-left,
+.equipment-slot-only-region.equipment-region-packed-right {
+  padding-top: 11%;
+}
+
+.slot-summary-field {
+  color: #171612 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: clamp(10px, 1.15vw, 14px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  pointer-events: none;
+}
+
+.brackenvale-art-sheet.calibration-mode .equipment-slot-only-region,
+.brackenvale-art-sheet.calibration-mode .slot-summary-field {
+  z-index: 40;
+  pointer-events: auto;
+}
+
+
+/* Slot columns must sit above the larger equipment regions during calibration. */
+.brackenvale-art-sheet.calibration-mode .equipment-slot-only-region {
+  z-index: 46 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  outline: 2px dashed rgba(34, 91, 170, 0.96) !important;
+  background: rgba(88, 157, 255, 0.32) !important;
+}
+
+/* Keep the slot values visible so the column can be aligned directly
+   against the item rows while calibrating. */
+.brackenvale-art-sheet.calibration-mode
+  .equipment-slot-only-region
+  .equipment-slot-only-row {
+  visibility: visible !important;
+  pointer-events: none !important;
+}
+
+/* Give the separate total box the same unmistakable calibration treatment. */
+.brackenvale-art-sheet.calibration-mode .slot-summary-field {
+  z-index: 46 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  outline: 2px dashed rgba(34, 91, 170, 0.96) !important;
+  background: rgba(88, 157, 255, 0.32) !important;
+}
+
+/* Selected slot overlays should clearly rise above every equipment box. */
+.brackenvale-art-sheet.calibration-mode
+  .equipment-slot-only-region.calibration-selected,
+.brackenvale-art-sheet.calibration-mode
+  .slot-summary-field.calibration-selected {
+  z-index: 55 !important;
+  outline: 3px solid #155fc2 !important;
+  background: rgba(88, 157, 255, 0.48) !important;
+}
+
+
+/* The slot overlays receive an explicit top-level hit surface in calibration. */
+.brackenvale-art-sheet.calibration-mode .equipment-slot-only-region::after,
+.brackenvale-art-sheet.calibration-mode .slot-summary-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  cursor: move;
+  pointer-events: none;
+}
+
+.brackenvale-art-sheet.calibration-mode .equipment-slot-only-region {
+  cursor: move !important;
+}
+
+
+/* Explicit slot-row positioning.
+   This prevents slot values from drifting toward the middle of a tall
+   calibrated column and guarantees both armor and shield rows remain visible. */
+.equipment-slot-only-region {
+  padding: 0 !important;
+}
+
+.equipment-slot-only-row {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Match the starting line of each corresponding equipment list. */
+.equipment-slot-only-region.equipment-region-weapons
+  .equipment-slot-only-row {
+  top: calc(10% + (var(--slot-row) * 22px));
+}
+
+.equipment-slot-only-region.equipment-region-worn
+  .equipment-slot-only-row {
+  top: calc(10% + (var(--slot-row) * 22px));
+}
+
+.equipment-slot-only-region.equipment-region-packed-left
+  .equipment-slot-only-row,
+.equipment-slot-only-region.equipment-region-packed-right
+  .equipment-slot-only-row {
+  top: calc(11% + (var(--slot-row) * 22px));
+}
+
+/* Armor and shield use fixed printed rows rather than the generic list rhythm. */
+.equipment-slot-only-region.equipment-region-armor
+  .equipment-slot-only-row:nth-child(1) {
+  top: 22%;
+  height: 24%;
+}
+
+.equipment-slot-only-region.equipment-region-armor
+  .equipment-slot-only-row:nth-child(2) {
+  top: 58%;
+  height: 24%;
+}
+
+
+/* =========================================================
+   Equipment Damage System v2
+   ========================================================= */
+
+.equipment-region.equipment-opaque-panel {
+  background: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+/* Main item panels sit above the sheet art but below values and controls. */
+.brackenvale-art-page[data-page="3"] .equipment-region.equipment-opaque-panel {
+  z-index: 2 !important;
+}
+
+/* Slot and damage overlays always remain above opaque item panels. */
+.equipment-slot-only-region,
+.equipment-damage-only-region,
+.slot-summary-field {
+  z-index: 12 !important;
+}
+
+.equipment-damage-only-region {
+  overflow: hidden;
+  padding: 0 !important;
+  pointer-events: auto;
+}
+
+.equipment-damage-only-row {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  padding: 0 4px 0 0;
+}
+
+/* Page 3 weapon damage uses the same row rhythm as the weapon list. */
+.brackenvale-art-page[data-page="3"]
+  .equipment-damage-only-region.equipment-region-weapons
+  .equipment-damage-only-row {
+  top: calc(10% + (var(--damage-row) * 22px));
+}
+
+/* Combined Page 3 armor/shield tracker follows its two printed rows. */
+.brackenvale-art-page[data-page="3"]
+  [data-component-key="equipment-damage-armor"]
+  .equipment-damage-only-row:nth-child(1) {
+  top: 22%;
+  height: 24%;
+}
+
+.brackenvale-art-page[data-page="3"]
+  [data-component-key="equipment-damage-armor"]
+  .equipment-damage-only-row:nth-child(2) {
+  top: 58%;
+  height: 24%;
+}
+
+/* Page 1 weapon conditions are a separate opaque, calibratable panel. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-weapon-condition"]
+  .equipment-damage-only-row {
+  top: calc(var(--damage-row) * 25%);
+  height: 25%;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Page 1 armor and shield each have their own component and calibration box. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"]
+  .equipment-damage-only-row,
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"]
+  .equipment-damage-only-row {
+  top: 0 !important;
+  height: 100% !important;
+  justify-content: center;
+  padding: 0;
+}
+
+.equipment-damage-pip {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  padding: 0;
+  border: 1.5px solid #171612;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.equipment-damage-pip.filled {
+  background: #171612;
+}
+
+/* Page 1 uses the square boxes printed on the artwork. */
+.brackenvale-art-page[data-page="1"] .equipment-damage-pip {
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  border-radius: 0;
+}
+
+.equipment-damage-only-row.broken::before {
+  content: "BROKEN";
+  margin-right: 4px;
+  color: #8a1919;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Calibration mode: every tracker is visible without hover. */
+.brackenvale-art-sheet.calibration-mode .equipment-damage-only-region {
+  z-index: 1000 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  cursor: move !important;
+  outline: 3px dashed rgba(155, 32, 32, 0.98) !important;
+  outline-offset: -2px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: inset 0 0 0 2px rgba(155, 32, 32, 0.22) !important;
+}
+
+.brackenvale-art-sheet.calibration-mode
+  .equipment-damage-only-region.calibration-selected {
+  z-index: 1100 !important;
+  outline: 4px solid #b00000 !important;
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 6px rgba(176, 0, 0, 0.92) !important;
+}
+
+.brackenvale-art-sheet.calibration-mode
+  .equipment-damage-only-region::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  z-index: 5;
+  max-width: calc(100% - 4px);
+  padding: 2px 4px;
+  overflow: hidden;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: rgba(107, 16, 16, 0.94);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.brackenvale-art-sheet.calibration-mode
+  .equipment-damage-only-region
+  .equipment-damage-only-row,
+.brackenvale-art-sheet.calibration-mode
+  .equipment-damage-only-region
+  .equipment-damage-pip {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+
+/* =========================================================
+   Page 3 lower section: currency, trade goods, and supplies
+   ========================================================= */
+
+.currency-field {
+  z-index: 14 !important;
+  padding: 0 3px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #4b4b43 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
+}
+
+.flag-text-area.trade-goods-field {
+  z-index: 14 !important;
+  resize: none;
+  overflow: hidden;
+  padding: 2px 4px;
+  border: 0 !important;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 20px,
+      rgba(50, 50, 45, 0.35) 20px,
+      rgba(50, 50, 45, 0.35) 21px
+    ),
+    #ffffff !important;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  line-height: 21px;
+}
+
+.supply-widget {
+  z-index: 14 !important;
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  overflow: hidden;
+  padding: 0;
+  background: #ffffff !important;
+}
+
+.supply-widget-row {
+  display: grid;
+  grid-template-columns: 1fr 76px;
+  align-items: center;
+  min-height: 0;
+  border-bottom: 1px solid rgba(50, 50, 45, 0.38);
+}
+
+.supply-widget-row:last-child {
+  border-bottom: 0;
+}
+
+.supply-roll-name {
+  display: none;
+}
+
+.supply-name-input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.supply-die-select {
+  width: 100%;
+  height: 100%;
+  padding: 0 2px;
+  border: 0;
+  border-left: 1px solid rgba(50, 50, 45, 0.38);
+  border-radius: 0;
+  background: #ffffff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Clicking the written supply name rolls it. The invisible roll button
+   is stretched over the name cell while the text field remains usable
+   by double-clicking/focusing it. */
+.supply-widget-row {
+  position: relative;
+}
+
+.supply-roll-name {
+  position: absolute;
+  inset: 0 76px 0 0;
+  z-index: 2;
+  display: block;
+  overflow: hidden;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+}
+
+.supply-name-input {
+  position: relative;
+  z-index: 1;
+}
+
+.supply-name-input:focus {
+  z-index: 3;
+  background: #ffffff;
+  outline: 1px solid rgba(80, 80, 70, 0.45);
+}
+
+/* Calibration visibility. */
+.brackenvale-art-sheet.calibration-mode .supply-widget,
+.brackenvale-art-sheet.calibration-mode .flag-text-area {
+  z-index: 1000 !important;
+  outline: 3px dashed rgba(155, 32, 32, 0.98) !important;
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  cursor: move !important;
+}
+
+.brackenvale-art-sheet.calibration-mode .supply-widget *,
+.brackenvale-art-sheet.calibration-mode .flag-text-area {
+  pointer-events: none !important;
+}
+
+
+/* 0.5.4-test.45: linked Supply Dice drop target */
+.supply-widget.supply-drag-target,
+.supply-widget.equipment-drag-target {
+  outline: 2px dashed rgba(40, 80, 40, 0.85) !important;
+  background: rgba(238, 248, 238, 0.98) !important;
+}
+
+.supply-widget-row.linked-supply .supply-name-input {
+  font-weight: 700;
+}
+
+.supply-widget-row.linked-supply .supply-name-input[readonly] {
+  cursor: default;
+}
+
+/* Widened Page 1 opaque condition panels retain compact pip placement. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"]
+  .equipment-damage-only-row,
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"]
+  .equipment-damage-only-row {
+  justify-content: flex-start;
+  padding-left: 12%;
+}
+
+
+/* 0.5.4-test.48: readable linked supplies and destructive controls */
+.supply-widget-row {
+  grid-template-columns: minmax(0, 1fr) 64px 20px !important;
+}
+
+.supply-widget-row.linked-supply .supply-name-input,
+.supply-name-input,
+.supply-name-input[readonly],
+.supply-name-input:disabled {
+  color: #171612 !important;
+  -webkit-text-fill-color: #171612 !important;
+  opacity: 1 !important;
+}
+
+.supply-die-select,
+.supply-die-select:focus,
+.supply-die-select option {
+  color: #171612 !important;
+  background: #ffffff !important;
+  -webkit-text-fill-color: #171612 !important;
+  opacity: 1 !important;
+  color-scheme: light !important;
+}
+
+.supply-delete {
+  width: 20px;
+  height: 100%;
+  min-width: 20px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid rgba(50, 50, 45, 0.38);
+  border-radius: 0;
+  background: #ffffff;
+  color: #a51414;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.supply-delete:hover,
+.supply-delete:focus {
+  background: #f7e8e8;
+  color: #7e0000;
+}
+
+.supply-roll-name {
+  right: 84px !important;
+}
+
+
+/* 0.5.4-test.49: Page 1 defense-condition masks.
+   These alter only overlay panels; sheet artwork remains untouched. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"],
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"] {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 6px #ffffff !important;
+}
+
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"]
+  .equipment-damage-only-row,
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"]
+  .equipment-damage-only-row {
+  justify-content: flex-start !important;
+  padding-left: 9% !important;
+}
+
+
+/* 0.5.4-test.50: fully mask the printed defense condition boxes.
+   Only the interactive overlay changes; the sheet artwork is untouched. */
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"],
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"] {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 10px #ffffff !important;
+  overflow: visible !important;
+}
+
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-armor-condition"]
+  .equipment-damage-only-row,
+.brackenvale-art-page[data-page="1"]
+  [data-component-key="page1-shield-condition"]
+  .equipment-damage-only-row {
+  z-index: 2;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+
+/* 0.5.4-test.52: Brackenvale critical-damage dialog */
+.brackenvale-damage-dialog .form-group {
+  margin: 0.65rem 0;
+}
+
+.brackenvale-damage-dialog input {
+  width: 100%;
+}
+
+.brackenvale-damage-dialog .hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+
+/* 0.5.4-test.53: native D&D class integration */
+.item-summary-field[data-component-key="classLevel"] {
+  cursor: pointer;
+}
+
+.item-summary-field[data-component-key="classLevel"].class-drop-target {
+  background: rgba(236, 246, 230, 0.94) !important;
+  outline: 2px dashed rgba(45, 92, 45, 0.9) !important;
+  outline-offset: 1px;
 }

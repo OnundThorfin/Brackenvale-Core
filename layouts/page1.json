@@ -688,6 +688,47 @@
       "top": 41.09157986111111,
       "width": 29.2,
       "height": 2
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "page1-weapon-condition",
+      "label": "Weapon Conditions",
+      "region": "weapons",
+      "sourceRegion": "weapons",
+      "displayMode": "damage",
+      "opaquePanel": true,
+      "left": 79.72081032018514,
+      "top": 84.8075,
+      "width": 13.7,
+      "height": 12.25
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "page1-armor-condition",
+      "label": "Armor Condition",
+      "region": "armor",
+      "sourceRegion": "armor",
+      "displayMode": "damage",
+      "itemRole": "armor",
+      "opaquePanel": true,
+      "left": 70.5,
+      "top": 34.650141571014395,
+      "width": 22.5,
+      "height": 3.2
+    },
+    {
+      "component": "equipmentRegion",
+      "key": "page1-shield-condition",
+      "label": "Shield Condition",
+      "region": "armor",
+      "sourceRegion": "armor",
+      "displayMode": "damage",
+      "itemRole": "shield",
+      "opaquePanel": true,
+      "left": 70.5,
+      "top": 43.96670114104542,
+      "width": 22.5,
+      "height": 3.2
     }
   ]
 }

@@ -5,6 +5,12 @@
  */
 
 import { prepareSheetComponent } from "./sheet-components.js";
+import {
+  deleteEquipmentItem,
+  isArmorOrShieldItem,
+  placeEquipmentItem,
+  setEquipmentDamage
+} from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
 const TEMPLATE_PATH =
@@ -13,7 +19,7 @@ const LAYOUT_ROOT =
   "modules/brackenvale-core/layouts";
 
 Hooks.once("init", () => {
-  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet`);
+  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet (equipment repository repair)`);
 
   const CharacterActorSheet =
     game.dnd5e?.applications?.actor?.CharacterActorSheet;
@@ -52,6 +58,7 @@ Hooks.once("init", () => {
     _workingLayouts = null;
     _calibrationMode = false;
     _selectedCalibrationField = null;
+    _activePage = 1;
 
     async _prepareContext(options) {
       const context = await super._prepareContext(options);
@@ -69,9 +76,10 @@ Hooks.once("init", () => {
       context.editable = editable;
       context.isGM = Boolean(game.user?.isGM);
       context.calibrationMode = this._calibrationMode;
-      context.pages = this._workingLayouts.map((layout, index) => ({
+
+      context.pages = this._workingLayouts.map((layout) => ({
         ...layout,
-        active: index === 0,
+        active: Number(layout.page) === Number(this._activePage),
         components: layout.components.map((component) =>
           prepareSheetComponent(
             component,
@@ -108,13 +116,12 @@ Hooks.once("init", () => {
     }
 
     _onRender(context, options) {
-      super._onRender(context, options);
-
       const root = this.element;
       if (!root) return;
 
       this._activateArtworkPageTabs(root);
       this._activateItemEditors(root);
+      this._activateClassIntegration(root);
       this._activateNativeDataBindings(root);
       this._activateCalibrationControls(root);
       this._activateAbilityRolls(root);
@@ -122,7 +129,319 @@ Hooks.once("init", () => {
       this._activateDeathSaveControls(root);
       this._activateHitDiceControls(root);
       this._activateWeaponControls(root);
+      this._activateEquipmentDamageControls(root);
+      this._activateEquipmentDropZones(root);
+      this._activateEquipmentControls(root);
+      this._activateEquipmentDragging(root);
+      this._activateSupplyControls(root);
+      this._activateFlagTextAreas(root);
     }
+    _activateSupplyControls(root) {
+      const getRows = () => {
+        const stored = foundry.utils.getProperty(
+          this.actor,
+          `flags.${MODULE_ID}.supplyDice`
+        );
+        return Array.from({length: 5}, (_, index) => ({
+          name: String(stored?.[index]?.name ?? ""),
+          itemId: String(stored?.[index]?.itemId ?? ""),
+          die: ["d12", "d10", "d8", "d6", "d4", "empty"].includes(stored?.[index]?.die)
+            ? stored[index].die
+            : "empty"
+        }));
+      };
+
+      const saveRows = async (rows) => {
+        await this.actor.update({
+          [`flags.${MODULE_ID}.supplyDice`]: rows
+        });
+        this.render();
+      };
+
+      const clearSupplyRow = () => ({
+        name: "",
+        itemId: "",
+        die: "empty"
+      });
+
+      const deleteSupply = async (index, {confirm = true} = {}) => {
+        const rows = getRows();
+        const row = rows[index];
+        if (!row) return false;
+
+        const supplyName = row.name || "this supply";
+        if (confirm) {
+          let approved = false;
+          const DialogV2 = foundry.applications?.api?.DialogV2;
+          if (DialogV2?.confirm) {
+            approved = await DialogV2.confirm({
+              window: {title: "Delete Supply Item"},
+              content: `<p>Delete <strong>${foundry.utils.escapeHTML(supplyName)}</strong> from Supplies and from the character's inventory?</p>`,
+              yes: {label: "Delete"},
+              no: {label: "Cancel"},
+              modal: true
+            });
+          } else {
+            approved = window.confirm(
+              `Delete ${supplyName} from Supplies and from the character's inventory?`
+            );
+          }
+          if (!approved) return false;
+        }
+
+        const linkedItem = row.itemId
+          ? this.actor.items.get(row.itemId) ?? null
+          : null;
+
+        rows[index] = clearSupplyRow();
+
+        if (linkedItem) {
+          await linkedItem.delete();
+        }
+
+        await this.actor.update({
+          [`flags.${MODULE_ID}.supplyDice`]: rows
+        });
+
+        this.render();
+        return true;
+      };
+
+      const supplyZone = root.querySelector("[data-supply-drop-zone]");
+      if (supplyZone) {
+        const clearSupplyHighlight = () => {
+          supplyZone.classList.remove("supply-drag-target");
+        };
+
+        supplyZone.addEventListener("dragenter", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          supplyZone.classList.add("supply-drag-target");
+        });
+
+        supplyZone.addEventListener("dragover", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = "link";
+        });
+
+        supplyZone.addEventListener("dragleave", (event) => {
+          if (supplyZone.contains(event.relatedTarget)) return;
+          clearSupplyHighlight();
+        });
+
+        supplyZone.addEventListener("drop", async (event) => {
+          clearSupplyHighlight();
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          let data = null;
+          const raw = event.dataTransfer?.getData("application/json")
+            || event.dataTransfer?.getData("text/plain");
+          if (raw) {
+            try {
+              data = JSON.parse(raw);
+            } catch (_error) {
+              data = null;
+            }
+          }
+          if (data) await this._handleSupplyDrop(data);
+        });
+      }
+
+      for (const input of root.querySelectorAll(
+        "[data-action='edit-supply-name']"
+      )) {
+        input.addEventListener("change", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+
+          const rows = getRows();
+          if (rows[index].itemId) return;
+          rows[index].name = event.currentTarget.value.trim();
+          await saveRows(rows);
+        });
+      }
+
+      for (const select of root.querySelectorAll(
+        "[data-action='set-supply-die']"
+      )) {
+        select.addEventListener("change", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+
+          const rows = getRows();
+          const nextDie = event.currentTarget.value;
+
+          if (nextDie === "empty") {
+            await deleteSupply(index, {confirm: false});
+            return;
+          }
+
+          rows[index].die = nextDie;
+          await saveRows(rows);
+        });
+      }
+
+      for (const button of root.querySelectorAll(
+        "[data-action='delete-supply']"
+      )) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+          await deleteSupply(index, {confirm: true});
+        });
+      }
+
+      for (const button of root.querySelectorAll(
+        "[data-action='roll-supply-die']"
+      )) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+
+          const index = Number(event.currentTarget.dataset.supplyIndex);
+          if (!Number.isInteger(index)) return;
+
+          const rows = getRows();
+          const row = rows[index];
+          const supplyName = row.name || "Supply";
+
+          if (row.die === "empty") {
+            ui.notifications.warn(`${supplyName} is exhausted.`);
+            return;
+          }
+
+          const faces = Number(row.die.slice(1));
+          const roll = await (new Roll(`1d${faces}`)).evaluate();
+          const result = Number(roll.total);
+          const steps = ["d12", "d10", "d8", "d6", "d4", "empty"];
+          const currentIndex = steps.indexOf(row.die);
+          let nextDie = row.die;
+
+          if (result <= 2) {
+            nextDie = steps[Math.min(currentIndex + 1, steps.length - 1)];
+            rows[index].die = nextDie;
+            if (nextDie !== "empty") {
+              await this.actor.update({
+                [`flags.${MODULE_ID}.supplyDice`]: rows
+              });
+            }
+          }
+
+          const outcome = result <= 2
+            ? nextDie === "empty"
+              ? `${supplyName} is exhausted and has been removed from inventory.`
+              : `${supplyName} decreases to ${nextDie}.`
+            : `${supplyName} remains at ${row.die}.`;
+
+          await roll.toMessage({
+            speaker: ChatMessage.getSpeaker({actor: this.actor}),
+            flavor: `<strong>${supplyName} Supply Die</strong><br>${outcome}`
+          });
+
+          if (nextDie === "empty") {
+            await deleteSupply(index, {confirm: false});
+          } else {
+            this.render();
+          }
+        });
+      }
+    }
+
+    async _handleSupplyDrop(data) {
+      if (!data || data.type !== "Item") {
+        ui.notifications?.warn("Only items can be tracked as supplies.");
+        return;
+      }
+
+      let item = data.id ? this.actor.items.get(data.id) ?? null : null;
+      if (!item && data.uuid) {
+        const source = await fromUuid(data.uuid);
+        if (source?.parent === this.actor) {
+          item = source;
+        } else if (source?.documentName === "Item") {
+          const itemData = source.toObject();
+          delete itemData._id;
+          [item] = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        }
+      }
+
+      if (!item) {
+        ui.notifications?.warn("Brackenvale could not find that supply item.");
+        return;
+      }
+
+      const stored = foundry.utils.getProperty(
+        this.actor,
+        `flags.${MODULE_ID}.supplyDice`
+      );
+      const rows = Array.from({length: 5}, (_, index) => ({
+        name: String(stored?.[index]?.name ?? ""),
+        itemId: String(stored?.[index]?.itemId ?? ""),
+        die: ["d12", "d10", "d8", "d6", "d4", "empty"].includes(stored?.[index]?.die)
+          ? stored[index].die
+          : "empty"
+      }));
+
+      const existingIndex = rows.findIndex((row) => row.itemId === item.id);
+      if (existingIndex >= 0) {
+        ui.notifications?.info(`${item.name} is already tracked as a Supply Die.`);
+        return;
+      }
+
+      const emptyIndex = rows.findIndex(
+        (row) => !row.itemId && !row.name && row.die === "empty"
+      );
+      if (emptyIndex < 0) {
+        ui.notifications?.warn("All Supply rows are currently in use.");
+        return;
+      }
+
+      rows[emptyIndex] = {
+        name: item.name,
+        itemId: item.id,
+        die: "d12"
+      };
+
+      await item.update({
+        [`flags.${MODULE_ID}.supplyTracked`]: true,
+        [`flags.${MODULE_ID}.slots`]: 1
+      });
+
+      await this.actor.update({
+        [`flags.${MODULE_ID}.supplyDice`]: rows
+      });
+
+      ui.notifications?.info(`${item.name} is now tracked as a d12 Supply Die.`);
+      this._activePage = 3;
+      this.render();
+    }
+
+    _activateFlagTextAreas(root) {
+      for (const field of root.querySelectorAll(
+        "textarea[data-flag-name]"
+      )) {
+        field.addEventListener("change", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          const flagName = event.currentTarget.dataset.flagName;
+          if (!flagName) return;
+
+          await this.actor.update({
+            [`flags.${MODULE_ID}.${flagName}`]: event.currentTarget.value
+          });
+        });
+      }
+    }
+
     _activateArtworkPageTabs(root) {
       const buttons = root.querySelectorAll(
         ".brackenvale-page-tabs [data-page]"
@@ -135,6 +454,7 @@ Hooks.once("init", () => {
         button.addEventListener("click", (event) => {
           event.preventDefault();
           const selectedPage = button.dataset.page;
+          this._activePage = Number(selectedPage);
 
           for (const tabButton of buttons) {
             tabButton.classList.toggle("active", tabButton === button);
@@ -149,6 +469,114 @@ Hooks.once("init", () => {
         });
       }
     }
+
+    _activateClassIntegration(root) {
+      const field = root.querySelector('[data-component-key="classLevel"]');
+      if (!field) return;
+
+      const clearHighlight = () => {
+        field.classList.remove("class-drop-target");
+      };
+
+      field.addEventListener("dragenter", (event) => {
+        if (this._calibrationMode || !this.isEditable) return;
+        event.preventDefault();
+        field.classList.add("class-drop-target");
+      });
+
+      field.addEventListener("dragover", (event) => {
+        if (this._calibrationMode || !this.isEditable) return;
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+      });
+
+      field.addEventListener("dragleave", (event) => {
+        if (field.contains(event.relatedTarget)) return;
+        clearHighlight();
+      });
+
+      field.addEventListener("drop", async (event) => {
+        clearHighlight();
+        if (this._calibrationMode || !this.isEditable) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        try {
+          let data = null;
+          const raw = event.dataTransfer?.getData("application/json")
+            || event.dataTransfer?.getData("text/plain");
+
+          if (raw) {
+            try {
+              data = JSON.parse(raw);
+            } catch (_error) {
+              data = null;
+            }
+          }
+
+          if (!data || data.type !== "Item") {
+            ui.notifications?.warn("Drop a D&D Class item onto Class & Level.");
+            return;
+          }
+
+          let sourceItem = null;
+          if (data.id) sourceItem = this.actor.items.get(data.id) ?? null;
+          if (!sourceItem && data.uuid) sourceItem = await fromUuid(data.uuid);
+
+          if (!sourceItem || sourceItem.type !== "class") {
+            ui.notifications?.warn("Only Class items can be dropped onto Class & Level.");
+            return;
+          }
+
+          // Prefer the native D&D actor-sheet drop handler so class
+          // advancements, HP, features, and multiclass logic remain native.
+          const nativeDrop = Object.getPrototypeOf(
+            Object.getPrototypeOf(this)
+          )?._onDrop;
+
+          if (typeof nativeDrop === "function") {
+            await nativeDrop.call(this, event);
+            this.render();
+            return;
+          }
+
+          // Compatibility fallback if D&D changes the private drop handler.
+          if (sourceItem.parent === this.actor) {
+            ui.notifications?.info(`${sourceItem.name} is already on this character.`);
+            return;
+          }
+
+          const itemData = sourceItem.toObject();
+          delete itemData._id;
+          await this.actor.createEmbeddedDocuments("Item", [itemData]);
+          ui.notifications?.info(`${sourceItem.name} added to ${this.actor.name}.`);
+          this.render();
+        } catch (error) {
+          console.error(`${MODULE_ID} | Could not add class`, error);
+          ui.notifications?.error(
+            "Brackenvale could not add that class. Open the console for details."
+          );
+        }
+      });
+
+      // A single click on an existing Class & Level field opens the native
+      // class item. Empty fields retain the printed "Add a class" prompt.
+      field.addEventListener("click", (event) => {
+        if (this._calibrationMode) return;
+        const itemId = field.dataset.itemId;
+        if (!itemId) {
+          ui.notifications?.info(
+            "Drag a D&D Class item from the Items or Compendium sidebar onto Class & Level."
+          );
+          return;
+        }
+
+        event.preventDefault();
+        this.actor.items.get(itemId)?.sheet?.render(true);
+      });
+    }
+
 
     _activateNativeDataBindings(root) {
       const fields = root.querySelectorAll(
@@ -333,6 +761,102 @@ Hooks.once("init", () => {
       }
     }
 
+    _buildBrackenvaleCriticalFormula(formula) {
+      const normalized = String(formula ?? "")
+        .replace(/−/g, "-")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (!normalized) return "";
+
+      let maximumDice = 0;
+      normalized.replace(/(\d*)d(\d+)/gi, (_match, rawCount, rawFaces) => {
+        const count = rawCount ? Number(rawCount) : 1;
+        const faces = Number(rawFaces);
+        if (Number.isFinite(count) && Number.isFinite(faces)) {
+          maximumDice += count * faces;
+        }
+        return _match;
+      });
+
+      return maximumDice > 0
+        ? `${normalized} + ${maximumDice}`
+        : normalized;
+    }
+
+    async _promptBrackenvaleDamageRoll(item, baseFormula) {
+      const DialogV2 = foundry.applications?.api?.DialogV2;
+      const safeName = foundry.utils.escapeHTML(item.name);
+      let result = null;
+
+      if (DialogV2?.wait) {
+        result = await DialogV2.wait({
+          window: {title: `${item.name} Damage`},
+          content: `
+            <form class="brackenvale-damage-dialog">
+              <p><strong>${safeName}</strong></p>
+              <div class="form-group">
+                <label>Base Damage</label>
+                <input type="text" name="baseFormula" value="${foundry.utils.escapeHTML(baseFormula)}" readonly>
+              </div>
+              <div class="form-group">
+                <label>Extra Damage Dice</label>
+                <input type="text" name="extraFormula" placeholder="For example: 3d6 or 3d8">
+                <p class="hint">Sneak Attack, Divine Smite, spell, magic-item, or other attack damage dice.</p>
+              </div>
+            </form>
+          `,
+          buttons: [
+            {
+              action: "normal",
+              label: "Normal Damage",
+              default: true,
+              callback: (_event, button) => ({
+                mode: "normal",
+                extra: button.form?.elements?.extraFormula?.value ?? ""
+              })
+            },
+            {
+              action: "critical",
+              label: "Critical Damage",
+              callback: (_event, button) => ({
+                mode: "critical",
+                extra: button.form?.elements?.extraFormula?.value ?? ""
+              })
+            },
+            {
+              action: "cancel",
+              label: "Cancel",
+              callback: () => null
+            }
+          ],
+          close: () => null,
+          modal: true
+        });
+      } else {
+        const critical = window.confirm(
+          `Roll ${item.name} as critical damage?\n\nChoose OK for Critical or Cancel for Normal.`
+        );
+        result = {mode: critical ? "critical" : "normal", extra: ""};
+      }
+
+      if (!result) return null;
+
+      const extra = String(result.extra ?? "")
+        .replace(/−/g, "-")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const combined = extra
+        ? `(${baseFormula}) + (${extra})`
+        : baseFormula;
+
+      return result.mode === "critical"
+        ? this._buildBrackenvaleCriticalFormula(combined)
+        : combined;
+    }
+
+
     _activateWeaponControls(root) {
       for (const button of root.querySelectorAll("[data-action='show-weapon-mastery']")) {
         button.addEventListener("click", async (event) => {
@@ -399,10 +923,60 @@ Hooks.once("init", () => {
           const item = this.actor.items.get(itemId);
           if (!item) return;
 
-          if (typeof item.use === "function") {
-            await item.use();
-          } else {
-            item.sheet?.render(true);
+          const conditionPenalty = Number(
+            foundry.utils.getProperty(
+              item,
+              `flags.${MODULE_ID}.equipmentDamage`
+            ) ?? 0
+          );
+
+          let penaltyEffect = null;
+
+          try {
+            if (conditionPenalty > 0) {
+              [penaltyEffect] = await this.actor.createEmbeddedDocuments(
+                "ActiveEffect",
+                [{
+                  name: `${item.name} Condition Penalty`,
+                  icon: item.img ?? "icons/svg/sword.svg",
+                  disabled: false,
+                  transfer: false,
+                  changes: [
+                    {
+                      key: "system.bonuses.mwak.attack",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: `-${conditionPenalty}`,
+                      priority: 100
+                    },
+                    {
+                      key: "system.bonuses.rwak.attack",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: `-${conditionPenalty}`,
+                      priority: 100
+                    }
+                  ],
+                  flags: {
+                    [MODULE_ID]: {
+                      temporaryWeaponCondition: true,
+                      itemId: item.id
+                    }
+                  }
+                }]
+              );
+            }
+
+            if (typeof item.use === "function") {
+              await item.use();
+            } else {
+              item.sheet?.render(true);
+            }
+          } finally {
+            if (penaltyEffect?.id && this.actor.effects?.get(penaltyEffect.id)) {
+              await this.actor.deleteEmbeddedDocuments(
+                "ActiveEffect",
+                [penaltyEffect.id]
+              );
+            }
           }
         });
       }
@@ -418,34 +992,342 @@ Hooks.once("init", () => {
           const item = this.actor.items.get(itemId);
           if (!item) return;
 
-          const activities = foundry.utils.getProperty(item, "system.activities");
-          let attackActivity = null;
+          const displayed = String(button.textContent ?? "").trim();
+          const baseFormula = displayed
+            .replace(/−/g, "-")
+            .replace(/\s+/g, " ")
+            .trim();
 
-          if (typeof activities?.getByType === "function") {
-            attackActivity = activities.getByType("attack")?.[0] ?? null;
-          }
-
-          if (!attackActivity && typeof activities?.values === "function") {
-            attackActivity = Array.from(activities.values()).find(
-              (activity) => typeof activity?.rollDamage === "function"
-            ) ?? null;
-          }
-
-          if (!attackActivity && activities && typeof activities === "object") {
-            attackActivity = Object.values(activities).find(
-              (activity) => typeof activity?.rollDamage === "function"
-            ) ?? null;
-          }
-
-          if (typeof attackActivity?.rollDamage === "function") {
-            await attackActivity.rollDamage({event});
+          if (!baseFormula) {
+            ui.notifications?.warn(`${item.name} does not expose a damage formula.`);
+            item.sheet?.render(true);
             return;
           }
 
-          ui.notifications?.warn(
-            `${item.name} does not expose a damage activity. Open the weapon item to review its activities.`
+          const formula = await this._promptBrackenvaleDamageRoll(
+            item,
+            baseFormula
           );
-          item.sheet?.render(true);
+          if (!formula) return;
+
+          try {
+            const roll = await (new Roll(formula)).evaluate();
+            const isCritical = formula !== baseFormula
+              && formula.includes(this._buildBrackenvaleCriticalFormula(baseFormula).split("+").at(-1)?.trim() ?? "");
+
+            await roll.toMessage({
+              speaker: ChatMessage.getSpeaker({actor: this.actor}),
+              flavor: `<strong>${foundry.utils.escapeHTML(item.name)} Damage</strong><br>${isCritical ? "Brackenvale critical damage" : "Damage roll"}`
+            });
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not roll Brackenvale damage`, error);
+            ui.notifications?.warn(
+              `${item.name}'s damage formula could not be rolled.`
+            );
+            item.sheet?.render(true);
+          }
+        });
+      }
+    }
+
+
+    _activateEquipmentDamageControls(root) {
+      for (const button of root.querySelectorAll(
+        "[data-action='set-equipment-damage']"
+      )) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const item = this.actor.items.get(button.dataset.itemId);
+          if (!item) return;
+
+          await setEquipmentDamage(
+            item,
+            Number(button.dataset.value),
+            MODULE_ID
+          );
+          this.render();
+        });
+      }
+    }
+
+    _activateEquipmentDropZones(root) {
+      const zones = root.querySelectorAll("[data-equipment-drop-zone]");
+
+      for (const zone of zones) {
+        const clearHighlight = () => {
+          zone.style.background = "transparent";
+          zone.style.outline = "none";
+        };
+
+        zone.addEventListener("dragenter", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          zone.style.background = "rgba(60, 100, 60, 0.12)";
+          zone.style.outline = "2px dashed rgba(40, 80, 40, 0.75)";
+        });
+
+        zone.addEventListener("dragover", (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+          event.preventDefault();
+          if (event.dataTransfer) {
+            const raw = event.dataTransfer.getData("application/json")
+              || event.dataTransfer.getData("text/plain");
+            event.dataTransfer.dropEffect = raw?.includes("brackenvaleOwnedItem")
+              ? "move"
+              : "copy";
+          }
+        });
+
+        zone.addEventListener("dragleave", (event) => {
+          if (zone.contains(event.relatedTarget)) return;
+          clearHighlight();
+        });
+
+        zone.addEventListener("drop", async (event) => {
+          clearHighlight();
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          try {
+            let data = null;
+
+            if (event.dataTransfer) {
+              const raw =
+                event.dataTransfer.getData("application/json")
+                || event.dataTransfer.getData("text/plain");
+
+              if (raw) {
+                try {
+                  data = JSON.parse(raw);
+                } catch (_error) {
+                  data = null;
+                }
+              }
+            }
+
+            if (!data?.type) return;
+
+            await this._handleEquipmentDrop(
+              data,
+              zone.dataset.equipmentDropZone
+            );
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not process equipment drop`, error);
+            ui.notifications?.error("Brackenvale could not add that item.");
+          }
+        });
+      }
+    }
+
+    async _handleEquipmentDrop(data, zoneType) {
+      if (!data || data.type !== "Item") {
+        ui.notifications?.warn("Only items can be dropped into equipment sections.");
+        return;
+      }
+
+      let sourceItem = null;
+
+      if (data.id) {
+        sourceItem = this.actor.items.get(data.id) ?? null;
+      }
+
+      if (!sourceItem && data.uuid) {
+        sourceItem = await fromUuid(data.uuid);
+      }
+
+      if (!sourceItem) {
+        ui.notifications?.warn("Brackenvale could not find the dropped item.");
+        return;
+      }
+
+      if (zoneType === "weapons" && sourceItem.type !== "weapon") {
+        ui.notifications?.warn("Only weapons can be dropped into the Weapons section.");
+        return;
+      }
+
+      if (zoneType === "armor" && !isArmorOrShieldItem(sourceItem)) {
+        ui.notifications?.warn("Only armor or shields can be dropped into the Armor & Shield section.");
+        return;
+      }
+
+      await placeEquipmentItem(this.actor, sourceItem, zoneType, MODULE_ID);
+
+      const sectionName = {
+        armor: "Armor & Shield",
+        weapons: "Weapons",
+        worn: "Worn Equipment",
+        "packed-left": "Packed Gear",
+        "packed-right": "Packed Gear"
+      }[zoneType] ?? "Equipment";
+
+      ui.notifications?.info(`${sourceItem.name} added to ${sectionName}.`);
+      this._activePage = 3;
+    }
+
+
+
+    _activateEquipmentDragging(root) {
+      const handles = root.querySelectorAll(
+        ".equipment-item-name[data-equipment-item-id]"
+      );
+
+      for (const handle of handles) {
+        handle.draggable = false;
+
+        handle.addEventListener("pointerdown", (event) => {
+          if (
+            this._calibrationMode
+            || !this.isEditable
+            || event.button !== 0
+          ) {
+            return;
+          }
+
+          const itemId = handle.dataset.equipmentItemId;
+          const item = this.actor.items.get(itemId);
+          if (!item) return;
+
+          const startX = event.clientX;
+          const startY = event.clientY;
+          let dragging = false;
+          let targetZone = null;
+
+          const ghost = document.createElement("div");
+          ghost.className = "brackenvale-equipment-drag-ghost";
+          ghost.textContent = item.name;
+
+          const clearTarget = () => {
+            targetZone?.classList.remove("equipment-drag-target");
+            targetZone = null;
+          };
+
+          const findTarget = (clientX, clientY) => {
+            const element = document.elementFromPoint(clientX, clientY);
+            return element?.closest?.(
+              "[data-equipment-drop-zone], [data-supply-drop-zone]"
+            ) ?? null;
+          };
+
+          const moveGhost = (clientX, clientY) => {
+            ghost.style.left = `${clientX + 12}px`;
+            ghost.style.top = `${clientY + 12}px`;
+          };
+
+          const onPointerMove = (moveEvent) => {
+            const distance = Math.hypot(
+              moveEvent.clientX - startX,
+              moveEvent.clientY - startY
+            );
+
+            if (!dragging && distance < 6) return;
+
+            if (!dragging) {
+              dragging = true;
+              handle.classList.add("dragging");
+              document.body.append(ghost);
+            }
+
+            moveEvent.preventDefault();
+            moveGhost(moveEvent.clientX, moveEvent.clientY);
+
+            const nextTarget = findTarget(
+              moveEvent.clientX,
+              moveEvent.clientY
+            );
+
+            if (nextTarget !== targetZone) {
+              clearTarget();
+              targetZone = nextTarget;
+              targetZone?.classList.add("equipment-drag-target");
+            }
+          };
+
+          const finish = async (upEvent) => {
+            window.removeEventListener("pointermove", onPointerMove, true);
+            window.removeEventListener("pointerup", finish, true);
+            window.removeEventListener("pointercancel", cancel, true);
+
+            handle.classList.remove("dragging");
+            ghost.remove();
+
+            const finalTarget = dragging
+              ? findTarget(upEvent.clientX, upEvent.clientY)
+              : null;
+
+            clearTarget();
+
+            if (!dragging || !finalTarget) return;
+
+            upEvent.preventDefault();
+            upEvent.stopPropagation();
+
+            try {
+              const dropData = {
+                type: "Item",
+                id: item.id,
+                uuid: item.uuid,
+                actorId: this.actor.id,
+                brackenvaleOwnedItem: true
+              };
+
+              if (finalTarget.dataset.supplyDropZone) {
+                await this._handleSupplyDrop(dropData);
+              } else {
+                await this._handleEquipmentDrop(
+                  dropData,
+                  finalTarget.dataset.equipmentDropZone
+                );
+              }
+            } catch (error) {
+              console.error(
+                `${MODULE_ID} | Could not move owned equipment item`,
+                error
+              );
+              ui.notifications?.error(
+                `Brackenvale could not move ${item.name}.`
+              );
+            }
+          };
+
+          const cancel = () => {
+            window.removeEventListener("pointermove", onPointerMove, true);
+            window.removeEventListener("pointerup", finish, true);
+            window.removeEventListener("pointercancel", cancel, true);
+            handle.classList.remove("dragging");
+            clearTarget();
+            ghost.remove();
+          };
+
+          window.addEventListener("pointermove", onPointerMove, true);
+          window.addEventListener("pointerup", finish, true);
+          window.addEventListener("pointercancel", cancel, true);
+        });
+      }
+    }
+
+    _activateEquipmentControls(root) {
+      for (const button of root.querySelectorAll("[data-action='delete-equipment-item']")) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          const item = this.actor.items.get(itemId);
+          if (!item) return;
+
+          const confirmed = globalThis.confirm(`Delete ${item.name} from this character?`);
+          if (!confirmed) return;
+
+          await deleteEquipmentItem(this.actor, item, MODULE_ID);
+          this._activePage = 3;
         });
       }
     }
@@ -479,6 +1361,24 @@ Hooks.once("init", () => {
       this._setCalibrationFieldState(root);
       this._activateCalibrationDragging(root);
       this._activateCalibrationKeyboard(root);
+
+      root.addEventListener("pointerdown", (event) => {
+        if (!this._calibrationMode) return;
+
+        const field = event.target.closest(
+          ".brackenvale-page-fields .overlay-field[data-component-key]"
+        );
+        if (!field || !root.contains(field)) return;
+
+        // The normal per-field handler performs dragging. This capture
+        // listener only guarantees that the intended overlay is selected.
+        if (
+          field.classList.contains("equipment-slot-only-region")
+          || field.classList.contains("slot-summary-field")
+        ) {
+          this._selectCalibrationField(root, field);
+        }
+      }, true);
     }
 
     _setCalibrationFieldState(root) {
@@ -490,15 +1390,35 @@ Hooks.once("init", () => {
         if (this._calibrationMode) {
           field.dataset.wasDisabled = String(field.disabled);
           field.dataset.wasReadonly = String(field.readOnly);
+          field.dataset.wasZIndex = field.style.zIndex ?? "";
+          field.dataset.wasPointerEvents = field.style.pointerEvents ?? "";
           field.disabled = false;
           field.readOnly = true;
           field.tabIndex = 0;
+
+          // Slot columns are narrow overlays that sit inside the larger
+          // equipment regions. Raise them explicitly while calibrating so
+          // pointer targeting cannot be intercepted by a drop zone.
+          if (
+            field.classList.contains("equipment-slot-only-region")
+            || field.classList.contains("equipment-damage-only-region")
+            || field.classList.contains("supply-widget")
+            || field.classList.contains("flag-text-area")
+            || field.classList.contains("slot-summary-field")
+          ) {
+            field.style.zIndex = "1000";
+            field.style.pointerEvents = "auto";
+          }
         } else {
           field.disabled = field.dataset.wasDisabled === "true";
           field.readOnly = field.dataset.wasReadonly === "true";
+          field.style.zIndex = field.dataset.wasZIndex ?? "";
+          field.style.pointerEvents = field.dataset.wasPointerEvents ?? "";
           field.classList.remove("calibration-selected");
           delete field.dataset.wasDisabled;
           delete field.dataset.wasReadonly;
+          delete field.dataset.wasZIndex;
+          delete field.dataset.wasPointerEvents;
         }
       }
     }

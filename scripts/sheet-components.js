@@ -1,3 +1,16 @@
+import {
+  getEquipmentState,
+  getItemLocation,
+  getItemSlotValue,
+  getEquipmentDamage,
+  getEquipmentDamageCapacity,
+  isEquipmentBroken,
+  isArmorItem,
+  isInventoryItem,
+  isNativeEquipped,
+  isShieldItem
+} from "./equipment-manager.js";
+
 /**
  * Brackenvale sheet component preparation.
  * Native D&D data is read from the Actor; Brackenvale-only data uses module flags.
@@ -31,6 +44,12 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareDeathSaveBubble(component, actor, editable);
     case "weaponTable":
       return prepareWeaponTable(component, actor);
+    case "equipmentRegion":
+      return prepareEquipmentRegion(component, actor, moduleId, editable);
+    case "supplyWidget":
+      return prepareSupplyWidget(component, actor, moduleId, editable);
+    case "flagTextArea":
+      return prepareFlagTextArea(component, actor, moduleId, editable);
     case "equippedDefenseName":
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
@@ -39,6 +58,61 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       console.warn(`${moduleId} | Unknown sheet component: ${component.component}`, component);
       return {...component, unsupported: true};
   }
+}
+
+
+function prepareSupplyWidget(component, actor, moduleId, editable) {
+  const stored = foundry.utils.getProperty(
+    actor,
+    `flags.${moduleId}.supplyDice`
+  );
+
+  const rows = Array.from({length: component.rows ?? 5}, (_, index) => {
+    const row = Array.isArray(stored) ? stored[index] ?? {} : {};
+    const die = ["d12", "d10", "d8", "d6", "d4", "empty"].includes(row.die)
+      ? row.die
+      : "empty";
+    const linkedItem = row.itemId ? actor.items?.get(row.itemId) ?? null : null;
+    const name = linkedItem?.name ?? String(row.name ?? "");
+
+    return {
+      index,
+      name,
+      itemId: linkedItem?.id ?? "",
+      linked: Boolean(linkedItem),
+      die,
+      isEmpty: die === "empty",
+      options: [
+        {value: "empty", label: "Empty", selected: die === "empty"},
+        {value: "d4", label: "d4", selected: die === "d4"},
+        {value: "d6", label: "d6", selected: die === "d6"},
+        {value: "d8", label: "d8", selected: die === "d8"},
+        {value: "d10", label: "d10", selected: die === "d10"},
+        {value: "d12", label: "d12", selected: die === "d12"}
+      ]
+    };
+  });
+
+  return {
+    ...component,
+    isSupplyWidget: true,
+    rows,
+    editable,
+    style: createPositionStyle(component)
+  };
+}
+
+function prepareFlagTextArea(component, actor, moduleId, editable) {
+  return {
+    ...component,
+    isFlagTextArea: true,
+    value: String(
+      foundry.utils.getProperty(actor, `flags.${moduleId}.${component.flag}`)
+        ?? ""
+    ),
+    editable,
+    style: createPositionStyle(component)
+  };
 }
 
 function prepareTextField(component, actor, flags, editable) {
@@ -82,6 +156,11 @@ function prepareDerivedField(component, actor) {
     case "proficiency":
       value = formatSignedNumber(foundry.utils.getProperty(actor, "system.attributes.prof") ?? 0);
       break;
+    case "gearSlotSummary": {
+      const state = getEquipmentState(actor);
+      value = `${state.slotsUsed} / ${state.slotCapacity}`;
+      break;
+    }
     default:
       value = foundry.utils.getProperty(actor, component.path) ?? "";
   }
@@ -234,8 +313,6 @@ function prepareDeathSaveBubble(component, actor, editable) {
 }
 
 function prepareWeaponTable(component, actor) {
-  const conditionMap =
-    foundry.utils.getProperty(actor, "flags.brackenvale-core.weaponConditions") ?? {};
 
   const weapons = actor.items
     ?.filter((item) => item.type === "weapon")
@@ -247,7 +324,9 @@ function prepareWeaponTable(component, actor) {
     })
     .slice(0, component.maxRows ?? 4)
     .map((item) => {
-      const penalty = Math.max(0, Math.min(5, Number(conditionMap[item.id] ?? 0)));
+      const penalty = getEquipmentDamage(item);
+      const capacity = getEquipmentDamageCapacity(item);
+      const broken = isEquipmentBroken(item);
       const mastery = getMasteryDetails(item);
       return {
         id: item.id,
@@ -257,20 +336,87 @@ function prepareWeaponTable(component, actor) {
         mastery: mastery.label,
         masteryReference: mastery.reference,
         equipped: isWeaponEquipped(item),
-        conditionPenalty: penalty,
-        conditionDots: [1,2,3,4,5].map((value) => ({value, filled: value <= penalty}))
+        broken
       };
     }) ?? [];
 
   while (weapons.length < (component.maxRows ?? 4)) {
     weapons.push({
       id: "", name: "", attack: "", damage: "", mastery: "",
-      masteryReference: "", equipped: false, conditionPenalty: 0,
-      conditionDots: [1,2,3,4,5].map((value) => ({value, filled: false}))
+      masteryReference: "", equipped: false, broken: false
     });
   }
 
   return {...component, isWeaponTable: true, weapons, style: createPositionStyle(component)};
+}
+
+
+function prepareEquipmentRegion(component, actor, moduleId, editable) {
+  const state = getEquipmentState(actor, moduleId);
+  const region = component.sourceRegion ?? component.region;
+  const slotOnly = component.displayMode === "slots";
+  const damageOnly = component.displayMode === "damage";
+
+  const summarize = (item) => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    slots: getItemSlotValue(item, moduleId),
+    damage: getEquipmentDamage(item, moduleId),
+    damageCapacity: getEquipmentDamageCapacity(item),
+    damageDots: Array.from(
+      {length: getEquipmentDamageCapacity(item)},
+      (_, index) => {
+        const value = index + 1;
+        return {value, filled: value <= getEquipmentDamage(item, moduleId)};
+      }
+    ),
+    broken: isEquipmentBroken(item, moduleId)
+  });
+
+  let items = [];
+  let armorItem = null;
+  let shieldItem = null;
+
+  if (region === "armor") {
+    armorItem = state.armor ? summarize(state.armor) : null;
+    shieldItem = state.shield ? summarize(state.shield) : null;
+  } else if (region === "weapons") {
+    items = state.weapons.map(summarize);
+  } else if (region === "worn") {
+    items = state.worn.map(summarize);
+  } else if (region === "packed-left") {
+    items = state.packedLeft.map(summarize);
+  } else if (region === "packed-right") {
+    items = state.packedRight.map(summarize);
+  }
+
+  return {
+    ...component,
+    isEquipmentRegion: true,
+    region,
+    slotOnly,
+    damageOnly,
+    opaquePanel: Boolean(component.opaquePanel),
+    itemRole: component.itemRole ?? "",
+    items,
+    slotRows: region === "armor"
+      ? [armorItem, shieldItem].filter(Boolean)
+      : items,
+    damageRows: region === "armor"
+      ? (
+          component.itemRole === "armor"
+            ? [armorItem].filter(Boolean)
+            : component.itemRole === "shield"
+              ? [shieldItem].filter(Boolean)
+              : [armorItem, shieldItem].filter(Boolean)
+        )
+      : items,
+    armorItem,
+    shieldItem,
+    editable,
+    style: createPositionStyle(component)
+  };
 }
 
 function applyNumericPenalty(value, penalty) {
@@ -291,26 +437,56 @@ function getMasteryDetails(item) {
   const raw = foundry.utils.getProperty(item, "system.mastery")
     ?? foundry.utils.getProperty(item, "system.properties.mastery")
     ?? "";
-  const key = typeof raw === "string" ? raw : (raw?.value ?? raw?.identifier ?? "");
+
+  const rawKey = typeof raw === "string"
+    ? raw
+    : (raw?.value ?? raw?.identifier ?? raw?.name ?? "");
+
+  const key = String(rawKey).trim().toLowerCase();
   if (!key) return {label: "", reference: ""};
 
-  const config = CONFIG.DND5E?.weaponMasteries?.[key]
-    ?? CONFIG.DND5E?.weaponMastery?.[key]
-    ?? CONFIG.DND5E?.masteries?.[key]
-    ?? null;
+  const collections = [
+    CONFIG.DND5E?.weaponMasteries,
+    CONFIG.DND5E?.weaponMastery,
+    CONFIG.DND5E?.masteries
+  ].filter(Boolean);
 
-  const label = config?.label ?? config?.name ?? key;
-  const text = String(label);
+  let config = null;
+  for (const collection of collections) {
+    config =
+      collection?.[key]
+      ?? collection?.[rawKey]
+      ?? Object.values(collection).find((entry) => {
+        const label = String(entry?.label ?? entry?.name ?? "").toLowerCase();
+        return label === key;
+      })
+      ?? null;
+
+    if (config) break;
+  }
+
+  const labelValue = config?.label ?? config?.name ?? rawKey;
+  const labelText = String(labelValue);
 
   return {
-    label: game.i18n?.has?.(text) ? game.i18n.localize(text) : text,
+    label: game.i18n?.has?.(labelText)
+      ? game.i18n.localize(labelText)
+      : labelText,
     reference: String(config?.reference ?? "")
   };
 }
 
 function prepareEquippedDefenseName(component, actor) {
-  const item = findEquippedDefense(actor, component.defenseType);
-  return {...component, isEquippedDefenseName: true, itemId: item?.id ?? "", value: item?.name ?? "", style: createPositionStyle(component)};
+  const state = getEquipmentState(actor);
+  const item = component.defenseType === "shield" ? state.shield : state.armor;
+
+  return {
+    ...component,
+    isEquippedDefenseName: true,
+    itemId: item?.id ?? "",
+    value: item?.name ?? "",
+    style: createPositionStyle(component)
+  };
 }
 
 function prepareDefenseConditionBubble(component, actor, editable) {
@@ -320,32 +496,12 @@ function prepareDefenseConditionBubble(component, actor, editable) {
 }
 
 function findEquippedDefense(actor, defenseType) {
-  const equipment = actor.items?.filter((item) => item.type === "equipment" && isWeaponEquipped(item)) ?? [];
-  const isShield = (item) => {
-    const values = [
-      foundry.utils.getProperty(item, "system.type.value"),
-      foundry.utils.getProperty(item, "system.type.baseItem"),
-      foundry.utils.getProperty(item, "system.armor.type"),
-      foundry.utils.getProperty(item, "system.identifier"),
-      item.name
-    ].filter(Boolean).map((v) => String(v).toLowerCase());
-    return values.some((v) => v.includes("shield"));
-  };
-  return defenseType === "shield"
-    ? (equipment.find(isShield) ?? null)
-    : (equipment.find((item) => !isShield(item)) ?? null);
+  const state = getEquipmentState(actor);
+  return defenseType === "shield" ? state.shield : state.armor;
 }
 
 function isWeaponEquipped(item) {
-  const direct = foundry.utils.getProperty(item, "system.equipped");
-  if (typeof direct === "boolean") return direct;
-  if (direct && typeof direct === "object" && "value" in direct) return Boolean(direct.value);
-
-  const carried =
-    foundry.utils.getProperty(item, "system.carried")
-    ?? foundry.utils.getProperty(item, "system.container");
-
-  return Boolean(carried === true);
+  return getItemLocation(item) === "equipped" || isNativeEquipped(item);
 }
 
 function getWeaponAttackLabel(item) {
@@ -375,25 +531,86 @@ function getWeaponAttackLabel(item) {
 
 function getWeaponDamageLabel(item) {
   const labels = item.labels ?? {};
-  if (labels.damage) return String(labels.damage);
+  let formula = labels.damage ? String(labels.damage) : "";
 
-  const activity = getFirstActivity(item);
-  const parts =
-    foundry.utils.getProperty(activity, "damage.parts")
-    ?? foundry.utils.getProperty(activity, "damage.include")
-    ?? [];
+  if (!formula) {
+    const activity = getFirstActivity(item);
+    const parts =
+      foundry.utils.getProperty(activity, "damage.parts")
+      ?? foundry.utils.getProperty(activity, "damage.include")
+      ?? [];
 
-  if (Array.isArray(parts)) {
-    return parts
-      .map((part) => {
-        if (typeof part === "string") return part;
-        return part?.formula ?? part?.number ?? part?.custom?.formula ?? "";
-      })
-      .filter(Boolean)
-      .join(" + ");
+    if (Array.isArray(parts)) {
+      formula = parts
+        .map((part) => {
+          if (typeof part === "string") return part;
+          return part?.formula ?? part?.number ?? part?.custom?.formula ?? "";
+        })
+        .filter(Boolean)
+        .join(" + ");
+    }
   }
 
-  return "";
+  if (!formula) return "";
+
+  // Native labels in D&D 5.3 can expose only the base weapon dice.
+  // Add the actor's relevant ability modifier when it is not already shown.
+  if (!formula.includes("@mod") && !/[+-]\s*\d+\s*$/.test(formula.trim())) {
+    const modifier = getWeaponAbilityModifier(item);
+    if (modifier) formula = `${formula} ${modifier > 0 ? "+" : "−"} ${Math.abs(modifier)}`;
+  }
+
+  return formula;
+}
+
+function getWeaponAbilityModifier(item) {
+  const actor = item.parent;
+  if (!actor) return 0;
+
+  const activity = getFirstActivity(item);
+  const explicitAbility =
+    foundry.utils.getProperty(activity, "attack.ability")
+    ?? foundry.utils.getProperty(activity, "ability")
+    ?? foundry.utils.getProperty(item, "system.ability");
+
+  let ability = explicitAbility ? String(explicitAbility) : "";
+
+  if (!ability) {
+    const properties = foundry.utils.getProperty(item, "system.properties");
+    const hasProperty = (key) => {
+      if (properties instanceof Set) return properties.has(key);
+      if (Array.isArray(properties)) return properties.includes(key);
+      return Boolean(properties?.[key]);
+    };
+
+    const weaponType = String(
+      foundry.utils.getProperty(item, "system.type.value") ?? ""
+    ).toLowerCase();
+
+    const attackType = String(
+      foundry.utils.getProperty(activity, "attack.type.value")
+      ?? foundry.utils.getProperty(activity, "attack.type")
+      ?? ""
+    ).toLowerCase();
+
+    const isRangedWeapon =
+      attackType.includes("ranged")
+      || weaponType.includes("ranged")
+      || weaponType.endsWith("r")
+      || hasProperty("amm");
+
+    ability = isRangedWeapon && !hasProperty("fin")
+      ? "dex"
+      : "str";
+
+    if (hasProperty("fin")) {
+      const strength = Number(foundry.utils.getProperty(actor, "system.abilities.str.mod") ?? 0);
+      const dexterity = Number(foundry.utils.getProperty(actor, "system.abilities.dex.mod") ?? 0);
+      ability = dexterity > strength ? "dex" : "str";
+    }
+  }
+
+  return Number(foundry.utils.getProperty(actor, `system.abilities.${ability}.mod`) ?? 0);
 }
 
 function getFirstActivity(item) {
