@@ -69,6 +69,18 @@
               data-action="class-level"
               {{#unless editable}}disabled{{/unless}}
             >{{value}}</button>
+            {{#if itemId}}
+              <button
+                type="button"
+                class="class-remove-button"
+                style="{{style}}"
+                data-action="remove-class"
+                data-item-id="{{itemId}}"
+                aria-label="Remove {{value}}"
+                title="Remove class"
+                {{#unless editable}}disabled{{/unless}}
+              >×</button>
+            {{/if}}
           {{/if}}
 
           {{#if isItemSummary}}

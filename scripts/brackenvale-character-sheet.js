@@ -519,6 +519,48 @@ Hooks.once("init", () => {
         await openClassControl(event);
       });
 
+      const removeButton = root.querySelector('[data-action="remove-class"]');
+      if (removeButton) {
+        removeButton.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = removeButton.dataset.itemId;
+          const classItem = this.actor.items.get(itemId);
+          if (!classItem || classItem.type !== "class") return;
+
+          const DialogV2 = foundry.applications?.api?.DialogV2;
+          let approved = false;
+
+          if (DialogV2?.confirm) {
+            approved = await DialogV2.confirm({
+              window: {title: "Remove Class"},
+              content: `
+                <p>Remove <strong>${foundry.utils.escapeHTML(classItem.name)}</strong>
+                from <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>?</p>
+                <p class="hint">This deletes the Class item from the character.
+                Features already granted by D&D advancement may need to be reviewed separately.</p>
+              `,
+              yes: {label: "Remove Class"},
+              no: {label: "Cancel"},
+              modal: true
+            });
+          } else {
+            approved = window.confirm(
+              `Remove ${classItem.name} from ${this.actor.name}?`
+            );
+          }
+
+          if (!approved) return;
+
+          await classItem.delete();
+          ui.notifications?.info(`${classItem.name} removed from ${this.actor.name}.`);
+          this.render();
+        });
+      }
+
       const clearHighlight = () => {
         field.classList.remove("class-drop-target");
       };
@@ -602,12 +644,25 @@ Hooks.once("init", () => {
       // installed, but they are intentionally hidden from this picker.
       const classPacks = Array.from(game.packs ?? []).filter((pack) => {
         if (pack.documentName !== "Item") return false;
+
+        const collection = String(pack.collection ?? "").toLowerCase();
+        const packageName = String(
+          pack.metadata?.packageName
+            ?? pack.metadata?.package
+            ?? pack.metadata?.packageId
+            ?? ""
+        ).toLowerCase();
         const label = String(
           pack.metadata?.label
             ?? pack.title
             ?? ""
         ).trim();
-        return label === "Character Classes";
+
+        const isPlayersHandbook =
+          collection.startsWith("dnd-players-handbook.")
+          || packageName === "dnd-players-handbook";
+
+        return isPlayersHandbook && label === "Character Classes";
       });
 
       for (const pack of classPacks) {
@@ -643,7 +698,7 @@ Hooks.once("init", () => {
 
       if (!classes.length) {
         ui.notifications?.warn(
-          "No modern Player's Handbook Character Classes were found. Make sure the PHB content pack is enabled."
+          "No Character Classes pack from the dnd-players-handbook package was found. Make sure the Player's Handbook premium content is enabled."
         );
         return;
       }

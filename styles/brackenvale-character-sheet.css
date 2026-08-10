@@ -1540,3 +1540,29 @@ input[data-component-key="classLevel"].class-level-interactive {
   background: rgba(255, 255, 240, 0.78) !important;
   outline: 1px solid rgba(70, 70, 55, 0.4) !important;
 }
+
+
+/* 0.5.4-test.59: PHB-only class picker and class removal control */
+.class-remove-button {
+  position: absolute;
+  z-index: 25;
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  margin-left: calc(var(--overlay-width, 0px) - 18px);
+  padding: 0;
+  border: 0;
+  background: #ffffff;
+  color: #a51414;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.class-remove-button:hover,
+.class-remove-button:focus {
+  color: #710000;
+  background: #f7e8e8;
+}
