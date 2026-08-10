@@ -471,8 +471,53 @@ Hooks.once("init", () => {
     }
 
     _activateClassIntegration(root) {
-      const field = root.querySelector('[data-action="class-level"]');
-      if (!field) return;
+      // Be deliberately permissive here. Older cached templates may still
+      // render Class & Level as an <input>, while newer ones render a <button>.
+      // Any element carrying the classLevel component key becomes the control.
+      const field = root.querySelector('[data-component-key="classLevel"]');
+      if (!field) {
+        console.warn(`${MODULE_ID} | Class & Level component was not found in the rendered sheet.`);
+        return;
+      }
+
+      // Prevent the legacy text-input behavior even if an older compiled
+      // template is still active in Foundry.
+      if ("readOnly" in field) field.readOnly = true;
+      if ("disabled" in field) field.disabled = false;
+      field.setAttribute("role", "button");
+      field.setAttribute("tabindex", "0");
+      field.classList.add("class-level-interactive");
+
+      const openClassControl = async (event) => {
+        if (this._calibrationMode) return;
+
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+
+        const itemId = field.dataset.itemId;
+        if (itemId) {
+          this.actor.items.get(itemId)?.sheet?.render(true);
+          return;
+        }
+
+        if (!this.isEditable) return;
+
+        field.classList.add("class-picker-loading");
+        try {
+          await this._openBrackenvaleClassPicker();
+        } finally {
+          field.classList.remove("class-picker-loading");
+        }
+      };
+
+      // Capture phase prevents the legacy editable/input handlers from
+      // swallowing the click before our picker sees it.
+      field.addEventListener("click", openClassControl, {capture: true});
+      field.addEventListener("dblclick", openClassControl, {capture: true});
+      field.addEventListener("keydown", async (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        await openClassControl(event);
+      });
 
       const clearHighlight = () => {
         field.classList.remove("class-drop-target");
@@ -515,23 +560,18 @@ Hooks.once("init", () => {
             }
           }
 
-          if (!data) {
-            ui.notifications?.warn("Brackenvale could not read that class drop.");
-            return;
-          }
-
           let sourceItem = null;
-          if (data.type === "Item" && data.id) {
+          if (data?.type === "Item" && data.id) {
             sourceItem = this.actor.items.get(data.id) ?? null;
           }
-          if (!sourceItem && data.uuid) {
+          if (!sourceItem && data?.uuid) {
             sourceItem = await fromUuid(data.uuid);
           }
 
           if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
-            ui.notifications?.warn(
-              "That is not a Class item. Click Class & Level to choose a class instead."
-            );
+            // Folder/category drops from the D&D browser are common. Instead
+            // of silently failing, open the picker immediately.
+            await this._openBrackenvaleClassPicker();
             return;
           }
 
@@ -541,29 +581,8 @@ Hooks.once("init", () => {
           ui.notifications?.error("Brackenvale could not add that class.");
         }
       });
-
-      field.addEventListener("click", async (event) => {
-        if (this._calibrationMode) return;
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const itemId = field.dataset.itemId;
-        if (itemId) {
-          this.actor.items.get(itemId)?.sheet?.render(true);
-          return;
-        }
-
-        if (!this.isEditable) return;
-
-        field.classList.add("class-picker-loading");
-        try {
-          await this._openBrackenvaleClassPicker();
-        } finally {
-          field.classList.remove("class-picker-loading");
-        }
-      });
     }
+
 
     async _openBrackenvaleClassPicker() {
       const DialogV2 = foundry.applications?.api?.DialogV2;
@@ -578,20 +597,20 @@ Hooks.once("init", () => {
 
       const entries = [];
 
-      // World Class items.
-      for (const item of game.items ?? []) {
-        if (item.type !== "class") continue;
-        entries.push({
-          name: item.name,
-          uuid: item.uuid,
-          source: "World"
-        });
-      }
+      // Brackenvale uses only the modern 2024 / 5.5e PHB class compendium.
+      // The D&D system may also expose SRD or legacy class packs; those remain
+      // installed, but they are intentionally hidden from this picker.
+      const classPacks = Array.from(game.packs ?? []).filter((pack) => {
+        if (pack.documentName !== "Item") return false;
+        const label = String(
+          pack.metadata?.label
+            ?? pack.title
+            ?? ""
+        ).trim();
+        return label === "Character Classes";
+      });
 
-      // Class items from every Item compendium the user can browse.
-      for (const pack of game.packs ?? []) {
-        if (pack.documentName !== "Item") continue;
-
+      for (const pack of classPacks) {
         try {
           const index = await pack.getIndex({fields: ["type"]});
           for (const entry of index) {
@@ -599,30 +618,32 @@ Hooks.once("init", () => {
             entries.push({
               name: entry.name,
               uuid: `Compendium.${pack.collection}.${entry._id}`,
-              source: pack.metadata?.label ?? pack.title ?? pack.collection
+              source: "Player's Handbook"
             });
           }
         } catch (error) {
           console.debug(
-            `${MODULE_ID} | Skipping unavailable class compendium ${pack.collection}`,
+            `${MODULE_ID} | Could not read modern Character Classes compendium ${pack.collection}`,
             error
           );
         }
       }
 
+      // Deduplicate by class name in case the same PHB pack is exposed twice.
       const unique = new Map();
       for (const entry of entries) {
-        if (!entry.uuid || unique.has(entry.uuid)) continue;
-        unique.set(entry.uuid, entry);
+        const key = String(entry.name ?? "").trim().toLowerCase();
+        if (!key || unique.has(key)) continue;
+        unique.set(key, entry);
       }
 
       const classes = Array.from(unique.values()).sort((a, b) =>
-        a.name.localeCompare(b.name) || a.source.localeCompare(b.source)
+        a.name.localeCompare(b.name)
       );
 
       if (!classes.length) {
         ui.notifications?.warn(
-          "No Class items were found in your world or available compendiums."
+          "No modern Player's Handbook Character Classes were found. Make sure the PHB content pack is enabled."
         );
         return;
       }
@@ -642,6 +663,7 @@ Hooks.once("init", () => {
               ${options}
             </select>
             <p class="hint">
+              Only the modern 2024 / 5.5e Player's Handbook classes are shown here.
               Brackenvale stores the normal D&D Class item on the actor so class levels,
               features, and advancement data remain system-managed.
             </p>

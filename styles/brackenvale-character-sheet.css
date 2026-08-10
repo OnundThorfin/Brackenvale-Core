@@ -1522,3 +1522,21 @@
   opacity: 0.65;
   cursor: wait;
 }
+
+
+/* 0.5.4-test.56: force Class & Level to behave as a clickable control
+   even if Foundry is still displaying a cached legacy input template. */
+[data-component-key="classLevel"].class-level-interactive {
+  cursor: pointer !important;
+  user-select: none;
+}
+
+input[data-component-key="classLevel"].class-level-interactive {
+  caret-color: transparent !important;
+}
+
+[data-component-key="classLevel"].class-level-interactive:hover,
+[data-component-key="classLevel"].class-level-interactive:focus {
+  background: rgba(255, 255, 240, 0.78) !important;
+  outline: 1px solid rgba(70, 70, 55, 0.4) !important;
+}
