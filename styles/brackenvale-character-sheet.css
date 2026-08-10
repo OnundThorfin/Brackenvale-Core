@@ -1469,3 +1469,24 @@
   outline: 2px dashed rgba(45, 92, 45, 0.9) !important;
   outline-offset: 1px;
 }
+
+
+/* 0.5.4-test.54: Class picker */
+.brackenvale-class-picker select {
+  width: 100%;
+  min-height: 34px;
+  margin: 0.5rem 0;
+  color: #171612;
+  background: #ffffff;
+}
+
+.brackenvale-class-picker option {
+  color: #171612;
+  background: #ffffff;
+}
+
+.brackenvale-class-picker .hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.82em;
+  opacity: 0.8;
+}

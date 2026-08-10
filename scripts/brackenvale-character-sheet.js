@@ -515,66 +515,211 @@ Hooks.once("init", () => {
             }
           }
 
-          if (!data || data.type !== "Item") {
-            ui.notifications?.warn("Drop a D&D Class item onto Class & Level.");
+          if (!data) {
+            ui.notifications?.warn("Brackenvale could not read that class drop.");
             return;
           }
 
           let sourceItem = null;
-          if (data.id) sourceItem = this.actor.items.get(data.id) ?? null;
-          if (!sourceItem && data.uuid) sourceItem = await fromUuid(data.uuid);
+          if (data.type === "Item" && data.id) {
+            sourceItem = this.actor.items.get(data.id) ?? null;
+          }
+          if (!sourceItem && data.uuid) {
+            sourceItem = await fromUuid(data.uuid);
+          }
 
-          if (!sourceItem || sourceItem.type !== "class") {
-            ui.notifications?.warn("Only Class items can be dropped onto Class & Level.");
+          if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
+            ui.notifications?.warn(
+              "That is not a Class item. Click Class & Level to choose a class instead."
+            );
             return;
           }
 
-          // Prefer the native D&D actor-sheet drop handler so class
-          // advancements, HP, features, and multiclass logic remain native.
-          const nativeDrop = Object.getPrototypeOf(
-            Object.getPrototypeOf(this)
-          )?._onDrop;
-
-          if (typeof nativeDrop === "function") {
-            await nativeDrop.call(this, event);
-            this.render();
-            return;
-          }
-
-          // Compatibility fallback if D&D changes the private drop handler.
-          if (sourceItem.parent === this.actor) {
-            ui.notifications?.info(`${sourceItem.name} is already on this character.`);
-            return;
-          }
-
-          const itemData = sourceItem.toObject();
-          delete itemData._id;
-          await this.actor.createEmbeddedDocuments("Item", [itemData]);
-          ui.notifications?.info(`${sourceItem.name} added to ${this.actor.name}.`);
-          this.render();
+          await this._addBrackenvaleClass(sourceItem);
         } catch (error) {
-          console.error(`${MODULE_ID} | Could not add class`, error);
-          ui.notifications?.error(
-            "Brackenvale could not add that class. Open the console for details."
-          );
+          console.error(`${MODULE_ID} | Could not add dropped class`, error);
+          ui.notifications?.error("Brackenvale could not add that class.");
         }
       });
 
-      // A single click on an existing Class & Level field opens the native
-      // class item. Empty fields retain the printed "Add a class" prompt.
-      field.addEventListener("click", (event) => {
+      field.addEventListener("click", async (event) => {
         if (this._calibrationMode) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
         const itemId = field.dataset.itemId;
-        if (!itemId) {
-          ui.notifications?.info(
-            "Drag a D&D Class item from the Items or Compendium sidebar onto Class & Level."
-          );
+        if (itemId) {
+          this.actor.items.get(itemId)?.sheet?.render(true);
           return;
         }
 
-        event.preventDefault();
-        this.actor.items.get(itemId)?.sheet?.render(true);
+        if (!this.isEditable) return;
+        await this._openBrackenvaleClassPicker();
       });
+    }
+
+    async _openBrackenvaleClassPicker() {
+      const DialogV2 = foundry.applications?.api?.DialogV2;
+      if (!DialogV2?.wait) {
+        ui.notifications?.warn(
+          "The class picker is unavailable in this Foundry build."
+        );
+        return;
+      }
+
+      ui.notifications?.info("Loading available D&D classes…");
+
+      const entries = [];
+
+      // World Class items.
+      for (const item of game.items ?? []) {
+        if (item.type !== "class") continue;
+        entries.push({
+          name: item.name,
+          uuid: item.uuid,
+          source: "World"
+        });
+      }
+
+      // Class items from every Item compendium the user can browse.
+      for (const pack of game.packs ?? []) {
+        if (pack.documentName !== "Item") continue;
+
+        try {
+          const index = await pack.getIndex({fields: ["type"]});
+          for (const entry of index) {
+            if (entry.type !== "class") continue;
+            entries.push({
+              name: entry.name,
+              uuid: `Compendium.${pack.collection}.${entry._id}`,
+              source: pack.metadata?.label ?? pack.title ?? pack.collection
+            });
+          }
+        } catch (error) {
+          console.debug(
+            `${MODULE_ID} | Skipping unavailable class compendium ${pack.collection}`,
+            error
+          );
+        }
+      }
+
+      const unique = new Map();
+      for (const entry of entries) {
+        if (!entry.uuid || unique.has(entry.uuid)) continue;
+        unique.set(entry.uuid, entry);
+      }
+
+      const classes = Array.from(unique.values()).sort((a, b) =>
+        a.name.localeCompare(b.name) || a.source.localeCompare(b.source)
+      );
+
+      if (!classes.length) {
+        ui.notifications?.warn(
+          "No Class items were found in your world or available compendiums."
+        );
+        return;
+      }
+
+      const options = classes.map((entry) => `
+        <option value="${foundry.utils.escapeHTML(entry.uuid)}">
+          ${foundry.utils.escapeHTML(entry.name)} — ${foundry.utils.escapeHTML(entry.source)}
+        </option>
+      `).join("");
+
+      const result = await DialogV2.wait({
+        window: {title: "Add a Class"},
+        content: `
+          <form class="brackenvale-class-picker">
+            <p>Select a D&D class to add to <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>.</p>
+            <select name="classUuid" autofocus>
+              ${options}
+            </select>
+            <p class="hint">
+              Brackenvale stores the normal D&D Class item on the actor so class levels,
+              features, and advancement data remain system-managed.
+            </p>
+          </form>
+        `,
+        buttons: [
+          {
+            action: "add",
+            label: "Add Class",
+            default: true,
+            callback: (_event, button) =>
+              button.form?.elements?.classUuid?.value ?? ""
+          },
+          {
+            action: "cancel",
+            label: "Cancel",
+            callback: () => ""
+          }
+        ],
+        close: () => "",
+        modal: true
+      });
+
+      if (!result) return;
+
+      const sourceItem = await fromUuid(result);
+      if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
+        ui.notifications?.error("The selected Class item could not be loaded.");
+        return;
+      }
+
+      await this._addBrackenvaleClass(sourceItem);
+    }
+
+    async _addBrackenvaleClass(sourceItem) {
+      if (!sourceItem || sourceItem.type !== "class") return;
+
+      if (sourceItem.parent === this.actor) {
+        sourceItem.sheet?.render(true);
+        return;
+      }
+
+      const existing = (this.actor.items ?? []).find((item) =>
+        item.type === "class"
+        && (
+          item.name === sourceItem.name
+          || (
+            foundry.utils.getProperty(item, "system.identifier")
+            && foundry.utils.getProperty(item, "system.identifier")
+              === foundry.utils.getProperty(sourceItem, "system.identifier")
+          )
+        )
+      );
+
+      if (existing) {
+        ui.notifications?.info(`${existing.name} is already on this character.`);
+        existing.sheet?.render(true);
+        return;
+      }
+
+      // Create the genuine D&D Class item on the actor. This preserves the
+      // class's advancement configuration rather than creating Brackenvale
+      // duplicate class data.
+      const itemData = sourceItem.toObject();
+      delete itemData._id;
+
+      const [created] = await this.actor.createEmbeddedDocuments(
+        "Item",
+        [itemData],
+        {keepId: false}
+      );
+
+      if (!created) {
+        ui.notifications?.error(`${sourceItem.name} could not be added.`);
+        return;
+      }
+
+      ui.notifications?.info(`${created.name} added to ${this.actor.name}.`);
+      this.render();
+
+      // Open the native D&D Class item immediately. If its advancement
+      // configuration requires choices, those remain available through the
+      // system-managed Class item rather than being reimplemented here.
+      created.sheet?.render(true);
     }
 
 
