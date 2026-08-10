@@ -759,10 +759,16 @@ Hooks.once("init", () => {
         return;
       }
 
-      const options = classes.map((entry) => `
-        <option value="${foundry.utils.escapeHTML(entry.uuid)}">
-          ${foundry.utils.escapeHTML(entry.name)}
-        </option>
+      const classChoices = classes.map((entry, index) => `
+        <label class="brackenvale-class-choice">
+          <input
+            type="radio"
+            name="brackenvaleClassKey"
+            value="${foundry.utils.escapeHTML(entry.key)}"
+            ${index === 0 ? "checked" : ""}
+          >
+          <span>${foundry.utils.escapeHTML(entry.name)}</span>
+        </label>
       `).join("");
 
       const result = await DialogV2.wait({
@@ -770,13 +776,12 @@ Hooks.once("init", () => {
         content: `
           <form class="brackenvale-class-picker">
             <p>Select a D&D class to add to <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>.</p>
-            <select name="classUuid" autofocus>
-              ${options}
-            </select>
+            <div class="brackenvale-class-choice-grid">
+              ${classChoices}
+            </div>
             <p class="hint">
-              Brackenvale shows one modern entry for each of the twelve 2024 / 5.5e classes.
-              SRD, legacy, and 2014 class sources are excluded.
-              Class levels, features, and advancement data remain D&D system-managed.
+              Brackenvale shows exactly one modern entry for each available 2024 / 5.5e class.
+              SRD, legacy, and 2014 sources are never shown in this menu.
             </p>
           </form>
         `,
@@ -786,7 +791,7 @@ Hooks.once("init", () => {
             label: "Add Class",
             default: true,
             callback: (_event, button) =>
-              button.form?.elements?.classUuid?.value ?? ""
+              button.form?.querySelector('input[name="brackenvaleClassKey"]:checked')?.value ?? ""
           },
           {
             action: "cancel",
@@ -800,7 +805,13 @@ Hooks.once("init", () => {
 
       if (!result) return;
 
-      const sourceItem = await fromUuid(result);
+      const selectedClass = selectedByClass.get(result);
+      if (!selectedClass?.uuid) {
+        ui.notifications?.error("The selected modern class source could not be resolved.");
+        return;
+      }
+
+      const sourceItem = await fromUuid(selectedClass.uuid);
       if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
         ui.notifications?.error("The selected Class item could not be loaded.");
         return;

@@ -1566,3 +1566,39 @@ input[data-component-key="classLevel"].class-level-interactive {
   color: #710000;
   background: #f7e8e8;
 }
+
+
+/* 0.5.4-test.61: fixed Brackenvale twelve-class chooser.
+   Uses radios rather than a native/select control so Foundry cannot inject
+   SRD or alternate class documents into the visible menu. */
+.brackenvale-class-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+  margin: 0.6rem 0;
+}
+
+.brackenvale-class-choice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 6px;
+  border: 1px solid rgba(70, 70, 60, 0.28);
+  background: #ffffff;
+  color: #171612;
+  cursor: pointer;
+}
+
+.brackenvale-class-choice:hover {
+  background: #f5f2e8;
+}
+
+.brackenvale-class-choice input {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.brackenvale-class-choice span {
+  color: #171612;
+}
