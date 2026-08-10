@@ -121,6 +121,7 @@ Hooks.once("init", () => {
 
       this._activateArtworkPageTabs(root);
       this._activateItemEditors(root);
+      this._activateClassIntegration(root);
       this._activateNativeDataBindings(root);
       this._activateCalibrationControls(root);
       this._activateAbilityRolls(root);
@@ -468,6 +469,284 @@ Hooks.once("init", () => {
         });
       }
     }
+
+    _activateClassIntegration(root) {
+      // Be deliberately permissive here. Older cached templates may still
+      // render Class & Level as an <input>, while newer ones render a <button>.
+      // Any element carrying the classLevel component key becomes the control.
+      const field = root.querySelector('[data-component-key="classLevel"]');
+      if (!field) {
+        console.warn(`${MODULE_ID} | Class & Level component was not found in the rendered sheet.`);
+        return;
+      }
+
+      // Prevent the legacy text-input behavior even if an older compiled
+      // template is still active in Foundry.
+      if ("readOnly" in field) field.readOnly = true;
+      if ("disabled" in field) field.disabled = false;
+      field.setAttribute("role", "button");
+      field.setAttribute("tabindex", "0");
+      field.classList.add("class-level-interactive");
+
+      const openClassControl = async (event) => {
+        if (this._calibrationMode) return;
+
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+
+        const itemId = field.dataset.itemId;
+        if (itemId) {
+          this.actor.items.get(itemId)?.sheet?.render(true);
+          return;
+        }
+
+        if (!this.isEditable) return;
+
+        field.classList.add("class-picker-loading");
+        try {
+          await this._openBrackenvaleClassPicker();
+        } finally {
+          field.classList.remove("class-picker-loading");
+        }
+      };
+
+      // Capture phase prevents the legacy editable/input handlers from
+      // swallowing the click before our picker sees it.
+      field.addEventListener("click", openClassControl, {capture: true});
+      field.addEventListener("dblclick", openClassControl, {capture: true});
+      field.addEventListener("keydown", async (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        await openClassControl(event);
+      });
+
+      const clearHighlight = () => {
+        field.classList.remove("class-drop-target");
+      };
+
+      field.addEventListener("dragenter", (event) => {
+        if (this._calibrationMode || !this.isEditable) return;
+        event.preventDefault();
+        field.classList.add("class-drop-target");
+      });
+
+      field.addEventListener("dragover", (event) => {
+        if (this._calibrationMode || !this.isEditable) return;
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+      });
+
+      field.addEventListener("dragleave", (event) => {
+        if (field.contains(event.relatedTarget)) return;
+        clearHighlight();
+      });
+
+      field.addEventListener("drop", async (event) => {
+        clearHighlight();
+        if (this._calibrationMode || !this.isEditable) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        try {
+          let data = null;
+          const raw = event.dataTransfer?.getData("application/json")
+            || event.dataTransfer?.getData("text/plain");
+
+          if (raw) {
+            try {
+              data = JSON.parse(raw);
+            } catch (_error) {
+              data = null;
+            }
+          }
+
+          let sourceItem = null;
+          if (data?.type === "Item" && data.id) {
+            sourceItem = this.actor.items.get(data.id) ?? null;
+          }
+          if (!sourceItem && data?.uuid) {
+            sourceItem = await fromUuid(data.uuid);
+          }
+
+          if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
+            // Folder/category drops from the D&D browser are common. Instead
+            // of silently failing, open the picker immediately.
+            await this._openBrackenvaleClassPicker();
+            return;
+          }
+
+          await this._addBrackenvaleClass(sourceItem);
+        } catch (error) {
+          console.error(`${MODULE_ID} | Could not add dropped class`, error);
+          ui.notifications?.error("Brackenvale could not add that class.");
+        }
+      });
+    }
+
+
+    async _openBrackenvaleClassPicker() {
+      const DialogV2 = foundry.applications?.api?.DialogV2;
+      if (!DialogV2?.wait) {
+        ui.notifications?.warn(
+          "The class picker is unavailable in this Foundry build."
+        );
+        return;
+      }
+
+      ui.notifications?.info("Loading available D&D classes…");
+
+      const entries = [];
+
+      // World Class items.
+      for (const item of game.items ?? []) {
+        if (item.type !== "class") continue;
+        entries.push({
+          name: item.name,
+          uuid: item.uuid,
+          source: "World"
+        });
+      }
+
+      // Class items from every Item compendium the user can browse.
+      for (const pack of game.packs ?? []) {
+        if (pack.documentName !== "Item") continue;
+
+        try {
+          const index = await pack.getIndex({fields: ["type"]});
+          for (const entry of index) {
+            if (entry.type !== "class") continue;
+            entries.push({
+              name: entry.name,
+              uuid: `Compendium.${pack.collection}.${entry._id}`,
+              source: pack.metadata?.label ?? pack.title ?? pack.collection
+            });
+          }
+        } catch (error) {
+          console.debug(
+            `${MODULE_ID} | Skipping unavailable class compendium ${pack.collection}`,
+            error
+          );
+        }
+      }
+
+      const unique = new Map();
+      for (const entry of entries) {
+        if (!entry.uuid || unique.has(entry.uuid)) continue;
+        unique.set(entry.uuid, entry);
+      }
+
+      const classes = Array.from(unique.values()).sort((a, b) =>
+        a.name.localeCompare(b.name) || a.source.localeCompare(b.source)
+      );
+
+      if (!classes.length) {
+        ui.notifications?.warn(
+          "No Class items were found in your world or available compendiums."
+        );
+        return;
+      }
+
+      const options = classes.map((entry) => `
+        <option value="${foundry.utils.escapeHTML(entry.uuid)}">
+          ${foundry.utils.escapeHTML(entry.name)} — ${foundry.utils.escapeHTML(entry.source)}
+        </option>
+      `).join("");
+
+      const result = await DialogV2.wait({
+        window: {title: "Add a Class"},
+        content: `
+          <form class="brackenvale-class-picker">
+            <p>Select a D&D class to add to <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>.</p>
+            <select name="classUuid" autofocus>
+              ${options}
+            </select>
+            <p class="hint">
+              Brackenvale stores the normal D&D Class item on the actor so class levels,
+              features, and advancement data remain system-managed.
+            </p>
+          </form>
+        `,
+        buttons: [
+          {
+            action: "add",
+            label: "Add Class",
+            default: true,
+            callback: (_event, button) =>
+              button.form?.elements?.classUuid?.value ?? ""
+          },
+          {
+            action: "cancel",
+            label: "Cancel",
+            callback: () => ""
+          }
+        ],
+        close: () => "",
+        modal: true
+      });
+
+      if (!result) return;
+
+      const sourceItem = await fromUuid(result);
+      if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
+        ui.notifications?.error("The selected Class item could not be loaded.");
+        return;
+      }
+
+      await this._addBrackenvaleClass(sourceItem);
+    }
+
+    async _addBrackenvaleClass(sourceItem) {
+      if (!sourceItem || sourceItem.type !== "class") return;
+
+      if (sourceItem.parent === this.actor) {
+        sourceItem.sheet?.render(true);
+        return;
+      }
+
+      const existing = (this.actor.items ?? []).find((item) =>
+        item.type === "class"
+        && (
+          item.name === sourceItem.name
+          || (
+            foundry.utils.getProperty(item, "system.identifier")
+            && foundry.utils.getProperty(item, "system.identifier")
+              === foundry.utils.getProperty(sourceItem, "system.identifier")
+          )
+        )
+      );
+
+      if (existing) {
+        ui.notifications?.info(`${existing.name} is already on this character.`);
+        existing.sheet?.render(true);
+        return;
+      }
+
+      // Create the genuine D&D Class item on the actor. This preserves the
+      // class's advancement configuration rather than creating Brackenvale
+      // duplicate class data.
+      const itemData = sourceItem.toObject();
+      delete itemData._id;
+
+      const [created] = await this.actor.createEmbeddedDocuments(
+        "Item",
+        [itemData],
+        {keepId: false}
+      );
+
+      if (!created) {
+        ui.notifications?.error(`${sourceItem.name} could not be added.`);
+        return;
+      }
+
+      ui.notifications?.info(`${created.name} added to ${this.actor.name}.`);
+      this.render();
+
+      // Open the native D&D Class item immediately. If its advancement
+      // configuration requires choices, those remain available through the
+      // system-managed Class item rather than being reimplemented here.
+      created.sheet?.render(true);
+    }
+
 
     _activateNativeDataBindings(root) {
       const fields = root.querySelectorAll(

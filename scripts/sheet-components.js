@@ -184,7 +184,19 @@ function prepareItemSummary(component, actor, editable) {
       : items.map((item) => item.name).join(" / ");
   }
 
-  return {...component, isItemSummary: true, value, itemId, editable, style: createPositionStyle(component)};
+  const isClassSummary =
+    component.key === "classLevel"
+    || (component.itemTypes ?? []).includes("class");
+
+  return {
+    ...component,
+    isItemSummary: !isClassSummary,
+    isClassSummary,
+    value,
+    itemId,
+    editable,
+    style: createPositionStyle(component)
+  };
 }
 
 function prepareCheckboxField(component, flags, editable) {

@@ -1457,3 +1457,86 @@
   font-size: 0.8em;
   opacity: 0.8;
 }
+
+
+/* 0.5.4-test.53: native D&D class integration */
+.item-summary-field[data-component-key="classLevel"] {
+  cursor: pointer;
+}
+
+.item-summary-field[data-component-key="classLevel"].class-drop-target {
+  background: rgba(236, 246, 230, 0.94) !important;
+  outline: 2px dashed rgba(45, 92, 45, 0.9) !important;
+  outline-offset: 1px;
+}
+
+
+/* 0.5.4-test.54: Class picker */
+.brackenvale-class-picker select {
+  width: 100%;
+  min-height: 34px;
+  margin: 0.5rem 0;
+  color: #171612;
+  background: #ffffff;
+}
+
+.brackenvale-class-picker option {
+  color: #171612;
+  background: #ffffff;
+}
+
+.brackenvale-class-picker .hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.82em;
+  opacity: 0.8;
+}
+
+
+/* 0.5.4-test.55: Class & Level is a real clickable control, not an input. */
+.class-level-button {
+  display: block;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #171612;
+  font: inherit;
+  line-height: 1.1;
+  text-align: left;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.class-level-button:hover,
+.class-level-button:focus {
+  background: rgba(255, 255, 240, 0.7);
+  outline: 1px solid rgba(70, 70, 55, 0.35);
+}
+
+.class-level-button.empty {
+  font-style: italic;
+}
+
+.class-level-button.class-picker-loading {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+
+/* 0.5.4-test.56: force Class & Level to behave as a clickable control
+   even if Foundry is still displaying a cached legacy input template. */
+[data-component-key="classLevel"].class-level-interactive {
+  cursor: pointer !important;
+  user-select: none;
+}
+
+input[data-component-key="classLevel"].class-level-interactive {
+  caret-color: transparent !important;
+}
+
+[data-component-key="classLevel"].class-level-interactive:hover,
+[data-component-key="classLevel"].class-level-interactive:focus {
+  background: rgba(255, 255, 240, 0.78) !important;
+  outline: 1px solid rgba(70, 70, 55, 0.4) !important;
+}

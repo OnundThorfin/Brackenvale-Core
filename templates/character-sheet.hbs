@@ -56,6 +56,21 @@
             >
           {{/if}}
 
+          {{#if isClassSummary}}
+            <button
+              type="button"
+              class="overlay-field {{className}} class-level-button {{#unless itemId}}empty{{/unless}}"
+              style="{{style}}"
+              aria-label="{{label}}"
+              title="{{#if itemId}}Open class{{else}}Click to add a class{{/if}}"
+              data-item-id="{{itemId}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              data-action="class-level"
+              {{#unless editable}}disabled{{/unless}}
+            >{{value}}</button>
+          {{/if}}
+
           {{#if isItemSummary}}
             <input
               class="overlay-field {{className}} item-summary-field"
@@ -67,6 +82,7 @@
               data-item-id="{{itemId}}"
               data-component-key="{{key}}"
               data-layout-part="root"
+              {{#if itemTypes}}data-item-summary-types="{{itemTypes}}"{{/if}}
               readonly
             >
           {{/if}}
