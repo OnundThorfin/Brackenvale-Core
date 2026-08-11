@@ -491,11 +491,25 @@ Hooks.once("init", () => {
       let classPickerOpening = false;
 
       const openClassControl = async (event) => {
+        console.group(`${MODULE_ID} | CLASS DIAGNOSTIC`);
+        console.log("event type:", event?.type);
+        console.log("event target:", event?.target);
+        console.log("current target:", event?.currentTarget);
+        console.log("composed path:", event?.composedPath?.());
+        console.log("class field element:", field);
+        console.log("class field outerHTML:", field?.outerHTML);
+        console.log("sheet class:", this.constructor?.name);
+        console.log("actor:", this.actor);
+        console.trace("Class & Level interaction trace");
+        console.groupEnd();
+
         if (this._calibrationMode || classPickerOpening) return;
 
         event?.preventDefault?.();
         event?.stopPropagation?.();
         event?.stopImmediatePropagation?.();
+
+        ui.notifications?.info("Brackenvale class diagnostic fired — check the browser console.");
 
         const itemId = field.dataset.itemId;
         if (itemId) {
@@ -516,6 +530,34 @@ Hooks.once("init", () => {
       };
 
       // Intercept before any native/item-summary handler can see the event.
+      if (!window.__brackenvaleDialogDiagnosticInstalled) {
+        window.__brackenvaleDialogDiagnosticInstalled = true;
+
+        const DialogV2 = foundry.applications?.api?.DialogV2;
+        if (DialogV2) {
+          for (const methodName of ["wait", "confirm", "prompt"]) {
+            const original = DialogV2[methodName];
+            if (typeof original !== "function") continue;
+
+            DialogV2[methodName] = async function(...args) {
+              try {
+                const config = args?.[0] ?? {};
+                const title = config?.window?.title ?? config?.title ?? "";
+                if (String(title).toLowerCase().includes("class")) {
+                  console.group(`${MODULE_ID} | DIALOG DIAGNOSTIC`);
+                  console.log("DialogV2 method:", methodName);
+                  console.log("title:", title);
+                  console.log("config:", config);
+                  console.trace("Dialog creation trace");
+                  console.groupEnd();
+                }
+              } catch (_error) {}
+              return original.apply(this, args);
+            };
+          }
+        }
+      }
+
       field.addEventListener("pointerdown", (event) => {
         if (this._calibrationMode) return;
         event.preventDefault();
