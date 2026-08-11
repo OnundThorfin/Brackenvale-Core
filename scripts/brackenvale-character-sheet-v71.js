@@ -647,10 +647,20 @@ Hooks.once("init", () => {
 
           const itemId = button.dataset.itemId;
           if (!itemId) return;
-
-          // The native D&D Class item remains the source of truth for its
-          // Advancement configuration and feature choices.
           this.actor.items.get(itemId)?.sheet?.render(true);
+        });
+      }
+
+      for (const button of root.querySelectorAll('[data-action="class-advancement"]')) {
+        button.addEventListener("click", (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+          this._openClassAdvancement(this.actor.items.get(itemId));
         });
       }
     }
@@ -1069,30 +1079,75 @@ Hooks.once("init", () => {
         return;
       }
 
-      // Create the genuine D&D Class item on the actor. This preserves the
-      // class's advancement configuration rather than creating Brackenvale
-      // duplicate class data.
-      const itemData = sourceItem.toObject();
-      delete itemData._id;
+      // IMPORTANT: do not createEmbeddedDocuments here.
+      // Feed the genuine compendium Class item through the inherited D&D5e
+      // character-sheet drop handler so D&D5e owns class creation and can
+      // launch its normal Advancement workflow/choices.
+      const dragData =
+        typeof sourceItem.toDragData === "function"
+          ? sourceItem.toDragData()
+          : {
+              type: "Item",
+              uuid: sourceItem.uuid
+            };
 
-      const [created] = await this.actor.createEmbeddedDocuments(
-        "Item",
-        [itemData],
-        {keepId: false}
-      );
+      const target =
+        this.element?.querySelector?.('[data-component-key="classLevel"]')
+        ?? this.element
+        ?? document.body;
 
-      if (!created) {
-        ui.notifications?.error(`${sourceItem.name} could not be added.`);
-        return;
+      const serialized = JSON.stringify(dragData);
+      const dropEvent = {
+        target,
+        currentTarget: target,
+        preventDefault() {},
+        stopPropagation() {},
+        stopImmediatePropagation() {},
+        dataTransfer: {
+          dropEffect: "copy",
+          effectAllowed: "copy",
+          getData(type) {
+            if (
+              type === "text/plain"
+              || type === "application/json"
+              || type === "text"
+            ) {
+              return serialized;
+            }
+            return "";
+          }
+        }
+      };
+
+      try {
+        // This is intentionally the native/inherited sheet drop path.
+        // Brackenvale chooses the source class; D&D5e performs the add.
+        if (typeof this._onDrop !== "function") {
+          throw new Error("D&D5e character sheet drop handler is unavailable.");
+        }
+
+        await this._onDrop(dropEvent);
+        ui.notifications?.info(
+          `${sourceItem.name} sent to D&D5e class advancement for ${this.actor.name}.`
+        );
+      } catch (error) {
+        console.error(`${MODULE_ID} | Native class drop failed`, error);
+        ui.notifications?.error(
+          `${sourceItem.name} could not be added through D&D5e Advancement.`
+        );
       }
+    }
 
-      ui.notifications?.info(`${created.name} added to ${this.actor.name}.`);
-      this.render();
+    _openClassAdvancement(item) {
+      if (!item || item.type !== "class") return;
 
-      // Open the native D&D Class item immediately. If its advancement
-      // configuration requires choices, those remain available through the
-      // system-managed Class item rather than being reimplemented here.
-      created.sheet?.render(true);
+      // Use the native D&D item sheet. Different D&D5e sheet revisions use
+      // slightly different tab option names, so provide both without
+      // reimplementing any advancement UI in Brackenvale.
+      item.sheet?.render(true, {
+        tab: "advancement",
+        activeTab: "advancement"
+      });
     }
 
 
@@ -1896,6 +1951,7 @@ Hooks.once("init", () => {
         if (
           field.classList.contains("equipment-slot-only-region")
           || field.classList.contains("slot-summary-field")
+          || field.classList.contains("page2-list-panel")
         ) {
           this._selectCalibrationField(root, field);
         }
@@ -1926,6 +1982,7 @@ Hooks.once("init", () => {
             || field.classList.contains("supply-widget")
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
+            || field.classList.contains("page2-list-panel")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";

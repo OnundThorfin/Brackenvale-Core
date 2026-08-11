@@ -94,7 +94,7 @@
 
           {{#if isFeatureList}}
             <section
-              class="overlay-field page2-list-panel page2-features-panel {{#if opaquePanel}}opaque-panel{{/if}}"
+              class="overlay-field calibration-page2-field page2-list-panel page2-features-panel {{#if opaquePanel}}opaque-panel{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
@@ -104,14 +104,26 @@
                 {{#if hasClass}}
                   <div class="page2-class-actions">
                     {{#each classItems}}
+                      <div class="page2-class-label">
+                        {{name}}{{#if levels}} {{levels}}{{/if}}
+                      </div>
+                      <button
+                        type="button"
+                        class="page2-class-advancement"
+                        data-action="class-advancement"
+                        data-item-id="{{id}}"
+                        title="Open {{name}} Advancement"
+                      >
+                        Advancement
+                      </button>
                       <button
                         type="button"
                         class="page2-manage-class"
                         data-action="manage-class"
                         data-item-id="{{id}}"
-                        title="Open {{name}} to manage class advancement"
+                        title="Open {{name}} class"
                       >
-                        Manage {{name}}{{#if levels}} {{levels}}{{/if}}
+                        Open Class
                       </button>
                     {{/each}}
                   </div>
@@ -141,7 +153,7 @@
 
           {{#if isLanguageList}}
             <section
-              class="overlay-field page2-list-panel page2-languages-panel {{#if opaquePanel}}opaque-panel{{/if}}"
+              class="overlay-field calibration-page2-field page2-list-panel page2-languages-panel {{#if opaquePanel}}opaque-panel{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
@@ -159,7 +171,7 @@
 
           {{#if isProficiencyList}}
             <section
-              class="overlay-field page2-list-panel page2-proficiencies-panel {{#if opaquePanel}}opaque-panel{{/if}}"
+              class="overlay-field calibration-page2-field page2-list-panel page2-proficiencies-panel {{#if opaquePanel}}opaque-panel{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"

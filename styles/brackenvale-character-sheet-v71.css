@@ -2077,3 +2077,58 @@ input[data-component-key="classLevel"].class-level-interactive {
 .calibration-mode .page2-list-panel > * {
   pointer-events: none !important;
 }
+
+
+/* test.108 — Page 2 uses the existing GM calibration system */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+  cursor: move !important;
+  touch-action: none !important;
+  user-select: none !important;
+  outline: 2px dashed rgba(179, 43, 43, 0.92) !important;
+  outline-offset: -1px !important;
+}
+
+/* During calibration the panel itself receives the pointer event, exactly
+   like the simple overlay fields on the other pages. */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel > * {
+  pointer-events: none !important;
+}
+
+/* Strong selection feedback, matching the rest of the sheet. */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel.calibration-selected {
+  z-index: 1100 !important;
+  outline: 3px solid #e31b1b !important;
+  outline-offset: 1px !important;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.95),
+    0 0 0 5px rgba(227,27,27,.95),
+    0 0 14px 6px rgba(227,27,27,.35) !important;
+}
+
+
+/* test.109 — Page 2 class / native Advancement controls */
+.page2-class-actions {
+  display: grid !important;
+  grid-template-columns: auto 1fr 1fr !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.page2-class-label {
+  padding: 2px 4px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+.page2-class-advancement,
+.page2-manage-class {
+  min-height: 22px !important;
+  padding: 1px 4px !important;
+  border: 1px solid rgba(0,0,0,.25) !important;
+  background: #f7f5ed !important;
+  color: #171612 !important;
+  font: inherit !important;
+  cursor: pointer !important;
+}
