@@ -85,9 +85,7 @@ Hooks.once("init", () => {
         active: Number(layout.page) === Number(this._activePage),
         isPage2: Number(layout.page) === 2,
         page2Data: Number(layout.page) === 2 ? page2Data : null,
-        components: Number(layout.page) === 2
-          ? []
-          : layout.components.map((component) =>
+        components: layout.components.map((component) =>
               prepareSheetComponent(
                 component,
                 this.actor,
@@ -198,7 +196,6 @@ Hooks.once("init", () => {
       if (!root) return;
 
       this._activateArtworkPageTabs(root);
-      this._renderPage2DirectDOM(root);
       this._activateItemEditors(root);
       this._activatePage2FeatureControls(root);
       this._activateClassIntegration(root);
@@ -1899,6 +1896,7 @@ Hooks.once("init", () => {
         if (
           field.classList.contains("equipment-slot-only-region")
           || field.classList.contains("slot-summary-field")
+          || field.classList.contains("page2-list-panel")
         ) {
           this._selectCalibrationField(root, field);
         }
@@ -1929,6 +1927,7 @@ Hooks.once("init", () => {
             || field.classList.contains("supply-widget")
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
+            || field.classList.contains("page2-list-panel")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";

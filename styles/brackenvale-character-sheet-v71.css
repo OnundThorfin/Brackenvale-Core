@@ -1975,3 +1975,134 @@ input[data-component-key="classLevel"].class-level-interactive {
   background: #ffffff !important;
   color: #171612 !important;
 }
+
+
+/* test.107 — Page 2 only. Uses the same overlay-field/calibration model as working pages. */
+.page2-list-panel {
+  position: absolute !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 4px 5px !important;
+  background: #ffffff !important;
+  color: #171612 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+}
+
+.page2-list-content,
+.page2-simple-rows,
+.page2-proficiency-groups {
+  width: 100% !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.page2-class-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 4px !important;
+  margin-bottom: 5px !important;
+}
+
+.page2-run-advancement,
+.page2-manage-class {
+  min-height: 22px !important;
+  padding: 1px 4px !important;
+  border: 1px solid rgba(0,0,0,.25) !important;
+  background: #f7f5ed !important;
+  color: #171612 !important;
+  font: inherit !important;
+  cursor: pointer !important;
+}
+
+.page2-feature-row {
+  display: block !important;
+  width: 100% !important;
+  min-height: 20px !important;
+  margin: 0 0 2px !important;
+  padding: 2px 4px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,.14) !important;
+  background: #ffffff !important;
+  color: #171612 !important;
+  text-align: left !important;
+  font: inherit !important;
+  cursor: pointer !important;
+}
+
+.page2-feature-row small {
+  display: block !important;
+  opacity: .6 !important;
+  font-size: .78em !important;
+}
+
+.page2-simple-row {
+  min-height: 20px !important;
+  padding: 2px 3px !important;
+  border-bottom: 1px solid rgba(0,0,0,.13) !important;
+}
+
+.page2-proficiency-group {
+  margin-bottom: 7px !important;
+}
+
+.page2-proficiency-group > strong {
+  display: block !important;
+  margin-bottom: 2px !important;
+  border-bottom: 1px solid rgba(0,0,0,.28) !important;
+}
+
+.page2-empty-list {
+  padding: 5px 3px !important;
+  opacity: .58 !important;
+  font-style: italic !important;
+}
+
+.calibration-mode .page2-list-panel {
+  outline: 2px dashed rgba(179,43,43,.92) !important;
+  outline-offset: -1px !important;
+  cursor: move !important;
+  user-select: none !important;
+  touch-action: none !important;
+  z-index: 1000 !important;
+}
+
+.calibration-mode .page2-list-panel.calibration-selected {
+  outline: 3px solid #d22c2c !important;
+  z-index: 1100 !important;
+}
+
+.calibration-mode .page2-list-panel > * {
+  pointer-events: none !important;
+}
+
+
+/* test.108 — Page 2 uses the existing GM calibration system */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+  cursor: move !important;
+  touch-action: none !important;
+  user-select: none !important;
+  outline: 2px dashed rgba(179, 43, 43, 0.92) !important;
+  outline-offset: -1px !important;
+}
+
+/* During calibration the panel itself receives the pointer event, exactly
+   like the simple overlay fields on the other pages. */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel > * {
+  pointer-events: none !important;
+}
+
+/* Strong selection feedback, matching the rest of the sheet. */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel.calibration-selected {
+  z-index: 1100 !important;
+  outline: 3px solid #e31b1b !important;
+  outline-offset: 1px !important;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.95),
+    0 0 0 5px rgba(227,27,27,.95),
+    0 0 14px 6px rgba(227,27,27,.35) !important;
+}
