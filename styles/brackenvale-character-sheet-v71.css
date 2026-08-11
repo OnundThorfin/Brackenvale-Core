@@ -1933,24 +1933,24 @@ input[data-component-key="classLevel"].class-level-interactive {
 }
 
 .page2-dom-features {
-  left: 5.4% !important;
-  top: 10% !important;
-  width: 48.1% !important;
-  height: 79.2% !important;
+  left: 5.4%;
+  top: 10%;
+  width: 48.1%;
+  height: 79.2%;
 }
 
 .page2-dom-languages {
-  left: 58.1% !important;
-  top: 10% !important;
-  width: 36.9% !important;
-  height: 28.9% !important;
+  left: 58.1%;
+  top: 10%;
+  width: 36.9%;
+  height: 28.9%;
 }
 
 .page2-dom-proficiencies {
-  left: 58.1% !important;
-  top: 44.4% !important;
-  width: 36.9% !important;
-  height: 44.8% !important;
+  left: 58.1%;
+  top: 44.4%;
+  width: 36.9%;
+  height: 44.8%;
 }
 
 .page2-dom-scroll {
@@ -1974,4 +1974,25 @@ input[data-component-key="classLevel"].class-level-interactive {
 .page2-dom-panel .page2-simple-row {
   background: #ffffff !important;
   color: #171612 !important;
+}
+
+
+/* 0.5.4-test.82 — Page 2 panels use the normal GM calibration system. */
+.calibration-mode .brackenvale-page2-dom {
+  pointer-events: auto !important;
+}
+
+.calibration-mode .page2-dom-panel {
+  z-index: 20000 !important;
+  pointer-events: auto !important;
+  cursor: move !important;
+  outline: 1px dashed rgba(180, 120, 20, 0.9) !important;
+}
+
+.calibration-mode .page2-dom-panel.calibration-selected {
+  outline: 2px solid rgba(170, 80, 20, 1) !important;
+}
+
+.calibration-mode .page2-dom-panel > * {
+  pointer-events: none !important;
 }
