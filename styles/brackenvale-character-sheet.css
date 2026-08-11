@@ -1602,3 +1602,19 @@ input[data-component-key="classLevel"].class-level-interactive {
 .brackenvale-class-choice span {
   color: #171612;
 }
+
+
+/* 0.5.4-test.62 diagnostic + hard class-control interception */
+.brackenvale-class-picker-version {
+  margin: 0 0 0.45rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(70, 70, 60, 0.35);
+  background: #f5f2e8;
+  color: #171612;
+  text-align: center;
+}
+
+[data-component-key="classLevel"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}

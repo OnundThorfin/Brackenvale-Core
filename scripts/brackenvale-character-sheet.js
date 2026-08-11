@@ -488,11 +488,14 @@ Hooks.once("init", () => {
       field.setAttribute("tabindex", "0");
       field.classList.add("class-level-interactive");
 
+      let classPickerOpening = false;
+
       const openClassControl = async (event) => {
-        if (this._calibrationMode) return;
+        if (this._calibrationMode || classPickerOpening) return;
 
         event?.preventDefault?.();
         event?.stopPropagation?.();
+        event?.stopImmediatePropagation?.();
 
         const itemId = field.dataset.itemId;
         if (itemId) {
@@ -502,22 +505,35 @@ Hooks.once("init", () => {
 
         if (!this.isEditable) return;
 
+        classPickerOpening = true;
         field.classList.add("class-picker-loading");
         try {
           await this._openBrackenvaleClassPicker();
         } finally {
           field.classList.remove("class-picker-loading");
+          classPickerOpening = false;
         }
       };
 
-      // Capture phase prevents the legacy editable/input handlers from
-      // swallowing the click before our picker sees it.
+      // Intercept before any native/item-summary handler can see the event.
+      field.addEventListener("pointerdown", (event) => {
+        if (this._calibrationMode) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+      }, {capture: true});
+
       field.addEventListener("click", openClassControl, {capture: true});
-      field.addEventListener("dblclick", openClassControl, {capture: true});
+      field.addEventListener("dblclick", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+      }, {capture: true});
+
       field.addEventListener("keydown", async (event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
         await openClassControl(event);
-      });
+      }, {capture: true});
 
       const removeButton = root.querySelector('[data-action="remove-class"]');
       if (removeButton) {
@@ -775,6 +791,7 @@ Hooks.once("init", () => {
         window: {title: "Add a Class"},
         content: `
           <form class="brackenvale-class-picker">
+            <p class="brackenvale-class-picker-version"><strong>Brackenvale Class Picker · test.62</strong></p>
             <p>Select a D&D class to add to <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>.</p>
             <div class="brackenvale-class-choice-grid">
               ${classChoices}
@@ -913,6 +930,9 @@ Hooks.once("init", () => {
 
     _activateItemEditors(root) {
       for (const field of root.querySelectorAll("[data-item-id]")) {
+        if (field.dataset.componentKey === "classLevel") continue;
+        if (field.dataset.action === "remove-class") continue;
+
         field.addEventListener("dblclick", (event) => {
           if (this._calibrationMode) return;
 
