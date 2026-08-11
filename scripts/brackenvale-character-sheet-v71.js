@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.71");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.85");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v70.hbs";
 const LAYOUT_ROOT =
@@ -559,18 +559,42 @@ Hooks.once("init", () => {
 
       page.querySelectorAll(".brackenvale-page2-dom").forEach((node) => node.remove());
 
+      const page2Layout = this._workingLayouts?.find(
+        (entry) => Number(entry.page) === 2
+      );
+      const componentByKey = (key) =>
+        page2Layout?.components?.find((entry) => entry.key === key);
+      const layoutStyle = (component, fallback) => {
+        const source = component ?? fallback;
+        return [
+          `left:${Number(source.left)}%`,
+          `top:${Number(source.top)}%`,
+          `width:${Number(source.width)}%`,
+          `height:${Number(source.height)}%`
+        ].join(";");
+      };
+
       const data = this._preparePage2DirectData();
       const escape = (value) => foundry.utils.escapeHTML(String(value ?? ""));
 
       const featureRows = [
         ...data.classes.map((entry) => `
-          <button
-            type="button"
-            class="page2-manage-class"
-            data-action="manage-class"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)} class"
-          >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          <div class="page2-class-actions">
+            <button
+              type="button"
+              class="page2-run-advancement"
+              data-action="run-class-advancement"
+              data-item-id="${escape(entry.id)}"
+              title="Run ${escape(entry.name)} through D&D5e Advancement"
+            >Run Advancement</button>
+            <button
+              type="button"
+              class="page2-manage-class"
+              data-action="manage-class"
+              data-item-id="${escape(entry.id)}"
+              title="Open ${escape(entry.name)} class"
+            >Open ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          </div>
         `),
         ...data.features.map((entry) => `
           <button
@@ -606,13 +630,37 @@ Hooks.once("init", () => {
       const overlay = document.createElement("div");
       overlay.className = "brackenvale-page2-dom";
       overlay.innerHTML = `
-        <section class="page2-dom-panel page2-dom-features">
+        <section
+          class="page2-dom-panel page2-dom-features overlay-field"
+          style="${layoutStyle(componentByKey("features-traits"), {left:5.4,top:10,width:48.1,height:79.2})}"
+          data-component-key="features-traits"
+          data-layout-part="root"
+          aria-label="Features & Traits"
+          tabindex="0"
+        >
+          <div class="page2-calibration-handle">MOVE FEATURES & TRAITS</div>
           <div class="page2-dom-scroll">${featureRows}</div>
         </section>
-        <section class="page2-dom-panel page2-dom-languages">
+        <section
+          class="page2-dom-panel page2-dom-languages overlay-field"
+          style="${layoutStyle(componentByKey("languages"), {left:58.1,top:10,width:36.9,height:28.9})}"
+          data-component-key="languages"
+          data-layout-part="root"
+          aria-label="Languages"
+          tabindex="0"
+        >
+          <div class="page2-calibration-handle">MOVE LANGUAGES</div>
           <div class="page2-dom-scroll">${languageRows}</div>
         </section>
-        <section class="page2-dom-panel page2-dom-proficiencies">
+        <section
+          class="page2-dom-panel page2-dom-proficiencies overlay-field"
+          style="${layoutStyle(componentByKey("proficiencies"), {left:58.1,top:44.4,width:36.9,height:44.8})}"
+          data-component-key="proficiencies"
+          data-layout-part="root"
+          aria-label="Proficiencies"
+          tabindex="0"
+        >
+          <div class="page2-calibration-handle">MOVE PROFICIENCIES</div>
           <div class="page2-dom-scroll">${proficiencyRows}</div>
         </section>
       `;
@@ -631,7 +679,6 @@ Hooks.once("init", () => {
       for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
-
           event.preventDefault();
           event.stopPropagation();
 
@@ -644,16 +691,26 @@ Hooks.once("init", () => {
       for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
-
           event.preventDefault();
           event.stopPropagation();
 
           const itemId = button.dataset.itemId;
           if (!itemId) return;
-
-          // The native D&D Class item remains the source of truth for its
-          // Advancement configuration and feature choices.
           this.actor.items.get(itemId)?.sheet?.render(true);
+        });
+      }
+
+      for (const button of root.querySelectorAll('[data-action="run-class-advancement"]')) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          const classItem = itemId ? this.actor.items.get(itemId) : null;
+          if (!classItem) return;
+
+          await this._rerunClassAdvancement(classItem);
         });
       }
     }
@@ -1067,35 +1124,115 @@ Hooks.once("init", () => {
       );
 
       if (existing) {
-        ui.notifications?.info(`${existing.name} is already on this character.`);
-        existing.sheet?.render(true);
+        ui.notifications?.info(
+          `${existing.name} is already on this character. Use Run Advancement on Page 2 to repair an older class.`
+        );
         return;
       }
 
-      // Create the genuine D&D Class item on the actor. This preserves the
-      // class's advancement configuration rather than creating Brackenvale
-      // duplicate class data.
-      const itemData = sourceItem.toObject();
-      delete itemData._id;
+      await this._runNativeClassDrop(sourceItem);
+    }
 
-      const [created] = await this.actor.createEmbeddedDocuments(
-        "Item",
-        [itemData],
-        {keepId: false}
-      );
+    async _runNativeClassDrop(sourceItem) {
+      if (!sourceItem || sourceItem.type !== "class") return false;
 
-      if (!created) {
-        ui.notifications?.error(`${sourceItem.name} could not be added.`);
+      const dragData =
+        typeof sourceItem.toDragData === "function"
+          ? sourceItem.toDragData()
+          : {type: "Item", uuid: sourceItem.uuid};
+
+      const target =
+        this.element?.querySelector?.(".brackenvale-art-page.active")
+        ?? this.element
+        ?? document.body;
+
+      const fakeEvent = {
+        target,
+        currentTarget: target,
+        preventDefault() {},
+        stopPropagation() {},
+        stopImmediatePropagation() {},
+        dataTransfer: {
+          getData(type) {
+            if (type === "text/plain" || type === "application/json") {
+              return JSON.stringify(dragData);
+            }
+            return "";
+          }
+        }
+      };
+
+      try {
+        // CharacterActorSheet's native item-drop path is what invokes the
+        // D&D5e Advancement Manager for classes, subclasses, and backgrounds.
+        if (typeof this._onDropItem === "function") {
+          await this._onDropItem(fakeEvent, sourceItem);
+          return true;
+        }
+
+        if (typeof this._onDrop === "function") {
+          await this._onDrop(fakeEvent);
+          return true;
+        }
+
+        throw new Error("No native D&D5e drop handler is available on this sheet.");
+      } catch (error) {
+        console.error(`${MODULE_ID} | Native class Advancement drop failed`, error);
+        ui.notifications?.error(
+          `D&D5e could not start Advancement for ${sourceItem.name}.`
+        );
+        return false;
+      }
+    }
+
+    async _rerunClassAdvancement(classItem) {
+      if (!classItem || classItem.type !== "class") return;
+
+      const sourceUuid =
+        foundry.utils.getProperty(classItem, "flags.core.sourceId")
+        ?? foundry.utils.getProperty(classItem, "_stats.compendiumSource")
+        ?? null;
+
+      if (!sourceUuid) {
+        ui.notifications?.warn(
+          `${classItem.name} has no original compendium source recorded. Remove it and add it again with the Brackenvale class picker.`
+        );
         return;
       }
 
-      ui.notifications?.info(`${created.name} added to ${this.actor.name}.`);
-      this.render();
+      const sourceItem = await fromUuid(sourceUuid);
+      if (!sourceItem || sourceItem.type !== "class") {
+        ui.notifications?.warn(
+          `Brackenvale could not load the original ${classItem.name} class.`
+        );
+        return;
+      }
 
-      // Open the native D&D Class item immediately. If its advancement
-      // configuration requires choices, those remain available through the
-      // system-managed Class item rather than being reimplemented here.
-      created.sheet?.render(true);
+      const DialogV2 = foundry.applications?.api?.DialogV2;
+      let approved = false;
+
+      if (DialogV2?.confirm) {
+        approved = await DialogV2.confirm({
+          window: {title: `Run ${classItem.name} Advancement`},
+          content: `
+            <p>This class was added before Brackenvale used D&D5e's native Advancement workflow.</p>
+            <p>Brackenvale will remove the embedded <strong>${foundry.utils.escapeHTML(classItem.name)}</strong>
+            class and immediately re-add its original compendium class through D&D5e Advancement.</p>
+          `,
+          yes: {label: "Run Advancement"},
+          no: {label: "Cancel"},
+          modal: true
+        });
+      } else {
+        approved = window.confirm(
+          `Re-add ${classItem.name} through D&D5e Advancement?`
+        );
+      }
+
+      if (!approved) return;
+
+      await classItem.delete();
+      await this._runNativeClassDrop(sourceItem);
     }
 
 
@@ -1890,7 +2027,7 @@ Hooks.once("init", () => {
         if (!this._calibrationMode) return;
 
         const field = event.target.closest(
-          ".brackenvale-page-fields .overlay-field[data-component-key]"
+          ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
         );
         if (!field || !root.contains(field)) return;
 
@@ -1899,6 +2036,7 @@ Hooks.once("init", () => {
         if (
           field.classList.contains("equipment-slot-only-region")
           || field.classList.contains("slot-summary-field")
+          || field.classList.contains("page2-dom-panel")
         ) {
           this._selectCalibrationField(root, field);
         }
@@ -1909,7 +2047,7 @@ Hooks.once("init", () => {
       root.classList.toggle("calibration-mode", this._calibrationMode);
 
       for (const field of root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field"
+        ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field"
       )) {
         if (this._calibrationMode) {
           field.dataset.wasDisabled = String(field.disabled);
@@ -1929,6 +2067,7 @@ Hooks.once("init", () => {
             || field.classList.contains("supply-widget")
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
+            || field.classList.contains("page2-dom-panel")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";
@@ -1949,7 +2088,7 @@ Hooks.once("init", () => {
 
     _activateCalibrationDragging(root) {
       const fields = root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field[data-component-key]"
+        ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
       );
 
       for (const field of fields) {
