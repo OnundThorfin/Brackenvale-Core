@@ -2194,3 +2194,18 @@ input[data-component-key="classLevel"].class-level-interactive {
   font: 700 10px/1 Arial, sans-serif !important;
   pointer-events: none !important;
 }
+
+
+/* test.98 — explicit visible proof on exact v71/v70 live path */
+.page2-live-proof-v96 {
+  position: absolute !important;
+  top: 5.2% !important;
+  left: 34% !important;
+  z-index: 999999 !important;
+  padding: 4px 10px !important;
+  background: #8b0000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+  font: 700 11px/1 Arial, sans-serif !important;
+  pointer-events: none !important;
+}
