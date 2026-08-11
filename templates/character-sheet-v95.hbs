@@ -33,8 +33,9 @@
       data-page="{{page}}"
     >
       {{#if isPage2}}
-        <div class="page2-live-proof-v96">PAGE 2 LIVE v98 · FORGE ROOT</div>
+        <div class="page2-rebuilt-proof">PAGE 2 REBUILT · v95</div>
       {{/if}}
+
       <img
         class="brackenvale-page-art"
         src="{{art}}"
@@ -109,21 +110,12 @@
                     {{#each classItems}}
                       <button
                         type="button"
-                        class="page2-run-advancement"
-                        data-action="run-class-advancement"
-                        data-item-id="{{id}}"
-                        title="Run {{name}} through D&D5e Advancement"
-                      >
-                        Run Advancement
-                      </button>
-                      <button
-                        type="button"
                         class="page2-manage-class"
                         data-action="manage-class"
                         data-item-id="{{id}}"
-                        title="Open {{name}} class"
+                        title="Open {{name}} to manage class advancement"
                       >
-                        Open {{name}}{{#if levels}} {{levels}}{{/if}}
+                        Manage {{name}}{{#if levels}} {{levels}}{{/if}}
                       </button>
                     {{/each}}
                   </div>
@@ -178,6 +170,103 @@
               aria-label="{{label}}"
             >
               <div class="page2-proficiency-groups">
+                {{#each groups}}
+                  <div class="page2-proficiency-group">
+                    <strong>{{label}}</strong>
+                    {{#each rows}}
+                      <div class="page2-simple-row">{{this}}</div>
+                    {{/each}}
+                  </div>
+                {{else}}
+                  <div class="page2-empty-list">No proficiencies recorded.</div>
+                {{/each}}
+              </div>
+            </section>
+          {{/if}}
+
+
+          {{#if isPage2FeaturesRegion}}
+            <section
+              class="overlay-field page2-rebuilt-region page2-rebuilt-features {{#if opaquePanel}}opaque-panel{{/if}}"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              aria-label="{{label}}"
+              tabindex="0"
+            >
+              <div class="page2-rebuilt-content">
+                {{#if hasClass}}
+                  <div class="page2-rebuilt-class-actions">
+                    {{#each classItems}}
+                      <button
+                        type="button"
+                        class="page2-run-advancement"
+                        data-action="run-class-advancement"
+                        data-item-id="{{id}}"
+                        title="Run {{name}} through D&D5e Advancement"
+                      >Run Advancement</button>
+                      <button
+                        type="button"
+                        class="page2-manage-class"
+                        data-action="manage-class"
+                        data-item-id="{{id}}"
+                        title="Open {{name}} class"
+                      >Open {{name}}{{#if levels}} {{levels}}{{/if}}</button>
+                    {{/each}}
+                  </div>
+                {{/if}}
+
+                <div class="page2-rebuilt-feature-list">
+                  {{#each rows}}
+                    <button
+                      type="button"
+                      class="page2-feature-row"
+                      data-action="open-feature"
+                      data-item-id="{{id}}"
+                      title="Open {{name}}"
+                    >
+                      <span class="page2-feature-name">{{name}}</span>
+                      {{#if typeLabel}}
+                        <span class="page2-feature-type">{{typeLabel}}</span>
+                      {{/if}}
+                    </button>
+                  {{else}}
+                    <div class="page2-empty-list">No features or traits have been granted yet.</div>
+                  {{/each}}
+                </div>
+              </div>
+            </section>
+          {{/if}}
+
+          {{#if isPage2LanguagesRegion}}
+            <section
+              class="overlay-field page2-rebuilt-region page2-rebuilt-languages {{#if opaquePanel}}opaque-panel{{/if}}"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              aria-label="{{label}}"
+              tabindex="0"
+            >
+              <div class="page2-rebuilt-simple-list">
+                {{#each rows}}
+                  <div class="page2-simple-row">{{this}}</div>
+                {{else}}
+                  <div class="page2-empty-list">No languages recorded.</div>
+                {{/each}}
+              </div>
+            </section>
+          {{/if}}
+
+          {{#if isPage2ProficienciesRegion}}
+            <section
+              class="overlay-field page2-rebuilt-region page2-rebuilt-proficiencies {{#if opaquePanel}}opaque-panel{{/if}}"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              aria-label="{{label}}"
+              tabindex="0"
+            >
+              <div class="page2-rebuilt-proficiency-list">
                 {{#each groups}}
                   <div class="page2-proficiency-group">
                     <strong>{{label}}</strong>

@@ -12,11 +12,11 @@ import {
   setEquipmentDamage
 } from "./equipment-manager.js";
 
-const MODULE_ID = "brackenvale-core";
+const MODULE_ID = "brackenvale-core-dev100";
 const TEMPLATE_PATH =
-  "modules/brackenvale-core/templates/character-sheet.hbs";
+  "modules/brackenvale-core-dev100/templates/character-sheet.hbs";
 const LAYOUT_ROOT =
-  "modules/brackenvale-core/layouts";
+  "modules/brackenvale-core-dev100/layouts";
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet (equipment repository repair)`);

@@ -49,7 +49,7 @@ export function isNativeEquipped(item) {
 }
 
 
-export function getItemSlotValue(item, moduleId = "brackenvale-core") {
+export function getItemSlotValue(item, moduleId = "brackenvale-core-dev100") {
   const override = Number(
     foundry.utils.getProperty(item, `flags.${moduleId}.slots`)
   );
@@ -110,7 +110,7 @@ export function getItemSlotValue(item, moduleId = "brackenvale-core") {
   return quantity;
 }
 
-export function getActorSlotCapacity(actor, moduleId = "brackenvale-core") {
+export function getActorSlotCapacity(actor, moduleId = "brackenvale-core-dev100") {
   const override = Number(
     foundry.utils.getProperty(actor, `flags.${moduleId}.totalSlots`)
   );
@@ -270,7 +270,7 @@ function isSupplyDieItem(item, moduleId) {
 }
 
 
-export function getEquipmentDamage(item, moduleId = "brackenvale-core") {
+export function getEquipmentDamage(item, moduleId = "brackenvale-core-dev100") {
   const value = Number(
     foundry.utils.getProperty(item, `flags.${moduleId}.equipmentDamage`) ?? 0
   );
@@ -308,7 +308,7 @@ export function getEquipmentDamageCapacity(item) {
   return 0;
 }
 
-export function isEquipmentBroken(item, moduleId = "brackenvale-core") {
+export function isEquipmentBroken(item, moduleId = "brackenvale-core-dev100") {
   const capacity = getEquipmentDamageCapacity(item);
   return capacity > 0 && getEquipmentDamage(item, moduleId) >= capacity;
 }
@@ -316,7 +316,7 @@ export function isEquipmentBroken(item, moduleId = "brackenvale-core") {
 export async function setEquipmentDamage(
   item,
   requestedDamage,
-  moduleId = "brackenvale-core"
+  moduleId = "brackenvale-core-dev100"
 ) {
   const capacity = getEquipmentDamageCapacity(item);
   if (!capacity) return;
@@ -422,18 +422,18 @@ function hasWeaponProperty(item, candidates) {
   );
 }
 
-async function refreshEquippedArmorClass(actor, moduleId = "brackenvale-core") {
+async function refreshEquippedArmorClass(actor, moduleId = "brackenvale-core-dev100") {
   if (!actor) return;
   const state = getEquipmentState(actor, moduleId);
   if (state.armor) await applyArmorClass(actor, state.armor, moduleId);
 }
 
-export function getItemLocation(item, moduleId = "brackenvale-core") {
+export function getItemLocation(item, moduleId = "brackenvale-core-dev100") {
   return foundry.utils.getProperty(item, `flags.${moduleId}.${EQUIPMENT_LOCATION_FLAG}`)
     ?? (isNativeEquipped(item) ? "equipped" : "packed");
 }
 
-export function getEquipmentState(actor, moduleId = "brackenvale-core") {
+export function getEquipmentState(actor, moduleId = "brackenvale-core-dev100") {
   const items = (actor?.items ?? [])
     .filter(isInventoryItem)
     .map((item) => ({
@@ -496,7 +496,7 @@ export async function placeEquipmentItem(
   actor,
   sourceItem,
   zoneType,
-  moduleId = "brackenvale-core"
+  moduleId = "brackenvale-core-dev100"
 ) {
   if (!actor || !sourceItem) throw new Error("Actor and source item are required.");
 
@@ -561,7 +561,7 @@ export async function placeEquipmentItem(
 export async function deleteEquipmentItem(
   actor,
   item,
-  moduleId = "brackenvale-core"
+  moduleId = "brackenvale-core-dev100"
 ) {
   const wasArmor = isArmorItem(item) && getItemLocation(item, moduleId) === "equipped";
   await item.delete();
@@ -660,7 +660,7 @@ async function applyArmorClass(actor, armor, moduleId) {
 
 async function restoreArmorClassIfUnarmored(
   actor,
-  moduleId = "brackenvale-core"
+  moduleId = "brackenvale-core-dev100"
 ) {
   const state = getEquipmentState(actor, moduleId);
   if (state.armor) return;

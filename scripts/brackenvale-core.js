@@ -1,4 +1,4 @@
-const MODULE_ID = "brackenvale-core";
+const MODULE_ID = "brackenvale-core-dev100";
 const MODULE_VERSION = "0.2.2";
 
 const CALENDAR = {

@@ -12,12 +12,12 @@ import {
   setEquipmentDamage
 } from "./equipment-manager.js";
 
-const MODULE_ID = "brackenvale-core";
+const MODULE_ID = "brackenvale-core-dev100";
 console.info("Brackenvale Core character sheet runtime: 0.5.4-test.77");
 const TEMPLATE_PATH =
-  "modules/brackenvale-core/templates/character-sheet-v70.hbs";
+  "modules/brackenvale-core-dev100/templates/character-sheet-v70.hbs";
 const LAYOUT_ROOT =
-  "modules/brackenvale-core/layouts";
+  "modules/brackenvale-core-dev100/layouts";
 
 let brackenvaleCharacterSheetRegistered = false;
 
