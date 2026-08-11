@@ -1079,27 +1079,26 @@ Hooks.once("init", () => {
         return;
       }
 
-      // IMPORTANT: do not createEmbeddedDocuments here.
-      // Feed the genuine compendium Class item through the inherited D&D5e
-      // character-sheet drop handler so D&D5e owns class creation and can
-      // launch its normal Advancement workflow/choices.
+      // D&D5e's automatic advancement is attached to the character sheet's
+      // specialized item-drop handler. Calling the generic _onDrop path can
+      // create the Item without ever entering the AdvancementManager.
       const dragData =
         typeof sourceItem.toDragData === "function"
           ? sourceItem.toDragData()
-          : {
-              type: "Item",
-              uuid: sourceItem.uuid
-            };
+          : {type: "Item", uuid: sourceItem.uuid};
 
+      const serialized = JSON.stringify(dragData);
       const target =
         this.element?.querySelector?.('[data-component-key="classLevel"]')
+        ?? this.element?.querySelector?.(".brackenvale-art-page.active")
         ?? this.element
         ?? document.body;
 
-      const serialized = JSON.stringify(dragData);
       const dropEvent = {
         target,
         currentTarget: target,
+        clientX: target?.getBoundingClientRect?.().left ?? 0,
+        clientY: target?.getBoundingClientRect?.().top ?? 0,
         preventDefault() {},
         stopPropagation() {},
         stopImmediatePropagation() {},
@@ -1119,24 +1118,60 @@ Hooks.once("init", () => {
         }
       };
 
+      let advancementOpened = false;
+      const hookId = Hooks.on("dnd5e.preAdvancementManagerRender", (manager) => {
+        const managerActor =
+          manager?.actor
+          ?? manager?.document
+          ?? manager?.object
+          ?? null;
+
+        if (!managerActor || managerActor === this.actor) {
+          advancementOpened = true;
+        }
+      });
+
       try {
-        // This is intentionally the native/inherited sheet drop path.
-        // Brackenvale chooses the source class; D&D5e performs the add.
-        if (typeof this._onDrop !== "function") {
-          throw new Error("D&D5e character sheet drop handler is unavailable.");
+        // IMPORTANT: call the D&D5e CharacterActorSheet item-drop handler
+        // directly. This is the system path responsible for class/background/
+        // species advancement when such an Item is dropped onto a character.
+        const nativeSheetClass =
+          game.dnd5e?.applications?.actor?.CharacterActorSheet;
+        const nativeItemDrop =
+          nativeSheetClass?.prototype?._onDropItem
+          ?? this._onDropItem;
+
+        if (typeof nativeItemDrop !== "function") {
+          throw new Error(
+            "D&D5e CharacterActorSheet._onDropItem is unavailable."
+          );
         }
 
-        await this._onDrop(dropEvent);
-        ui.notifications?.info(
-          `${sourceItem.name} sent to D&D5e class advancement for ${this.actor.name}.`
-        );
+        await nativeItemDrop.call(this, dropEvent, sourceItem);
+
+        // Let an ApplicationV2 advancement window begin rendering before
+        // deciding whether the native workflow actually started.
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        if (!advancementOpened) {
+          console.warn(
+            `${MODULE_ID} | D&D5e item drop completed without opening an AdvancementManager.`,
+            {actor: this.actor, sourceItem}
+          );
+          ui.notifications?.warn(
+            `${sourceItem.name} was sent through D&D5e's native item-drop handler, but no Advancement window opened.`
+          );
+        }
       } catch (error) {
-        console.error(`${MODULE_ID} | Native class drop failed`, error);
+        console.error(`${MODULE_ID} | D&D5e native class Advancement failed`, error);
         ui.notifications?.error(
-          `${sourceItem.name} could not be added through D&D5e Advancement.`
+          `${sourceItem.name} could not start D&D5e Advancement.`
         );
+      } finally {
+        Hooks.off("dnd5e.preAdvancementManagerRender", hookId);
       }
     }
+
 
     _openClassAdvancement(item) {
       if (!item || item.type !== "class") return;
