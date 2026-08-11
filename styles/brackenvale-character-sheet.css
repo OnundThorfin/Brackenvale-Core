@@ -1618,3 +1618,78 @@ input[data-component-key="classLevel"].class-level-interactive {
   pointer-events: auto !important;
   cursor: pointer !important;
 }
+
+
+/* 0.5.4-test.64: isolated Brackenvale class picker.
+   No DialogV2 and no native select menus are used. */
+.brackenvale-class-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.brackenvale-class-modal-panel {
+  width: min(520px, calc(100vw - 40px));
+  max-height: calc(100vh - 60px);
+  overflow: auto;
+  padding: 18px;
+  border: 2px solid #40382a;
+  background: #f5f0df;
+  color: #171612;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+.brackenvale-class-modal-panel h2 {
+  margin: 0 0 8px;
+  color: #171612;
+  text-align: center;
+}
+
+.brackenvale-class-modal-panel > p {
+  margin: 0 0 14px;
+  color: #171612;
+  text-align: center;
+}
+
+.brackenvale-class-button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.brackenvale-class-pick-button,
+.brackenvale-class-cancel-button {
+  min-height: 34px;
+  border: 1px solid #706653;
+  background: #ffffff;
+  color: #171612;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.brackenvale-class-pick-button:hover:not(:disabled),
+.brackenvale-class-cancel-button:hover {
+  background: #e9e1cb;
+}
+
+.brackenvale-class-pick-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.brackenvale-class-modal-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(64, 56, 42, 0.35);
+  text-align: center;
+}
+
+.brackenvale-class-modal-footer p {
+  margin: 0 0 8px;
+  color: #40382a;
+  font-size: 0.85em;
+}

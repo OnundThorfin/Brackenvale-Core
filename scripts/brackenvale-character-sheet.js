@@ -491,17 +491,6 @@ Hooks.once("init", () => {
       let classPickerOpening = false;
 
       const openClassControl = async (event) => {
-        console.group(`${MODULE_ID} | CLASS DIAGNOSTIC`);
-        console.log("event type:", event?.type);
-        console.log("event target:", event?.target);
-        console.log("current target:", event?.currentTarget);
-        console.log("composed path:", event?.composedPath?.());
-        console.log("class field element:", field);
-        console.log("class field outerHTML:", field?.outerHTML);
-        console.log("sheet class:", this.constructor?.name);
-        console.log("actor:", this.actor);
-        console.trace("Class & Level interaction trace");
-        console.groupEnd();
 
         if (this._calibrationMode || classPickerOpening) return;
 
@@ -509,7 +498,6 @@ Hooks.once("init", () => {
         event?.stopPropagation?.();
         event?.stopImmediatePropagation?.();
 
-        ui.notifications?.info("Brackenvale class diagnostic fired — check the browser console.");
 
         const itemId = field.dataset.itemId;
         if (itemId) {
@@ -530,33 +518,6 @@ Hooks.once("init", () => {
       };
 
       // Intercept before any native/item-summary handler can see the event.
-      if (!window.__brackenvaleDialogDiagnosticInstalled) {
-        window.__brackenvaleDialogDiagnosticInstalled = true;
-
-        const DialogV2 = foundry.applications?.api?.DialogV2;
-        if (DialogV2) {
-          for (const methodName of ["wait", "confirm", "prompt"]) {
-            const original = DialogV2[methodName];
-            if (typeof original !== "function") continue;
-
-            DialogV2[methodName] = async function(...args) {
-              try {
-                const config = args?.[0] ?? {};
-                const title = config?.window?.title ?? config?.title ?? "";
-                if (String(title).toLowerCase().includes("class")) {
-                  console.group(`${MODULE_ID} | DIALOG DIAGNOSTIC`);
-                  console.log("DialogV2 method:", methodName);
-                  console.log("title:", title);
-                  console.log("config:", config);
-                  console.trace("Dialog creation trace");
-                  console.groupEnd();
-                }
-              } catch (_error) {}
-              return original.apply(this, args);
-            };
-          }
-        }
-      }
 
       field.addEventListener("pointerdown", (event) => {
         if (this._calibrationMode) return;
@@ -685,17 +646,7 @@ Hooks.once("init", () => {
 
 
     async _openBrackenvaleClassPicker() {
-      const DialogV2 = foundry.applications?.api?.DialogV2;
-      if (!DialogV2?.wait) {
-        ui.notifications?.warn(
-          "The class picker is unavailable in this Foundry build."
-        );
-        return;
-      }
-
-      ui.notifications?.info("Loading available D&D classes…");
-
-      const allowedClassNames = new Set([
+      const canonicalOrder = [
         "barbarian",
         "bard",
         "cleric",
@@ -708,12 +659,25 @@ Hooks.once("init", () => {
         "sorcerer",
         "warlock",
         "wizard"
-      ]);
+      ];
+
+      const displayNames = {
+        barbarian: "Barbarian",
+        bard: "Bard",
+        cleric: "Cleric",
+        druid: "Druid",
+        fighter: "Fighter",
+        monk: "Monk",
+        paladin: "Paladin",
+        ranger: "Ranger",
+        rogue: "Rogue",
+        sorcerer: "Sorcerer",
+        warlock: "Warlock",
+        wizard: "Wizard"
+      };
 
       const candidates = [];
 
-      // Read all browseable Item packs, but enforce Brackenvale's class list
-      // ourselves instead of trusting Foundry's package labels.
       for (const pack of game.packs ?? []) {
         if (pack.documentName !== "Item") continue;
 
@@ -734,8 +698,6 @@ Hooks.once("init", () => {
 
         const sourceText = `${label} ${collection} ${packageName}`.toLowerCase();
 
-        // Never allow SRD, legacy, or explicitly 2014 class sources into the
-        // Brackenvale picker.
         if (
           sourceText.includes("srd")
           || sourceText.includes("legacy")
@@ -751,11 +713,9 @@ Hooks.once("init", () => {
             if (entry.type !== "class") continue;
 
             const key = String(entry.name ?? "").trim().toLowerCase();
-            if (!allowedClassNames.has(key)) continue;
+            if (!canonicalOrder.includes(key)) continue;
 
             let score = 0;
-
-            // Strongly prefer the modern PHB Character Classes pack.
             if (label === "Character Classes") score += 100;
             if (collection.toLowerCase().startsWith("dnd-players-handbook.")) score += 50;
             if (packageName.toLowerCase() === "dnd-players-handbook") score += 50;
@@ -764,7 +724,7 @@ Hooks.once("init", () => {
               key,
               name: entry.name,
               uuid: `Compendium.${pack.collection}.${entry._id}`,
-              source: label || "Character Classes",
+              source: label || pack.collection,
               score
             });
           }
@@ -776,8 +736,6 @@ Hooks.once("init", () => {
         }
       }
 
-      // Exactly one entry per Brackenvale class. Highest-scoring modern source
-      // wins; ties are stable by source name/UUID.
       const selectedByClass = new Map();
 
       for (const candidate of candidates.sort((a, b) =>
@@ -790,94 +748,129 @@ Hooks.once("init", () => {
         }
       }
 
-      const canonicalOrder = [
-        "barbarian",
-        "bard",
-        "cleric",
-        "druid",
-        "fighter",
-        "monk",
-        "paladin",
-        "ranger",
-        "rogue",
-        "sorcerer",
-        "warlock",
-        "wizard"
-      ];
+      const availableKeys = canonicalOrder.filter((key) =>
+        selectedByClass.has(key)
+      );
 
-      const classes = canonicalOrder
-        .map((key) => selectedByClass.get(key))
-        .filter(Boolean);
-
-
-      if (!classes.length) {
+      if (!availableKeys.length) {
         ui.notifications?.warn(
           "No modern 2024 / 5.5e class items were found after excluding SRD, legacy, and 2014 sources."
         );
         return;
       }
 
-      const classChoices = classes.map((entry, index) => `
-        <label class="brackenvale-class-choice">
-          <input
-            type="radio"
-            name="brackenvaleClassKey"
-            value="${foundry.utils.escapeHTML(entry.key)}"
-            ${index === 0 ? "checked" : ""}
-          >
-          <span>${foundry.utils.escapeHTML(entry.name)}</span>
-        </label>
-      `).join("");
+      // Do not use DialogV2 or a native <select> here. The picker is an
+      // isolated Brackenvale modal with twelve explicit buttons so no D&D
+      // system selector can inject SRD/legacy alternatives into the UI.
+      const existing = document.querySelector(".brackenvale-class-modal");
+      existing?.remove();
 
-      const result = await DialogV2.wait({
-        window: {title: "Add a Class"},
-        content: `
-          <form class="brackenvale-class-picker">
-            <p class="brackenvale-class-picker-version"><strong>Brackenvale Class Picker · test.62</strong></p>
-            <p>Select a D&D class to add to <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>.</p>
-            <div class="brackenvale-class-choice-grid">
-              ${classChoices}
-            </div>
-            <p class="hint">
-              Brackenvale shows exactly one modern entry for each available 2024 / 5.5e class.
-              SRD, legacy, and 2014 sources are never shown in this menu.
-            </p>
-          </form>
-        `,
-        buttons: [
-          {
-            action: "add",
-            label: "Add Class",
-            default: true,
-            callback: (_event, button) =>
-              button.form?.querySelector('input[name="brackenvaleClassKey"]:checked')?.value ?? ""
-          },
-          {
-            action: "cancel",
-            label: "Cancel",
-            callback: () => ""
-          }
-        ],
-        close: () => "",
-        modal: true
+      const overlay = document.createElement("div");
+      overlay.className = "brackenvale-class-modal";
+
+      const panel = document.createElement("div");
+      panel.className = "brackenvale-class-modal-panel";
+
+      const heading = document.createElement("h2");
+      heading.textContent = "Add a Class";
+
+      const intro = document.createElement("p");
+      intro.textContent = `Choose a 2024 / 5.5e class for ${this.actor.name}.`;
+
+      const grid = document.createElement("div");
+      grid.className = "brackenvale-class-button-grid";
+
+      const closeModal = () => {
+        document.removeEventListener("keydown", onKeyDown, true);
+        overlay.remove();
+      };
+
+      const onKeyDown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          closeModal();
+        }
+      };
+
+      for (const key of canonicalOrder) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "brackenvale-class-pick-button";
+        button.textContent = displayNames[key];
+
+        const candidate = selectedByClass.get(key);
+        if (!candidate) {
+          button.disabled = true;
+          button.title = "Modern class source not available";
+        } else {
+          button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            button.disabled = true;
+
+            try {
+              const sourceItem = await fromUuid(candidate.uuid);
+              if (
+                !sourceItem
+                || sourceItem.documentName !== "Item"
+                || sourceItem.type !== "class"
+              ) {
+                ui.notifications?.error(
+                  `${displayNames[key]} could not be loaded from the modern class source.`
+                );
+                button.disabled = false;
+                return;
+              }
+
+              closeModal();
+              await this._addBrackenvaleClass(sourceItem);
+            } catch (error) {
+              console.error(
+                `${MODULE_ID} | Could not add ${displayNames[key]}`,
+                error
+              );
+              ui.notifications?.error(
+                `${displayNames[key]} could not be added.`
+              );
+              button.disabled = false;
+            }
+          });
+        }
+
+        grid.append(button);
+      }
+
+      const footer = document.createElement("div");
+      footer.className = "brackenvale-class-modal-footer";
+
+      const note = document.createElement("p");
+      note.textContent =
+        "SRD, legacy, and 2014 class sources are excluded from this picker.";
+
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "brackenvale-class-cancel-button";
+      cancel.textContent = "Cancel";
+      cancel.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeModal();
       });
 
-      if (!result) return;
+      footer.append(note, cancel);
+      panel.append(heading, intro, grid, footer);
+      overlay.append(panel);
 
-      const selectedClass = selectedByClass.get(result);
-      if (!selectedClass?.uuid) {
-        ui.notifications?.error("The selected modern class source could not be resolved.");
-        return;
-      }
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) closeModal();
+      });
 
-      const sourceItem = await fromUuid(selectedClass.uuid);
-      if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
-        ui.notifications?.error("The selected Class item could not be loaded.");
-        return;
-      }
-
-      await this._addBrackenvaleClass(sourceItem);
+      document.addEventListener("keydown", onKeyDown, true);
+      document.body.append(overlay);
     }
+
 
     async _addBrackenvaleClass(sourceItem) {
       if (!sourceItem || sourceItem.type !== "class") return;
