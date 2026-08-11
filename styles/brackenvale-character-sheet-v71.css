@@ -1932,6 +1932,27 @@ input[data-component-key="classLevel"].class-level-interactive {
   font-family: Georgia, "Times New Roman", serif !important;
 }
 
+.page2-dom-features {
+  left: 5.4% !important;
+  top: 10% !important;
+  width: 48.1% !important;
+  height: 79.2% !important;
+}
+
+.page2-dom-languages {
+  left: 58.1% !important;
+  top: 10% !important;
+  width: 36.9% !important;
+  height: 28.9% !important;
+}
+
+.page2-dom-proficiencies {
+  left: 58.1% !important;
+  top: 44.4% !important;
+  width: 36.9% !important;
+  height: 44.8% !important;
+}
+
 .page2-dom-scroll {
   width: 100% !important;
   height: 100% !important;
@@ -1953,76 +1974,4 @@ input[data-component-key="classLevel"].class-level-interactive {
 .page2-dom-panel .page2-simple-row {
   background: #ffffff !important;
   color: #171612 !important;
-}
-
-
-/* 0.5.4-test.72: direct Page 2 panels are fully calibratable. */
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
-  pointer-events: auto !important;
-  cursor: move !important;
-  outline: 1px dashed rgba(180, 120, 20, 0.9) !important;
-}
-.calibration-mode .page2-dom-panel.calibration-selected {
-  outline: 2px solid rgba(170, 80, 20, 1) !important;
-}
-.calibration-mode .page2-dom-panel > * {
-  pointer-events: none !important;
-}
-
-
-/* 0.5.4-test.73: reliable Page 2 direct overlays + calibration */
-.brackenvale-art-page[data-page="2"] {
-  position: relative !important;
-}
-
-.brackenvale-page2-dom {
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 10000 !important;
-  pointer-events: none !important;
-}
-
-.page2-dom-panel {
-  position: absolute !important;
-  z-index: 10001 !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  padding: 4px 5px !important;
-  background: #ffffff !important;
-  opacity: 1 !important;
-  color: #171612 !important;
-  pointer-events: auto !important;
-}
-
-.page2-dom-scroll {
-  width: 100% !important;
-  height: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
-  cursor: move !important;
-  outline: 1px dashed rgba(180, 120, 20, 0.9) !important;
-}
-
-.calibration-mode .page2-dom-panel.calibration-selected {
-  outline: 2px solid rgba(170, 80, 20, 1) !important;
-}
-
-.calibration-mode .page2-dom-panel > * {
-  pointer-events: none !important;
-}
-
-
-/* test.78 registration/calibration stabilization */
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
-  pointer-events: auto !important;
-  cursor: move !important;
-}
-.calibration-mode .page2-dom-panel > * {
-  pointer-events: none !important;
 }

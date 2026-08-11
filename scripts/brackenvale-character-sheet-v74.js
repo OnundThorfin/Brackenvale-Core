@@ -13,9 +13,9 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.78");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.74");
 const TEMPLATE_PATH =
-  "modules/brackenvale-core/templates/character-sheet-v70.hbs";
+  "modules/brackenvale-core/templates/character-sheet-v74.hbs";
 const LAYOUT_ROOT =
   "modules/brackenvale-core/layouts";
 
@@ -80,22 +80,30 @@ Hooks.once("init", () => {
 
       const page2Data = this._preparePage2DirectData();
 
-      context.pages = this._workingLayouts.map((layout) => ({
+      context.pages = this._workingLayouts.map((layout) => {
+        const componentStyle = (key) => {
+          const c = layout.components.find((entry) => entry.key === key);
+          if (!c) return "";
+          return `left:${Number(c.left ?? 0)}%;top:${Number(c.top ?? 0)}%;width:${Number(c.width ?? 0)}%;height:${Number(c.height ?? 0)}%;`;
+        };
+        const directPage2Data = Number(layout.page) === 2 ? {
+          ...page2Data,
+          featureStyle: componentStyle("features-traits"),
+          languageStyle: componentStyle("languages"),
+          proficiencyStyle: componentStyle("proficiencies")
+        } : null;
+        return {
         ...layout,
         active: Number(layout.page) === Number(this._activePage),
         isPage2: Number(layout.page) === 2,
-        page2Data: Number(layout.page) === 2 ? page2Data : null,
+        page2Data: directPage2Data,
         components: Number(layout.page) === 2
           ? []
           : layout.components.map((component) =>
-              prepareSheetComponent(
-                component,
-                this.actor,
-                MODULE_ID,
-                editable
-              )
+              prepareSheetComponent(component, this.actor, MODULE_ID, editable)
             )
-      }));
+        };
+      });
 
       return context;
     }
@@ -218,17 +226,8 @@ Hooks.once("init", () => {
       // Render Page 2 overlays only after Foundry and the base D&D sheet have
       // finished their own render pass, preventing our injected DOM from
       // being replaced immediately afterward.
-      requestAnimationFrame(() => {
-        const renderedRoot = this.element;
-        if (!renderedRoot) return;
-        this._renderPage2DirectDOM(renderedRoot);
-        this._activatePage2FeatureControls(renderedRoot);
-
-        // Page 2 is injected after initial render. Attach drag handlers to the
-        // new fields, but do not bind the Calibrate toggle a second time.
-        this._setCalibrationFieldState(renderedRoot);
-        this._activateCalibrationDragging(renderedRoot);
-      });
+      // Page 2 is rendered directly by the sheet template in test.74.
+      // No post-render DOM injection is used.
     }
     _activateSupplyControls(root) {
       const getRows = () => {
@@ -719,7 +718,7 @@ Hooks.once("init", () => {
       }
 
       for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
-        button.addEventListener("click", async (event) => {
+        button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
 
           event.preventDefault();
@@ -1967,7 +1966,7 @@ Hooks.once("init", () => {
         if (!this._calibrationMode) return;
 
         const field = event.target.closest(
-          ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
+          ".brackenvale-page-fields .overlay-field, .page2-direct-panel[data-component-key]"
         );
         if (!field || !root.contains(field)) return;
 
@@ -1977,6 +1976,7 @@ Hooks.once("init", () => {
           field.classList.contains("equipment-slot-only-region")
           || field.classList.contains("slot-summary-field")
             || field.classList.contains("page2-dom-panel")
+            || field.classList.contains("page2-direct-panel")
         ) {
           this._selectCalibrationField(root, field);
         }
@@ -1987,7 +1987,7 @@ Hooks.once("init", () => {
       root.classList.toggle("calibration-mode", this._calibrationMode);
 
       for (const field of root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field"
+        ".brackenvale-page-fields .overlay-field, .page2-direct-panel[data-component-key]"
       )) {
         if (this._calibrationMode) {
           field.dataset.wasDisabled = String(field.disabled);
@@ -2007,7 +2007,7 @@ Hooks.once("init", () => {
             || field.classList.contains("supply-widget")
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
-            || field.classList.contains("page2-dom-panel")
+            || field.classList.contains("page2-direct-panel")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";
@@ -2028,7 +2028,7 @@ Hooks.once("init", () => {
 
     _activateCalibrationDragging(root) {
       const fields = root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
+        ".brackenvale-page-fields .overlay-field, .page2-direct-panel[data-component-key]"
       );
 
       for (const field of fields) {
@@ -2210,7 +2210,8 @@ Hooks.once("init", () => {
     }
   }
 
-  foundry.documents.collections.Actors.registerSheet(
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(
+    Actor,
     MODULE_ID,
     BrackenvaleCharacterSheet,
     {

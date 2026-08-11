@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.78");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.76");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v70.hbs";
 const LAYOUT_ROOT =
@@ -198,6 +198,7 @@ Hooks.once("init", () => {
       if (!root) return;
 
       this._activateArtworkPageTabs(root);
+      this._renderPage2DirectDOM(root);
       this._activateItemEditors(root);
       this._activatePage2FeatureControls(root);
       this._activateClassIntegration(root);
@@ -214,21 +215,6 @@ Hooks.once("init", () => {
       this._activateEquipmentDragging(root);
       this._activateSupplyControls(root);
       this._activateFlagTextAreas(root);
-
-      // Render Page 2 overlays only after Foundry and the base D&D sheet have
-      // finished their own render pass, preventing our injected DOM from
-      // being replaced immediately afterward.
-      requestAnimationFrame(() => {
-        const renderedRoot = this.element;
-        if (!renderedRoot) return;
-        this._renderPage2DirectDOM(renderedRoot);
-        this._activatePage2FeatureControls(renderedRoot);
-
-        // Page 2 is injected after initial render. Attach drag handlers to the
-        // new fields, but do not bind the Calibrate toggle a second time.
-        this._setCalibrationFieldState(renderedRoot);
-        this._activateCalibrationDragging(renderedRoot);
-      });
     }
     _activateSupplyControls(root) {
       const getRows = () => {
@@ -565,8 +551,6 @@ Hooks.once("init", () => {
     }
 
     _renderPage2DirectDOM(root) {
-      if (!root) return;
-
       const page = root.querySelector('.brackenvale-art-page[data-page="2"]');
       if (!page) return;
 
@@ -592,29 +576,19 @@ Hooks.once("init", () => {
 
       const featureRows = [
         ...data.classes.map((entry) => `
-          <button
-            type="button"
-            class="page2-manage-class"
-            data-action="manage-class"
-            data-item-id="${escape(entry.id)}"
-          >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          <button type="button" class="page2-manage-class"
+            data-action="manage-class" data-item-id="${escape(entry.id)}">
+            Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}
+          </button>
         `),
         ...data.features.map((entry) => `
-          <button
-            type="button"
-            class="page2-feature-row"
-            data-action="open-feature"
-            data-item-id="${escape(entry.id)}"
-          >
+          <button type="button" class="page2-feature-row"
+            data-action="open-feature" data-item-id="${escape(entry.id)}">
             <span class="page2-feature-name">${escape(entry.name)}</span>
             ${entry.type ? `<span class="page2-feature-type">${escape(entry.type)}</span>` : ""}
           </button>
         `)
-      ].join("") || `
-        <div class="page2-empty-list">
-          No granted features yet. Click Manage Class to open Advancement.
-        </div>
-      `;
+      ].join("") || `<div class="page2-empty-list">No granted features yet. Open the class and use its Advancement tab.</div>`;
 
       const languageRows = data.languages.length
         ? data.languages.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")
@@ -632,36 +606,30 @@ Hooks.once("init", () => {
       const overlay = document.createElement("div");
       overlay.className = "brackenvale-page2-dom";
       overlay.innerHTML = `
-        <section
-          class="overlay-field page2-dom-panel"
+        <section class="overlay-field page2-dom-panel"
           style="${styleFor(featureLayout)}"
           data-component-key="features-traits"
           data-layout-part="root"
           aria-label="Features & Traits"
-          tabindex="0"
-        >
+          tabindex="0">
           <div class="page2-dom-scroll">${featureRows}</div>
         </section>
 
-        <section
-          class="overlay-field page2-dom-panel"
+        <section class="overlay-field page2-dom-panel"
           style="${styleFor(languageLayout)}"
           data-component-key="languages"
           data-layout-part="root"
           aria-label="Languages"
-          tabindex="0"
-        >
+          tabindex="0">
           <div class="page2-dom-scroll">${languageRows}</div>
         </section>
 
-        <section
-          class="overlay-field page2-dom-panel"
+        <section class="overlay-field page2-dom-panel"
           style="${styleFor(proficiencyLayout)}"
           data-component-key="proficiencies"
           data-layout-part="root"
           aria-label="Proficiencies"
-          tabindex="0"
-        >
+          tabindex="0">
           <div class="page2-dom-scroll">${proficiencyRows}</div>
         </section>
       `;
@@ -670,15 +638,12 @@ Hooks.once("init", () => {
     }
 
 
+
     async _openNativeClassAdvancement(classItem) {
       if (!classItem) return;
-
       const sheet = classItem.sheet;
       sheet?.render(true);
 
-      // D&D5e's class sheet owns advancement. After rendering it, attempt to
-      // activate the Advancement tab so the player lands directly on the
-      // feature-selection workflow instead of the Description tab.
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           try {
@@ -703,7 +668,6 @@ Hooks.once("init", () => {
       });
     }
 
-
     _activatePage2FeatureControls(root) {
       for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
         button.addEventListener("click", (event) => {
@@ -719,7 +683,7 @@ Hooks.once("init", () => {
       }
 
       for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
-        button.addEventListener("click", async (event) => {
+        button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
 
           event.preventDefault();
@@ -1967,7 +1931,7 @@ Hooks.once("init", () => {
         if (!this._calibrationMode) return;
 
         const field = event.target.closest(
-          ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
+          ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field[data-component-key]"
         );
         if (!field || !root.contains(field)) return;
 
@@ -1987,7 +1951,7 @@ Hooks.once("init", () => {
       root.classList.toggle("calibration-mode", this._calibrationMode);
 
       for (const field of root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field"
+        ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field[data-component-key]"
       )) {
         if (this._calibrationMode) {
           field.dataset.wasDisabled = String(field.disabled);
@@ -2007,7 +1971,6 @@ Hooks.once("init", () => {
             || field.classList.contains("supply-widget")
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
-            || field.classList.contains("page2-dom-panel")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";
@@ -2028,7 +1991,7 @@ Hooks.once("init", () => {
 
     _activateCalibrationDragging(root) {
       const fields = root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
+        ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field[data-component-key]"
       );
 
       for (const field of fields) {
@@ -2210,7 +2173,8 @@ Hooks.once("init", () => {
     }
   }
 
-  foundry.documents.collections.Actors.registerSheet(
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(
+    Actor,
     MODULE_ID,
     BrackenvaleCharacterSheet,
     {

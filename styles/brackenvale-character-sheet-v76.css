@@ -1971,58 +1971,8 @@ input[data-component-key="classLevel"].class-level-interactive {
 }
 
 
-/* 0.5.4-test.73: reliable Page 2 direct overlays + calibration */
-.brackenvale-art-page[data-page="2"] {
-  position: relative !important;
-}
-
-.brackenvale-page2-dom {
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 10000 !important;
-  pointer-events: none !important;
-}
-
-.page2-dom-panel {
-  position: absolute !important;
-  z-index: 10001 !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  padding: 4px 5px !important;
-  background: #ffffff !important;
-  opacity: 1 !important;
-  color: #171612 !important;
-  pointer-events: auto !important;
-}
-
-.page2-dom-scroll {
-  width: 100% !important;
-  height: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
+/* test.76: Page 2 calibration targets remain visible/selectable without changing sheet rendering. */
+.calibration-mode .brackenvale-page2-dom .overlay-field[data-component-key] {
   cursor: move !important;
-  outline: 1px dashed rgba(180, 120, 20, 0.9) !important;
-}
-
-.calibration-mode .page2-dom-panel.calibration-selected {
-  outline: 2px solid rgba(170, 80, 20, 1) !important;
-}
-
-.calibration-mode .page2-dom-panel > * {
-  pointer-events: none !important;
-}
-
-
-/* test.78 registration/calibration stabilization */
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
   pointer-events: auto !important;
-  cursor: move !important;
-}
-.calibration-mode .page2-dom-panel > * {
-  pointer-events: none !important;
 }

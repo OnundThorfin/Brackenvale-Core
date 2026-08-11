@@ -2016,13 +2016,37 @@ input[data-component-key="classLevel"].class-level-interactive {
   pointer-events: none !important;
 }
 
-
-/* test.78 registration/calibration stabilization */
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
-  pointer-events: auto !important;
-  cursor: move !important;
+/* test.74 — Page 2 is template-rendered with inline layout coordinates. */
+.brackenvale-page2-direct {
+  position:absolute !important;
+  inset:0 !important;
+  z-index:5000 !important;
+  pointer-events:none !important;
 }
-.calibration-mode .page2-dom-panel > * {
-  pointer-events: none !important;
+.page2-direct-panel {
+  position:absolute !important;
+  z-index:5001 !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+  padding:4px 5px !important;
+  background:#fff !important;
+  opacity:1 !important;
+  color:#171612 !important;
+  border:0 !important;
+  box-shadow:none !important;
+  pointer-events:auto !important;
+  font-family:Georgia,"Times New Roman",serif !important;
 }
+.page2-direct-scroll { width:100% !important; height:100% !important; overflow:auto !important; }
+.page2-direct-panel .page2-manage-class { display:block !important; width:100% !important; margin:0 0 5px !important; color:#171612 !important; }
+.page2-direct-panel .page2-feature-row,
+.page2-direct-panel .page2-simple-row,
+.page2-direct-panel .page2-proficiency-group { color:#171612 !important; background:#fff !important; }
+.calibration-mode .page2-direct-panel {
+  z-index:20000 !important;
+  pointer-events:auto !important;
+  cursor:move !important;
+  outline:1px dashed rgba(180,120,20,.9) !important;
+}
+.calibration-mode .page2-direct-panel.calibration-selected { outline:2px solid rgba(170,80,20,1) !important; }
+.calibration-mode .page2-direct-panel > * { pointer-events:none !important; }

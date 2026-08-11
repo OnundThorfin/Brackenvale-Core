@@ -13,24 +13,28 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.78");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.77");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v70.hbs";
 const LAYOUT_ROOT =
   "modules/brackenvale-core/layouts";
 
-Hooks.once("init", () => {
-  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet (equipment repository repair)`);
+let brackenvaleCharacterSheetRegistered = false;
+
+function registerBrackenvaleCharacterSheet() {
+  if (brackenvaleCharacterSheetRegistered) return true;
 
   const CharacterActorSheet =
     game.dnd5e?.applications?.actor?.CharacterActorSheet;
 
   if (!CharacterActorSheet) {
-    console.error(
-      `${MODULE_ID} | D&D 5e CharacterActorSheet could not be found.`
+    console.warn(
+      `${MODULE_ID} | D&D 5e CharacterActorSheet is not available yet; registration will retry.`
     );
-    return;
+    return false;
   }
+
+  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet`);
 
   class BrackenvaleCharacterSheet extends CharacterActorSheet {
     static DEFAULT_OPTIONS = {
@@ -221,11 +225,12 @@ Hooks.once("init", () => {
       requestAnimationFrame(() => {
         const renderedRoot = this.element;
         if (!renderedRoot) return;
+
         this._renderPage2DirectDOM(renderedRoot);
         this._activatePage2FeatureControls(renderedRoot);
 
-        // Page 2 is injected after initial render. Attach drag handlers to the
-        // new fields, but do not bind the Calibrate toggle a second time.
+        // Do not bind the Calibrate toggle a second time. Only prepare the
+        // newly injected Page 2 fields for the already-active calibration system.
         this._setCalibrationFieldState(renderedRoot);
         this._activateCalibrationDragging(renderedRoot);
       });
@@ -719,7 +724,7 @@ Hooks.once("init", () => {
       }
 
       for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
-        button.addEventListener("click", async (event) => {
+        button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
 
           event.preventDefault();
@@ -2210,7 +2215,8 @@ Hooks.once("init", () => {
     }
   }
 
-  foundry.documents.collections.Actors.registerSheet(
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(
+    Actor,
     MODULE_ID,
     BrackenvaleCharacterSheet,
     {
@@ -2223,4 +2229,20 @@ Hooks.once("init", () => {
   game.brackenvaleCore ??= {};
   game.brackenvaleCore.BrackenvaleCharacterSheet =
     BrackenvaleCharacterSheet;
+
+  brackenvaleCharacterSheetRegistered = true;
+  return true;
+}
+
+Hooks.once("init", () => {
+  registerBrackenvaleCharacterSheet();
+});
+
+// D&D5e's application classes can become available after the module init hook.
+// Retry once the world is ready so the sheet cannot silently disappear from
+// Sheet Configuration just because of initialization order.
+Hooks.once("ready", () => {
+  if (!brackenvaleCharacterSheetRegistered) {
+    registerBrackenvaleCharacterSheet();
+  }
 });

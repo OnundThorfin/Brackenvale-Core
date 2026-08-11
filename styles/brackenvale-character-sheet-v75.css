@@ -2015,14 +2015,3 @@ input[data-component-key="classLevel"].class-level-interactive {
 .calibration-mode .page2-dom-panel > * {
   pointer-events: none !important;
 }
-
-
-/* test.78 registration/calibration stabilization */
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
-  pointer-events: auto !important;
-  cursor: move !important;
-}
-.calibration-mode .page2-dom-panel > * {
-  pointer-events: none !important;
-}
