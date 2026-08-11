@@ -57,30 +57,39 @@
           {{/if}}
 
           {{#if isClassSummary}}
-            <button
-              type="button"
-              class="overlay-field {{className}} class-level-button {{#unless itemId}}empty{{/unless}}"
+            <div
+              class="overlay-field {{className}} class-level-wrapper"
               style="{{style}}"
-              aria-label="{{label}}"
-              title="{{#if itemId}}Open class{{else}}Click to add a class{{/if}}"
-              data-item-id="{{itemId}}"
               data-component-key="{{key}}"
               data-layout-part="root"
-              data-action="class-level"
-              {{#unless editable}}disabled{{/unless}}
-            >{{value}}</button>
-            {{#if itemId}}
+            >
+              <span
+                class="class-level-display"
+                data-item-id="{{itemId}}"
+              >{{value}}</span>
+
               <button
                 type="button"
-                class="class-remove-button"
-                style="{{style}}"
-                data-action="remove-class"
+                class="class-level-overlay-button"
+                data-action="class-level-overlay"
                 data-item-id="{{itemId}}"
-                aria-label="Remove {{value}}"
-                title="Remove class"
+                aria-label="{{label}}"
+                title="{{#if itemId}}Open class{{else}}Click to add a class{{/if}}"
                 {{#unless editable}}disabled{{/unless}}
-              >×</button>
-            {{/if}}
+              ></button>
+
+              {{#if itemId}}
+                <button
+                  type="button"
+                  class="class-remove-button"
+                  data-action="remove-class"
+                  data-item-id="{{itemId}}"
+                  aria-label="Remove {{value}}"
+                  title="Remove class"
+                  {{#unless editable}}disabled{{/unless}}
+                >×</button>
+              {{/if}}
+            </div>
           {{/if}}
 
           {{#if isItemSummary}}

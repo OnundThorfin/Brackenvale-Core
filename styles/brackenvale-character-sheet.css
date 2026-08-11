@@ -1693,3 +1693,79 @@ input[data-component-key="classLevel"].class-level-interactive {
   color: #40382a;
   font-size: 0.85em;
 }
+
+
+/* 0.5.4-test.65: dedicated Class & Level interaction overlay. */
+.class-level-wrapper {
+  position: absolute !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.class-level-display {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  color: #171612;
+  background: transparent;
+  font: inherit;
+  line-height: 1.1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.class-level-overlay-button {
+  position: absolute;
+  inset: -2px 0;
+  z-index: 100;
+  display: block;
+  width: 100%;
+  height: calc(100% + 4px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.class-level-overlay-button:hover,
+.class-level-overlay-button:focus {
+  background: rgba(255, 255, 240, 0.32);
+  outline: 1px solid rgba(70, 70, 55, 0.35);
+}
+
+.class-level-wrapper .class-remove-button {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 120 !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: translateY(-50%);
+  border: 0;
+  background: #ffffff;
+  color: #a51414;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.class-level-wrapper.class-drop-target {
+  background: rgba(236, 246, 230, 0.82) !important;
+  outline: 2px dashed rgba(45, 92, 45, 0.9) !important;
+  outline-offset: 1px;
+}

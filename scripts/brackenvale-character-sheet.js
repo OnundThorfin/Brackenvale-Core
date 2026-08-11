@@ -471,35 +471,23 @@ Hooks.once("init", () => {
     }
 
     _activateClassIntegration(root) {
-      // Be deliberately permissive here. Older cached templates may still
-      // render Class & Level as an <input>, while newer ones render a <button>.
-      // Any element carrying the classLevel component key becomes the control.
-      const field = root.querySelector('[data-component-key="classLevel"]');
-      if (!field) {
-        console.warn(`${MODULE_ID} | Class & Level component was not found in the rendered sheet.`);
+      const overlayButton = root.querySelector('[data-action="class-level-overlay"]');
+      if (!overlayButton) {
+        console.warn(`${MODULE_ID} | Class overlay control not found.`);
         return;
       }
 
-      // Prevent the legacy text-input behavior even if an older compiled
-      // template is still active in Foundry.
-      if ("readOnly" in field) field.readOnly = true;
-      if ("disabled" in field) field.disabled = false;
-      field.setAttribute("role", "button");
-      field.setAttribute("tabindex", "0");
-      field.classList.add("class-level-interactive");
-
-      let classPickerOpening = false;
+      const wrapper = overlayButton.closest('[data-component-key="classLevel"]');
 
       const openClassControl = async (event) => {
+        if (this._calibrationMode) return;
 
-        if (this._calibrationMode || classPickerOpening) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
-        event?.preventDefault?.();
-        event?.stopPropagation?.();
-        event?.stopImmediatePropagation?.();
+        const itemId = overlayButton.dataset.itemId;
 
-
-        const itemId = field.dataset.itemId;
         if (itemId) {
           this.actor.items.get(itemId)?.sheet?.render(true);
           return;
@@ -507,44 +495,44 @@ Hooks.once("init", () => {
 
         if (!this.isEditable) return;
 
-        classPickerOpening = true;
-        field.classList.add("class-picker-loading");
+        overlayButton.disabled = true;
+        wrapper?.classList.add("class-picker-loading");
         try {
           await this._openBrackenvaleClassPicker();
         } finally {
-          field.classList.remove("class-picker-loading");
-          classPickerOpening = false;
+          overlayButton.disabled = false;
+          wrapper?.classList.remove("class-picker-loading");
         }
       };
 
-      // Intercept before any native/item-summary handler can see the event.
-
-      field.addEventListener("pointerdown", (event) => {
-        if (this._calibrationMode) return;
+      overlayButton.addEventListener("pointerdown", (event) => {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
       }, {capture: true});
 
-      field.addEventListener("click", openClassControl, {capture: true});
-      field.addEventListener("dblclick", (event) => {
+      overlayButton.addEventListener("click", openClassControl, {capture: true});
+
+      overlayButton.addEventListener("dblclick", (event) => {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-      }, {capture: true});
-
-      field.addEventListener("keydown", async (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        await openClassControl(event);
       }, {capture: true});
 
       const removeButton = root.querySelector('[data-action="remove-class"]');
       if (removeButton) {
+        removeButton.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+        }, {capture: true});
+
         removeButton.addEventListener("click", async (event) => {
           if (this._calibrationMode || !this.isEditable) return;
 
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
 
           const itemId = removeButton.dataset.itemId;
           const classItem = this.actor.items.get(itemId);
@@ -577,41 +565,40 @@ Hooks.once("init", () => {
           await classItem.delete();
           ui.notifications?.info(`${classItem.name} removed from ${this.actor.name}.`);
           this.render();
-        });
+        }, {capture: true});
       }
 
-      const clearHighlight = () => {
-        field.classList.remove("class-drop-target");
-      };
+      const clearHighlight = () => wrapper?.classList.remove("class-drop-target");
 
-      field.addEventListener("dragenter", (event) => {
+      wrapper?.addEventListener("dragenter", (event) => {
         if (this._calibrationMode || !this.isEditable) return;
         event.preventDefault();
-        field.classList.add("class-drop-target");
+        wrapper.classList.add("class-drop-target");
       });
 
-      field.addEventListener("dragover", (event) => {
+      wrapper?.addEventListener("dragover", (event) => {
         if (this._calibrationMode || !this.isEditable) return;
         event.preventDefault();
         if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
       });
 
-      field.addEventListener("dragleave", (event) => {
-        if (field.contains(event.relatedTarget)) return;
+      wrapper?.addEventListener("dragleave", (event) => {
+        if (wrapper.contains(event.relatedTarget)) return;
         clearHighlight();
       });
 
-      field.addEventListener("drop", async (event) => {
+      wrapper?.addEventListener("drop", async (event) => {
         clearHighlight();
         if (this._calibrationMode || !this.isEditable) return;
 
         event.preventDefault();
         event.stopPropagation();
+        event.stopImmediatePropagation();
 
         try {
-          let data = null;
           const raw = event.dataTransfer?.getData("application/json")
             || event.dataTransfer?.getData("text/plain");
+          let data = null;
 
           if (raw) {
             try {
@@ -630,8 +617,6 @@ Hooks.once("init", () => {
           }
 
           if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
-            // Folder/category drops from the D&D browser are common. Instead
-            // of silently failing, open the picker immediately.
             await this._openBrackenvaleClassPicker();
             return;
           }
@@ -965,7 +950,7 @@ Hooks.once("init", () => {
 
     _activateItemEditors(root) {
       for (const field of root.querySelectorAll("[data-item-id]")) {
-        if (field.dataset.componentKey === "classLevel") continue;
+        if (field.closest?.('[data-component-key="classLevel"]')) continue;
         if (field.dataset.action === "remove-class") continue;
 
         field.addEventListener("dblclick", (event) => {
