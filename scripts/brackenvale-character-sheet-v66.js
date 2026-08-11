@@ -122,7 +122,6 @@ Hooks.once("init", () => {
 
       this._activateArtworkPageTabs(root);
       this._activateItemEditors(root);
-      this._activatePage2FeatureControls(root);
       this._activateClassIntegration(root);
       this._activateNativeDataBindings(root);
       this._activateCalibrationControls(root);
@@ -471,38 +470,6 @@ Hooks.once("init", () => {
         });
       }
     }
-
-    _activatePage2FeatureControls(root) {
-      for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
-        button.addEventListener("click", (event) => {
-          if (this._calibrationMode) return;
-
-          event.preventDefault();
-          event.stopPropagation();
-
-          const itemId = button.dataset.itemId;
-          if (!itemId) return;
-          this.actor.items.get(itemId)?.sheet?.render(true);
-        });
-      }
-
-      for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
-        button.addEventListener("click", (event) => {
-          if (this._calibrationMode) return;
-
-          event.preventDefault();
-          event.stopPropagation();
-
-          const itemId = button.dataset.itemId;
-          if (!itemId) return;
-
-          // The native D&D Class item remains the source of truth for its
-          // Advancement configuration and feature choices.
-          this.actor.items.get(itemId)?.sheet?.render(true);
-        });
-      }
-    }
-
 
     _activateClassIntegration(root) {
       const overlayButton = root.querySelector('[data-action="class-level-overlay"]');

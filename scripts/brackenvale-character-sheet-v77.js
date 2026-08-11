@@ -4,7 +4,7 @@
  * Foundry VTT 14 / D&D 5e 5.3.3
  */
 
-import { prepareSheetComponent } from "./sheet-components.js";
+import { prepareSheetComponent } from "./sheet-components-v69.js";
 import {
   deleteEquipmentItem,
   isArmorOrShieldItem,
@@ -13,23 +13,28 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.77");
 const TEMPLATE_PATH =
-  "modules/brackenvale-core/templates/character-sheet.hbs";
+  "modules/brackenvale-core/templates/character-sheet-v70.hbs";
 const LAYOUT_ROOT =
   "modules/brackenvale-core/layouts";
 
-Hooks.once("init", () => {
-  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet (equipment repository repair)`);
+let brackenvaleCharacterSheetRegistered = false;
+
+function registerBrackenvaleCharacterSheet() {
+  if (brackenvaleCharacterSheetRegistered) return true;
 
   const CharacterActorSheet =
     game.dnd5e?.applications?.actor?.CharacterActorSheet;
 
   if (!CharacterActorSheet) {
-    console.error(
-      `${MODULE_ID} | D&D 5e CharacterActorSheet could not be found.`
+    console.warn(
+      `${MODULE_ID} | D&D 5e CharacterActorSheet is not available yet; registration will retry.`
     );
-    return;
+    return false;
   }
+
+  console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet`);
 
   class BrackenvaleCharacterSheet extends CharacterActorSheet {
     static DEFAULT_OPTIONS = {
@@ -77,21 +82,95 @@ Hooks.once("init", () => {
       context.isGM = Boolean(game.user?.isGM);
       context.calibrationMode = this._calibrationMode;
 
+      const page2Data = this._preparePage2DirectData();
+
       context.pages = this._workingLayouts.map((layout) => ({
         ...layout,
         active: Number(layout.page) === Number(this._activePage),
-        components: layout.components.map((component) =>
-          prepareSheetComponent(
-            component,
-            this.actor,
-            MODULE_ID,
-            editable
-          )
-        )
+        isPage2: Number(layout.page) === 2,
+        page2Data: Number(layout.page) === 2 ? page2Data : null,
+        components: Number(layout.page) === 2
+          ? []
+          : layout.components.map((component) =>
+              prepareSheetComponent(
+                component,
+                this.actor,
+                MODULE_ID,
+                editable
+              )
+            )
       }));
 
       return context;
     }
+
+    _preparePage2DirectData() {
+      const features = Array.from(this.actor.items ?? [])
+        .filter((item) => item.type === "feat")
+        .map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: foundry.utils.getProperty(item, "system.type.label")
+            ?? foundry.utils.getProperty(item, "system.type.value")
+            ?? ""
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      const classes = Array.from(this.actor.items ?? [])
+        .filter((item) => item.type === "class")
+        .map((item) => ({
+          id: item.id,
+          name: item.name,
+          levels: foundry.utils.getProperty(item, "system.levels")
+            ?? foundry.utils.getProperty(item, "system.level")
+            ?? ""
+        }));
+
+      const traitValues = (trait) => {
+        if (!trait) return [];
+        const values = trait.value ?? trait;
+        const custom = trait.custom ?? "";
+        let list = [];
+        if (values instanceof Set) list.push(...values);
+        else if (Array.isArray(values)) list.push(...values);
+        else if (typeof values === "string") list.push(...values.split(/[;,]/));
+        else if (values && typeof values === "object") {
+          for (const [key, enabled] of Object.entries(values)) {
+            if (enabled === true) list.push(key);
+          }
+        }
+        if (typeof custom === "string" && custom.trim()) list.push(...custom.split(/[;,]/));
+        return list.map((v) => String(v ?? "").trim()).filter(Boolean);
+      };
+
+      const localizeValues = (values, config = {}) =>
+        Array.from(new Set(values.map((value) => {
+          const configured = config?.[value];
+          if (typeof configured === "string") return game.i18n?.localize(configured) ?? configured;
+          if (configured && typeof configured === "object") {
+            const label = configured.label ?? configured.name ?? value;
+            return game.i18n?.localize(label) ?? label;
+          }
+          return value;
+        }))).sort((a, b) => a.localeCompare(b));
+
+      const languages = localizeValues(
+        traitValues(foundry.utils.getProperty(this.actor, "system.traits.languages")),
+        CONFIG.DND5E?.languages ?? {}
+      );
+
+      const proficiencyGroups = [
+        ["Armor", "system.traits.armorProf", CONFIG.DND5E?.armorProficiencies ?? {}],
+        ["Weapons", "system.traits.weaponProf", CONFIG.DND5E?.weaponProficiencies ?? {}],
+        ["Tools", "system.traits.toolProf", CONFIG.DND5E?.toolProficiencies ?? {}]
+      ].map(([label, path, config]) => ({
+        label,
+        values: localizeValues(traitValues(foundry.utils.getProperty(this.actor, path)), config)
+      })).filter((group) => group.values.length);
+
+      return {features, classes, languages, proficiencyGroups};
+    }
+
 
     async _loadLayouts() {
       if (BrackenvaleCharacterSheet.#layoutCache) {
@@ -101,7 +180,10 @@ Hooks.once("init", () => {
       const pageNumbers = [1, 2, 3, 4];
       const layouts = await Promise.all(
         pageNumbers.map(async (pageNumber) => {
-          const response = await fetch(`${LAYOUT_ROOT}/page${pageNumber}.json`);
+          const response = await fetch(
+            `${LAYOUT_ROOT}/page${pageNumber}-v69.json`,
+            {cache: "no-store"}
+          );
           if (!response.ok) {
             throw new Error(
               `${MODULE_ID} | Could not load page ${pageNumber} layout.`
@@ -121,6 +203,7 @@ Hooks.once("init", () => {
 
       this._activateArtworkPageTabs(root);
       this._activateItemEditors(root);
+      this._activatePage2FeatureControls(root);
       this._activateClassIntegration(root);
       this._activateNativeDataBindings(root);
       this._activateCalibrationControls(root);
@@ -135,6 +218,22 @@ Hooks.once("init", () => {
       this._activateEquipmentDragging(root);
       this._activateSupplyControls(root);
       this._activateFlagTextAreas(root);
+
+      // Render Page 2 overlays only after Foundry and the base D&D sheet have
+      // finished their own render pass, preventing our injected DOM from
+      // being replaced immediately afterward.
+      requestAnimationFrame(() => {
+        const renderedRoot = this.element;
+        if (!renderedRoot) return;
+
+        this._renderPage2DirectDOM(renderedRoot);
+        this._activatePage2FeatureControls(renderedRoot);
+
+        // Do not bind the Calibrate toggle a second time. Only prepare the
+        // newly injected Page 2 fields for the already-active calibration system.
+        this._setCalibrationFieldState(renderedRoot);
+        this._activateCalibrationDragging(renderedRoot);
+      });
     }
     _activateSupplyControls(root) {
       const getRows = () => {
@@ -470,31 +569,196 @@ Hooks.once("init", () => {
       }
     }
 
+    _renderPage2DirectDOM(root) {
+      if (!root) return;
+
+      const page = root.querySelector('.brackenvale-art-page[data-page="2"]');
+      if (!page) return;
+
+      page.querySelectorAll(".brackenvale-page2-dom").forEach((node) => node.remove());
+
+      const layout = this._workingLayouts?.find((entry) => Number(entry.page) === 2);
+      if (!layout) return;
+
+      const byKey = (key) => layout.components.find((entry) => entry.key === key);
+      const featureLayout = byKey("features-traits");
+      const languageLayout = byKey("languages");
+      const proficiencyLayout = byKey("proficiencies");
+
+      const styleFor = (component) => [
+        `left:${Number(component?.left ?? 0)}%`,
+        `top:${Number(component?.top ?? 0)}%`,
+        `width:${Number(component?.width ?? 0)}%`,
+        `height:${Number(component?.height ?? 0)}%`
+      ].join(";");
+
+      const data = this._preparePage2DirectData();
+      const escape = (value) => foundry.utils.escapeHTML(String(value ?? ""));
+
+      const featureRows = [
+        ...data.classes.map((entry) => `
+          <button
+            type="button"
+            class="page2-manage-class"
+            data-action="manage-class"
+            data-item-id="${escape(entry.id)}"
+          >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+        `),
+        ...data.features.map((entry) => `
+          <button
+            type="button"
+            class="page2-feature-row"
+            data-action="open-feature"
+            data-item-id="${escape(entry.id)}"
+          >
+            <span class="page2-feature-name">${escape(entry.name)}</span>
+            ${entry.type ? `<span class="page2-feature-type">${escape(entry.type)}</span>` : ""}
+          </button>
+        `)
+      ].join("") || `
+        <div class="page2-empty-list">
+          No granted features yet. Click Manage Class to open Advancement.
+        </div>
+      `;
+
+      const languageRows = data.languages.length
+        ? data.languages.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")
+        : `<div class="page2-empty-list">No languages recorded.</div>`;
+
+      const proficiencyRows = data.proficiencyGroups.length
+        ? data.proficiencyGroups.map((group) => `
+            <div class="page2-proficiency-group">
+              <strong>${escape(group.label)}</strong>
+              ${group.values.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")}
+            </div>
+          `).join("")
+        : `<div class="page2-empty-list">No proficiencies recorded.</div>`;
+
+      const overlay = document.createElement("div");
+      overlay.className = "brackenvale-page2-dom";
+      overlay.innerHTML = `
+        <section
+          class="overlay-field page2-dom-panel"
+          style="${styleFor(featureLayout)}"
+          data-component-key="features-traits"
+          data-layout-part="root"
+          aria-label="Features & Traits"
+          tabindex="0"
+        >
+          <div class="page2-dom-scroll">${featureRows}</div>
+        </section>
+
+        <section
+          class="overlay-field page2-dom-panel"
+          style="${styleFor(languageLayout)}"
+          data-component-key="languages"
+          data-layout-part="root"
+          aria-label="Languages"
+          tabindex="0"
+        >
+          <div class="page2-dom-scroll">${languageRows}</div>
+        </section>
+
+        <section
+          class="overlay-field page2-dom-panel"
+          style="${styleFor(proficiencyLayout)}"
+          data-component-key="proficiencies"
+          data-layout-part="root"
+          aria-label="Proficiencies"
+          tabindex="0"
+        >
+          <div class="page2-dom-scroll">${proficiencyRows}</div>
+        </section>
+      `;
+
+      page.append(overlay);
+    }
+
+
+    async _openNativeClassAdvancement(classItem) {
+      if (!classItem) return;
+
+      const sheet = classItem.sheet;
+      sheet?.render(true);
+
+      // D&D5e's class sheet owns advancement. After rendering it, attempt to
+      // activate the Advancement tab so the player lands directly on the
+      // feature-selection workflow instead of the Description tab.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try {
+            const element = sheet?.element;
+            const root = element instanceof HTMLElement
+              ? element
+              : element?.[0] ?? element;
+            if (!root) return;
+
+            const tab =
+              root.querySelector('[data-tab="advancement"]')
+              ?? root.querySelector('[data-group="primary"][data-tab="advancement"]')
+              ?? Array.from(root.querySelectorAll("a,button")).find((node) =>
+                   String(node.textContent ?? "").trim().toLowerCase() === "advancement"
+                 );
+
+            tab?.click();
+          } catch (error) {
+            console.debug(`${MODULE_ID} | Could not auto-open class Advancement tab`, error);
+          }
+        });
+      });
+    }
+
+
+    _activatePage2FeatureControls(root) {
+      for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
+        button.addEventListener("click", (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+          this.actor.items.get(itemId)?.sheet?.render(true);
+        });
+      }
+
+      for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
+        button.addEventListener("click", (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+
+          const classItem = this.actor.items.get(itemId);
+          if (!classItem) return;
+          await this._openNativeClassAdvancement(classItem);
+        });
+      }
+    }
+
+
     _activateClassIntegration(root) {
-      // Be deliberately permissive here. Older cached templates may still
-      // render Class & Level as an <input>, while newer ones render a <button>.
-      // Any element carrying the classLevel component key becomes the control.
-      const field = root.querySelector('[data-component-key="classLevel"]');
-      if (!field) {
-        console.warn(`${MODULE_ID} | Class & Level component was not found in the rendered sheet.`);
+      const overlayButton = root.querySelector('[data-action="class-level-overlay"]');
+      if (!overlayButton) {
+        console.warn(`${MODULE_ID} | Class overlay control not found.`);
         return;
       }
 
-      // Prevent the legacy text-input behavior even if an older compiled
-      // template is still active in Foundry.
-      if ("readOnly" in field) field.readOnly = true;
-      if ("disabled" in field) field.disabled = false;
-      field.setAttribute("role", "button");
-      field.setAttribute("tabindex", "0");
-      field.classList.add("class-level-interactive");
+      const wrapper = overlayButton.closest('[data-component-key="classLevel"]');
 
       const openClassControl = async (event) => {
         if (this._calibrationMode) return;
 
-        event?.preventDefault?.();
-        event?.stopPropagation?.();
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
-        const itemId = field.dataset.itemId;
+        const itemId = overlayButton.dataset.itemId;
+
         if (itemId) {
           this.actor.items.get(itemId)?.sheet?.render(true);
           return;
@@ -502,55 +766,110 @@ Hooks.once("init", () => {
 
         if (!this.isEditable) return;
 
-        field.classList.add("class-picker-loading");
+        overlayButton.disabled = true;
+        wrapper?.classList.add("class-picker-loading");
         try {
           await this._openBrackenvaleClassPicker();
         } finally {
-          field.classList.remove("class-picker-loading");
+          overlayButton.disabled = false;
+          wrapper?.classList.remove("class-picker-loading");
         }
       };
 
-      // Capture phase prevents the legacy editable/input handlers from
-      // swallowing the click before our picker sees it.
-      field.addEventListener("click", openClassControl, {capture: true});
-      field.addEventListener("dblclick", openClassControl, {capture: true});
-      field.addEventListener("keydown", async (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        await openClassControl(event);
-      });
+      overlayButton.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+      }, {capture: true});
 
-      const clearHighlight = () => {
-        field.classList.remove("class-drop-target");
-      };
+      overlayButton.addEventListener("click", openClassControl, {capture: true});
 
-      field.addEventListener("dragenter", (event) => {
+      overlayButton.addEventListener("dblclick", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+      }, {capture: true});
+
+      const removeButton = root.querySelector('[data-action="remove-class"]');
+      if (removeButton) {
+        removeButton.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+        }, {capture: true});
+
+        removeButton.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+
+          const itemId = removeButton.dataset.itemId;
+          const classItem = this.actor.items.get(itemId);
+          if (!classItem || classItem.type !== "class") return;
+
+          const DialogV2 = foundry.applications?.api?.DialogV2;
+          let approved = false;
+
+          if (DialogV2?.confirm) {
+            approved = await DialogV2.confirm({
+              window: {title: "Remove Class"},
+              content: `
+                <p>Remove <strong>${foundry.utils.escapeHTML(classItem.name)}</strong>
+                from <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>?</p>
+                <p class="hint">This deletes the Class item from the character.
+                Features already granted by D&D advancement may need to be reviewed separately.</p>
+              `,
+              yes: {label: "Remove Class"},
+              no: {label: "Cancel"},
+              modal: true
+            });
+          } else {
+            approved = window.confirm(
+              `Remove ${classItem.name} from ${this.actor.name}?`
+            );
+          }
+
+          if (!approved) return;
+
+          await classItem.delete();
+          ui.notifications?.info(`${classItem.name} removed from ${this.actor.name}.`);
+          this.render();
+        }, {capture: true});
+      }
+
+      const clearHighlight = () => wrapper?.classList.remove("class-drop-target");
+
+      wrapper?.addEventListener("dragenter", (event) => {
         if (this._calibrationMode || !this.isEditable) return;
         event.preventDefault();
-        field.classList.add("class-drop-target");
+        wrapper.classList.add("class-drop-target");
       });
 
-      field.addEventListener("dragover", (event) => {
+      wrapper?.addEventListener("dragover", (event) => {
         if (this._calibrationMode || !this.isEditable) return;
         event.preventDefault();
         if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
       });
 
-      field.addEventListener("dragleave", (event) => {
-        if (field.contains(event.relatedTarget)) return;
+      wrapper?.addEventListener("dragleave", (event) => {
+        if (wrapper.contains(event.relatedTarget)) return;
         clearHighlight();
       });
 
-      field.addEventListener("drop", async (event) => {
+      wrapper?.addEventListener("drop", async (event) => {
         clearHighlight();
         if (this._calibrationMode || !this.isEditable) return;
 
         event.preventDefault();
         event.stopPropagation();
+        event.stopImmediatePropagation();
 
         try {
-          let data = null;
           const raw = event.dataTransfer?.getData("application/json")
             || event.dataTransfer?.getData("text/plain");
+          let data = null;
 
           if (raw) {
             try {
@@ -569,8 +888,6 @@ Hooks.once("init", () => {
           }
 
           if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
-            // Folder/category drops from the D&D browser are common. Instead
-            // of silently failing, open the picker immediately.
             await this._openBrackenvaleClassPicker();
             return;
           }
@@ -585,40 +902,86 @@ Hooks.once("init", () => {
 
 
     async _openBrackenvaleClassPicker() {
-      const DialogV2 = foundry.applications?.api?.DialogV2;
-      if (!DialogV2?.wait) {
-        ui.notifications?.warn(
-          "The class picker is unavailable in this Foundry build."
-        );
-        return;
-      }
+      const canonicalOrder = [
+        "barbarian",
+        "bard",
+        "cleric",
+        "druid",
+        "fighter",
+        "monk",
+        "paladin",
+        "ranger",
+        "rogue",
+        "sorcerer",
+        "warlock",
+        "wizard"
+      ];
 
-      ui.notifications?.info("Loading available D&D classes…");
+      const displayNames = {
+        barbarian: "Barbarian",
+        bard: "Bard",
+        cleric: "Cleric",
+        druid: "Druid",
+        fighter: "Fighter",
+        monk: "Monk",
+        paladin: "Paladin",
+        ranger: "Ranger",
+        rogue: "Rogue",
+        sorcerer: "Sorcerer",
+        warlock: "Warlock",
+        wizard: "Wizard"
+      };
 
-      const entries = [];
+      const candidates = [];
 
-      // World Class items.
-      for (const item of game.items ?? []) {
-        if (item.type !== "class") continue;
-        entries.push({
-          name: item.name,
-          uuid: item.uuid,
-          source: "World"
-        });
-      }
-
-      // Class items from every Item compendium the user can browse.
       for (const pack of game.packs ?? []) {
         if (pack.documentName !== "Item") continue;
 
+        const label = String(
+          pack.metadata?.label
+            ?? pack.title
+            ?? pack.collection
+            ?? ""
+        ).trim();
+
+        const collection = String(pack.collection ?? "").trim();
+        const packageName = String(
+          pack.metadata?.packageName
+            ?? pack.metadata?.package
+            ?? pack.metadata?.packageId
+            ?? ""
+        ).trim();
+
+        const sourceText = `${label} ${collection} ${packageName}`.toLowerCase();
+
+        if (
+          sourceText.includes("srd")
+          || sourceText.includes("legacy")
+          || sourceText.includes("2014")
+        ) {
+          continue;
+        }
+
         try {
           const index = await pack.getIndex({fields: ["type"]});
+
           for (const entry of index) {
             if (entry.type !== "class") continue;
-            entries.push({
+
+            const key = String(entry.name ?? "").trim().toLowerCase();
+            if (!canonicalOrder.includes(key)) continue;
+
+            let score = 0;
+            if (label === "Character Classes") score += 100;
+            if (collection.toLowerCase().startsWith("dnd-players-handbook.")) score += 50;
+            if (packageName.toLowerCase() === "dnd-players-handbook") score += 50;
+
+            candidates.push({
+              key,
               name: entry.name,
               uuid: `Compendium.${pack.collection}.${entry._id}`,
-              source: pack.metadata?.label ?? pack.title ?? pack.collection
+              source: label || pack.collection,
+              score
             });
           }
         } catch (error) {
@@ -629,71 +992,141 @@ Hooks.once("init", () => {
         }
       }
 
-      const unique = new Map();
-      for (const entry of entries) {
-        if (!entry.uuid || unique.has(entry.uuid)) continue;
-        unique.set(entry.uuid, entry);
+      const selectedByClass = new Map();
+
+      for (const candidate of candidates.sort((a, b) =>
+        b.score - a.score
+        || a.source.localeCompare(b.source)
+        || a.uuid.localeCompare(b.uuid)
+      )) {
+        if (!selectedByClass.has(candidate.key)) {
+          selectedByClass.set(candidate.key, candidate);
+        }
       }
 
-      const classes = Array.from(unique.values()).sort((a, b) =>
-        a.name.localeCompare(b.name) || a.source.localeCompare(b.source)
+      const availableKeys = canonicalOrder.filter((key) =>
+        selectedByClass.has(key)
       );
 
-      if (!classes.length) {
+      if (!availableKeys.length) {
         ui.notifications?.warn(
-          "No Class items were found in your world or available compendiums."
+          "No modern 2024 / 5.5e class items were found after excluding SRD, legacy, and 2014 sources."
         );
         return;
       }
 
-      const options = classes.map((entry) => `
-        <option value="${foundry.utils.escapeHTML(entry.uuid)}">
-          ${foundry.utils.escapeHTML(entry.name)} — ${foundry.utils.escapeHTML(entry.source)}
-        </option>
-      `).join("");
+      // Do not use DialogV2 or a native <select> here. The picker is an
+      // isolated Brackenvale modal with twelve explicit buttons so no D&D
+      // system selector can inject SRD/legacy alternatives into the UI.
+      const existing = document.querySelector(".brackenvale-class-modal");
+      existing?.remove();
 
-      const result = await DialogV2.wait({
-        window: {title: "Add a Class"},
-        content: `
-          <form class="brackenvale-class-picker">
-            <p>Select a D&D class to add to <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>.</p>
-            <select name="classUuid" autofocus>
-              ${options}
-            </select>
-            <p class="hint">
-              Brackenvale stores the normal D&D Class item on the actor so class levels,
-              features, and advancement data remain system-managed.
-            </p>
-          </form>
-        `,
-        buttons: [
-          {
-            action: "add",
-            label: "Add Class",
-            default: true,
-            callback: (_event, button) =>
-              button.form?.elements?.classUuid?.value ?? ""
-          },
-          {
-            action: "cancel",
-            label: "Cancel",
-            callback: () => ""
-          }
-        ],
-        close: () => "",
-        modal: true
-      });
+      const overlay = document.createElement("div");
+      overlay.className = "brackenvale-class-modal";
 
-      if (!result) return;
+      const panel = document.createElement("div");
+      panel.className = "brackenvale-class-modal-panel";
 
-      const sourceItem = await fromUuid(result);
-      if (!sourceItem || sourceItem.documentName !== "Item" || sourceItem.type !== "class") {
-        ui.notifications?.error("The selected Class item could not be loaded.");
-        return;
+      const heading = document.createElement("h2");
+      heading.textContent = "Add a Class";
+
+      const intro = document.createElement("p");
+      intro.textContent = `Choose a 2024 / 5.5e class for ${this.actor.name}.`;
+
+      const grid = document.createElement("div");
+      grid.className = "brackenvale-class-button-grid";
+
+      const closeModal = () => {
+        document.removeEventListener("keydown", onKeyDown, true);
+        overlay.remove();
+      };
+
+      const onKeyDown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          closeModal();
+        }
+      };
+
+      for (const key of canonicalOrder) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "brackenvale-class-pick-button";
+        button.textContent = displayNames[key];
+
+        const candidate = selectedByClass.get(key);
+        if (!candidate) {
+          button.disabled = true;
+          button.title = "Modern class source not available";
+        } else {
+          button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            button.disabled = true;
+
+            try {
+              const sourceItem = await fromUuid(candidate.uuid);
+              if (
+                !sourceItem
+                || sourceItem.documentName !== "Item"
+                || sourceItem.type !== "class"
+              ) {
+                ui.notifications?.error(
+                  `${displayNames[key]} could not be loaded from the modern class source.`
+                );
+                button.disabled = false;
+                return;
+              }
+
+              closeModal();
+              await this._addBrackenvaleClass(sourceItem);
+            } catch (error) {
+              console.error(
+                `${MODULE_ID} | Could not add ${displayNames[key]}`,
+                error
+              );
+              ui.notifications?.error(
+                `${displayNames[key]} could not be added.`
+              );
+              button.disabled = false;
+            }
+          });
+        }
+
+        grid.append(button);
       }
 
-      await this._addBrackenvaleClass(sourceItem);
+      const footer = document.createElement("div");
+      footer.className = "brackenvale-class-modal-footer";
+
+      const note = document.createElement("p");
+      note.textContent =
+        "SRD, legacy, and 2014 class sources are excluded from this picker.";
+
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "brackenvale-class-cancel-button";
+      cancel.textContent = "Cancel";
+      cancel.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeModal();
+      });
+
+      footer.append(note, cancel);
+      panel.append(heading, intro, grid, footer);
+      overlay.append(panel);
+
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) closeModal();
+      });
+
+      document.addEventListener("keydown", onKeyDown, true);
+      document.body.append(overlay);
     }
+
 
     async _addBrackenvaleClass(sourceItem) {
       if (!sourceItem || sourceItem.type !== "class") return;
@@ -788,6 +1221,9 @@ Hooks.once("init", () => {
 
     _activateItemEditors(root) {
       for (const field of root.querySelectorAll("[data-item-id]")) {
+        if (field.closest?.('[data-component-key="classLevel"]')) continue;
+        if (field.dataset.action === "remove-class") continue;
+
         field.addEventListener("dblclick", (event) => {
           if (this._calibrationMode) return;
 
@@ -1536,7 +1972,7 @@ Hooks.once("init", () => {
         if (!this._calibrationMode) return;
 
         const field = event.target.closest(
-          ".brackenvale-page-fields .overlay-field[data-component-key]"
+          ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
         );
         if (!field || !root.contains(field)) return;
 
@@ -1545,6 +1981,7 @@ Hooks.once("init", () => {
         if (
           field.classList.contains("equipment-slot-only-region")
           || field.classList.contains("slot-summary-field")
+            || field.classList.contains("page2-dom-panel")
         ) {
           this._selectCalibrationField(root, field);
         }
@@ -1555,7 +1992,7 @@ Hooks.once("init", () => {
       root.classList.toggle("calibration-mode", this._calibrationMode);
 
       for (const field of root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field"
+        ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field"
       )) {
         if (this._calibrationMode) {
           field.dataset.wasDisabled = String(field.disabled);
@@ -1575,6 +2012,7 @@ Hooks.once("init", () => {
             || field.classList.contains("supply-widget")
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
+            || field.classList.contains("page2-dom-panel")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";
@@ -1595,7 +2033,7 @@ Hooks.once("init", () => {
 
     _activateCalibrationDragging(root) {
       const fields = root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field[data-component-key]"
+        ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
       );
 
       for (const field of fields) {
@@ -1791,4 +2229,20 @@ Hooks.once("init", () => {
   game.brackenvaleCore ??= {};
   game.brackenvaleCore.BrackenvaleCharacterSheet =
     BrackenvaleCharacterSheet;
+
+  brackenvaleCharacterSheetRegistered = true;
+  return true;
+}
+
+Hooks.once("init", () => {
+  registerBrackenvaleCharacterSheet();
+});
+
+// D&D5e's application classes can become available after the module init hook.
+// Retry once the world is ready so the sheet cannot silently disappear from
+// Sheet Configuration just because of initialization order.
+Hooks.once("ready", () => {
+  if (!brackenvaleCharacterSheetRegistered) {
+    registerBrackenvaleCharacterSheet();
+  }
 });
