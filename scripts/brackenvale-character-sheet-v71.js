@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.99 DIRECT-MOUNT");
+console.info("Brackenvale Core v103 runtime active");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v95.hbs";
 const LAYOUT_ROOT =
@@ -792,7 +792,7 @@ Hooks.once("init", () => {
 
       const marker = document.createElement("div");
       marker.className = "bv99-page2-rebuild bv99-proof";
-      marker.textContent = "PAGE 2 REBUILD ACTIVE · v99";
+      marker.textContent = "PAGE 2 ACTIVE · v103";
       page.append(marker);
 
       const createPanel = (key, className, style, html) => {
