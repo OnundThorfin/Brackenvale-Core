@@ -2334,16 +2334,53 @@ input[data-component-key="classLevel"].class-level-interactive {
   pointer-events: none !important;
 }
 
-/* v103 package identity proof */
+/* v104 package identity proof */
 .bv99-proof {
   background: #003b8e !important;
   border: 3px solid #ffdf00 !important;
 }
 
-/* v103 PAGE 2 visible proof */
-.bv99-proof{position:absolute!important;top:5.25%!important;left:35%!important;z-index:999999!important;padding:4px 10px!important;background:#7b1515!important;color:#fff!important;border:3px solid #d6b85a!important;font:700 11px/1 Arial,sans-serif!important;pointer-events:none!important}
-.bv99-panel{position:absolute!important;z-index:50000!important;box-sizing:border-box!important;overflow:hidden!important;padding:4px 5px!important;background:#fff!important;color:#171612!important;pointer-events:auto!important}
-.bv99-content{width:100%!important;height:100%!important;overflow-y:auto!important;overflow-x:hidden!important}
-.calibration-mode .bv99-panel{outline:2px dashed #b32b2b!important;cursor:move!important;user-select:none!important;touch-action:none!important;z-index:60000!important}
-.calibration-mode .bv99-panel.bv99-selected{outline:3px solid #e31b1b!important;z-index:61000!important}
-.calibration-mode .bv99-content{pointer-events:none!important}
+
+/* v104 — repaired actual module, lowercase install folder */
+.bv99-proof {
+  position:absolute !important;
+  top:5.25% !important;
+  left:35% !important;
+  z-index:999999 !important;
+  padding:4px 10px !important;
+  background:#7b1515 !important;
+  color:#fff !important;
+  border:3px solid #d6b85a !important;
+  font:700 11px/1 Arial,sans-serif !important;
+  pointer-events:none !important;
+}
+.bv99-panel {
+  position:absolute !important;
+  z-index:50000 !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+  padding:4px 5px !important;
+  background:#fff !important;
+  color:#171612 !important;
+  pointer-events:auto !important;
+}
+.bv99-content {
+  width:100% !important;
+  height:100% !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+.calibration-mode .bv99-panel {
+  outline:2px dashed #b32b2b !important;
+  cursor:move !important;
+  user-select:none !important;
+  touch-action:none !important;
+  z-index:60000 !important;
+}
+.calibration-mode .bv99-panel.bv99-selected {
+  outline:3px solid #e31b1b !important;
+  z-index:61000 !important;
+}
+.calibration-mode .bv99-content {
+  pointer-events:none !important;
+}
