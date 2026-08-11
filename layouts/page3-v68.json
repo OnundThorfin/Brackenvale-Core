@@ -1,6 +1,6 @@
 {
   "page": 3,
-  "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-3.webp",
+  "art": "modules/brackenvale-core-dev100/assets/character-sheet/character-sheet-page-3.webp",
   "components": [
     {
       "component": "equipmentRegion",

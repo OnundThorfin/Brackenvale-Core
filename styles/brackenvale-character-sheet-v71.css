@@ -1933,24 +1933,24 @@ input[data-component-key="classLevel"].class-level-interactive {
 }
 
 .page2-dom-features {
-  left: 5.4%;
-  top: 10%;
-  width: 48.1%;
-  height: 79.2%;
+  left: 5.4% !important;
+  top: 10% !important;
+  width: 48.1% !important;
+  height: 79.2% !important;
 }
 
 .page2-dom-languages {
-  left: 58.1%;
-  top: 10%;
-  width: 36.9%;
-  height: 28.9%;
+  left: 58.1% !important;
+  top: 10% !important;
+  width: 36.9% !important;
+  height: 28.9% !important;
 }
 
 .page2-dom-proficiencies {
-  left: 58.1%;
-  top: 44.4%;
-  width: 36.9%;
-  height: 44.8%;
+  left: 58.1% !important;
+  top: 44.4% !important;
+  width: 36.9% !important;
+  height: 44.8% !important;
 }
 
 .page2-dom-scroll {
@@ -1977,161 +1977,17 @@ input[data-component-key="classLevel"].class-level-interactive {
 }
 
 
-/* test.85 — direct v71 Page 2 calibration + native Advancement */
-.page2-class-actions {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 4px !important;
-  margin-bottom: 5px !important;
-}
-
-.page2-run-advancement,
-.page2-manage-class {
-  min-height: 22px !important;
-  padding: 1px 4px !important;
-  border: 1px solid rgba(0,0,0,.3) !important;
-  background: #f7f5ed !important;
-  color: #171612 !important;
-  font: inherit !important;
-  cursor: pointer !important;
-}
-
-.page2-calibration-handle {
-  display: none !important;
-}
-
-.calibration-mode .brackenvale-page2-dom {
-  pointer-events: auto !important;
-}
-
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
-  pointer-events: auto !important;
-  cursor: move !important;
-  outline: 2px dashed #8b5a14 !important;
-}
-
-.calibration-mode .page2-calibration-handle {
-  display: block !important;
-  position: absolute !important;
-  top: 2px !important;
-  left: 2px !important;
-  right: 2px !important;
-  z-index: 30000 !important;
-  padding: 3px 5px !important;
-  background: #fff3c9 !important;
-  color: #4b320c !important;
-  border: 1px solid #8b5a14 !important;
-  font-size: 9px !important;
-  font-weight: 700 !important;
-  text-align: center !important;
-  pointer-events: none !important;
-}
-
-.calibration-mode .page2-dom-scroll {
-  pointer-events: none !important;
-}
-
-
-/* ============================================================
-   test.95 — PAGE 2 REBUILT FROM SCRATCH
-   These regions are ordinary overlay-fields, exactly like Page 3.
-   ============================================================ */
-.page2-rebuilt-region {
-  position: absolute !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  padding: 4px 5px !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  color: #171612 !important;
-  font-family: Georgia, "Times New Roman", serif !important;
-  pointer-events: auto !important;
-}
-
-.page2-rebuilt-region.opaque-panel {
-  background: #ffffff !important;
-}
-
-.page2-rebuilt-content,
-.page2-rebuilt-simple-list,
-.page2-rebuilt-proficiency-list {
-  width: 100% !important;
-  height: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.page2-rebuilt-class-actions {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 4px !important;
-  margin-bottom: 5px !important;
-  padding-bottom: 5px !important;
-  border-bottom: 1px solid rgba(0,0,0,.22) !important;
-}
-
-.page2-run-advancement,
-.page2-manage-class {
-  min-height: 22px !important;
-  padding: 1px 4px !important;
-  border: 1px solid rgba(0,0,0,.3) !important;
-  background: #f7f5ed !important;
-  color: #171612 !important;
-  font: inherit !important;
-  font-size: .8em !important;
-  cursor: pointer !important;
-}
-
-.page2-rebuilt-proof {
-  position: absolute !important;
-  top: 5.7% !important;
-  left: 38% !important;
-  z-index: 900 !important;
-  padding: 2px 7px !important;
-  background: #7b2e2e !important;
-  color: #fff !important;
-  border: 1px solid #3e1717 !important;
-  font: 700 9px/1 Georgia, "Times New Roman", serif !important;
-  pointer-events: none !important;
-}
-
-/* In calibration mode, use the SAME generic field interaction rules.
-   Only the children are muted so dragging the region itself is reliable. */
-.calibration-mode .page2-rebuilt-region {
-  outline: 2px dashed rgba(179, 43, 43, .92) !important;
-  outline-offset: -1px !important;
-  cursor: move !important;
-  pointer-events: auto !important;
-  user-select: none !important;
-  touch-action: none !important;
-  z-index: 1000 !important;
-}
-
-.calibration-mode .page2-rebuilt-region.calibration-selected {
-  outline: 3px solid #d22c2c !important;
-  z-index: 1100 !important;
-}
-
-.calibration-mode .page2-rebuilt-region > * {
-  pointer-events: none !important;
-}
-
-
-/* test.96 — rebuilt directly on the proven live v71/v70 path */
+/* test.107 — Page 2 only. Uses the same overlay-field/calibration model as working pages. */
 .page2-list-panel {
   position: absolute !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
   padding: 4px 5px !important;
+  background: #ffffff !important;
+  color: #171612 !important;
   border: 0 !important;
   box-shadow: none !important;
-  color: #171612 !important;
-  font-family: Georgia, "Times New Roman", serif !important;
-}
-
-.page2-list-panel.opaque-panel {
-  background: #ffffff !important;
+  pointer-events: auto !important;
 }
 
 .page2-list-content,
@@ -2154,20 +2010,60 @@ input[data-component-key="classLevel"].class-level-interactive {
 .page2-manage-class {
   min-height: 22px !important;
   padding: 1px 4px !important;
-  border: 1px solid rgba(0,0,0,.3) !important;
+  border: 1px solid rgba(0,0,0,.25) !important;
   background: #f7f5ed !important;
   color: #171612 !important;
   font: inherit !important;
-  font-size: .8em !important;
   cursor: pointer !important;
+}
+
+.page2-feature-row {
+  display: block !important;
+  width: 100% !important;
+  min-height: 20px !important;
+  margin: 0 0 2px !important;
+  padding: 2px 4px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,.14) !important;
+  background: #ffffff !important;
+  color: #171612 !important;
+  text-align: left !important;
+  font: inherit !important;
+  cursor: pointer !important;
+}
+
+.page2-feature-row small {
+  display: block !important;
+  opacity: .6 !important;
+  font-size: .78em !important;
+}
+
+.page2-simple-row {
+  min-height: 20px !important;
+  padding: 2px 3px !important;
+  border-bottom: 1px solid rgba(0,0,0,.13) !important;
+}
+
+.page2-proficiency-group {
+  margin-bottom: 7px !important;
+}
+
+.page2-proficiency-group > strong {
+  display: block !important;
+  margin-bottom: 2px !important;
+  border-bottom: 1px solid rgba(0,0,0,.28) !important;
+}
+
+.page2-empty-list {
+  padding: 5px 3px !important;
+  opacity: .58 !important;
+  font-style: italic !important;
 }
 
 .calibration-mode .page2-list-panel {
   outline: 2px dashed rgba(179,43,43,.92) !important;
   outline-offset: -1px !important;
-  background: #ffffff !important;
   cursor: move !important;
-  pointer-events: auto !important;
   user-select: none !important;
   touch-action: none !important;
   z-index: 1000 !important;
@@ -2180,207 +2076,4 @@ input[data-component-key="classLevel"].class-level-interactive {
 
 .calibration-mode .page2-list-panel > * {
   pointer-events: none !important;
-}
-
-.page2-live-proof-v96 {
-  position: absolute !important;
-  top: 5.5% !important;
-  left: 40% !important;
-  z-index: 99999 !important;
-  padding: 3px 8px !important;
-  background: #7b2e2e !important;
-  color: #fff !important;
-  border: 1px solid #3e1717 !important;
-  font: 700 10px/1 Arial, sans-serif !important;
-  pointer-events: none !important;
-}
-
-
-/* test.98 — explicit visible proof on exact v71/v70 live path */
-.page2-live-proof-v96 {
-  position: absolute !important;
-  top: 5.2% !important;
-  left: 34% !important;
-  z-index: 999999 !important;
-  padding: 4px 10px !important;
-  background: #8b0000 !important;
-  color: #ffffff !important;
-  border: 2px solid #ffffff !important;
-  font: 700 11px/1 Arial, sans-serif !important;
-  pointer-events: none !important;
-}
-
-
-/* =========================================================
-   test.99 — direct mount onto the exact live Page 2 DOM.
-   ========================================================= */
-.bv99-proof {
-  position: absolute !important;
-  top: 5.4% !important;
-  left: 35% !important;
-  z-index: 999999 !important;
-  padding: 4px 9px !important;
-  background: #8b0000 !important;
-  color: #ffffff !important;
-  border: 2px solid #ffffff !important;
-  font: 700 10px/1 Arial, sans-serif !important;
-  pointer-events: none !important;
-}
-
-.bv99-panel {
-  position: absolute !important;
-  z-index: 50000 !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  padding: 4px 5px !important;
-  background: #ffffff !important;
-  color: #171612 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  font-family: Georgia, "Times New Roman", serif !important;
-  pointer-events: auto !important;
-}
-
-.bv99-content {
-  width: 100% !important;
-  height: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.bv99-class-actions {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 4px !important;
-  margin-bottom: 5px !important;
-}
-
-.bv99-class-actions button,
-.bv99-feature-row {
-  min-height: 22px !important;
-  padding: 1px 4px !important;
-  border: 1px solid rgba(0,0,0,.25) !important;
-  background: #f7f5ed !important;
-  color: #171612 !important;
-  font: inherit !important;
-  cursor: pointer !important;
-}
-
-.bv99-feature-row {
-  display: block !important;
-  width: 100% !important;
-  margin-bottom: 2px !important;
-  text-align: left !important;
-  background: #ffffff !important;
-}
-
-.bv99-row {
-  min-height: 20px !important;
-  padding: 2px 3px !important;
-  border-bottom: 1px solid rgba(0,0,0,.13) !important;
-}
-
-.bv99-prof-group {
-  margin-bottom: 8px !important;
-}
-
-.bv99-prof-group > strong {
-  display: block !important;
-  margin-bottom: 2px !important;
-  border-bottom: 1px solid rgba(0,0,0,.3) !important;
-}
-
-.bv99-empty {
-  padding: 5px 3px !important;
-  opacity: .6 !important;
-  font-style: italic !important;
-}
-
-.bv99-move-label {
-  display: none !important;
-}
-
-.calibration-mode .bv99-panel {
-  outline: 2px dashed #b32b2b !important;
-  cursor: move !important;
-  user-select: none !important;
-  touch-action: none !important;
-  z-index: 60000 !important;
-}
-
-.calibration-mode .bv99-panel.bv99-selected {
-  outline: 3px solid #e31b1b !important;
-  z-index: 61000 !important;
-}
-
-.calibration-mode .bv99-content {
-  pointer-events: none !important;
-}
-
-.calibration-mode .bv99-move-label {
-  display: block !important;
-  position: absolute !important;
-  top: 2px !important;
-  left: 2px !important;
-  right: 2px !important;
-  z-index: 62000 !important;
-  padding: 3px 5px !important;
-  background: #fff3c9 !important;
-  color: #4b320c !important;
-  border: 1px solid #8b5a14 !important;
-  font-size: 9px !important;
-  font-weight: 700 !important;
-  text-align: center !important;
-  pointer-events: none !important;
-}
-
-/* v104 package identity proof */
-.bv99-proof {
-  background: #003b8e !important;
-  border: 3px solid #ffdf00 !important;
-}
-
-
-/* v104 — repaired actual module, lowercase install folder */
-.bv99-proof {
-  position:absolute !important;
-  top:5.25% !important;
-  left:35% !important;
-  z-index:999999 !important;
-  padding:4px 10px !important;
-  background:#7b1515 !important;
-  color:#fff !important;
-  border:3px solid #d6b85a !important;
-  font:700 11px/1 Arial,sans-serif !important;
-  pointer-events:none !important;
-}
-.bv99-panel {
-  position:absolute !important;
-  z-index:50000 !important;
-  box-sizing:border-box !important;
-  overflow:hidden !important;
-  padding:4px 5px !important;
-  background:#fff !important;
-  color:#171612 !important;
-  pointer-events:auto !important;
-}
-.bv99-content {
-  width:100% !important;
-  height:100% !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-}
-.calibration-mode .bv99-panel {
-  outline:2px dashed #b32b2b !important;
-  cursor:move !important;
-  user-select:none !important;
-  touch-action:none !important;
-  z-index:60000 !important;
-}
-.calibration-mode .bv99-panel.bv99-selected {
-  outline:3px solid #e31b1b !important;
-  z-index:61000 !important;
-}
-.calibration-mode .bv99-content {
-  pointer-events:none !important;
 }

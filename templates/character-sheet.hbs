@@ -32,7 +32,7 @@
       class="brackenvale-art-page {{#if active}}active{{/if}}"
       data-page="{{page}}"
     >
-<img
+      <img
         class="brackenvale-page-art"
         src="{{art}}"
         alt=""
@@ -57,159 +57,21 @@
           {{/if}}
 
           {{#if isClassSummary}}
-            <div
-              class="overlay-field {{className}} class-level-wrapper"
+            <button
+              type="button"
+              class="overlay-field {{className}} class-level-button {{#unless itemId}}empty{{/unless}}"
               style="{{style}}"
-              data-component-key="{{key}}"
-              data-layout-part="root"
-            >
-              <span
-                class="class-level-display"
-                data-item-id="{{itemId}}"
-              >{{value}}</span>
-
-              <button
-                type="button"
-                class="class-level-overlay-button"
-                data-action="class-level-overlay"
-                data-item-id="{{itemId}}"
-                aria-label="{{label}}"
-                title="{{#if itemId}}Open class{{else}}Click to add a class{{/if}}"
-                {{#unless editable}}disabled{{/unless}}
-              ></button>
-
-              {{#if itemId}}
-                <button
-                  type="button"
-                  class="class-remove-button"
-                  data-action="remove-class"
-                  data-item-id="{{itemId}}"
-                  aria-label="Remove {{value}}"
-                  title="Remove class"
-                  {{#unless editable}}disabled{{/unless}}
-                >×</button>
-              {{/if}}
-            </div>
-          {{/if}}
-
-          {{#if isFeatureList}}
-            <section
-              class="overlay-field page2-list-panel page2-features-panel {{#if opaquePanel}}opaque-panel{{/if}}"
-              style="{{style}}"
-              data-component-key="{{key}}"
-              data-layout-part="root"
               aria-label="{{label}}"
-            >
-              <div class="page2-list-content">
-                {{#if hasClass}}
-                  <div class="page2-class-actions">
-                    {{#each classItems}}
-                      <button
-                        type="button"
-                        class="page2-run-advancement"
-                        data-action="run-class-advancement"
-                        data-item-id="{{id}}"
-                        title="Run {{name}} through D&D5e Advancement"
-                      >
-                        Run Advancement
-                      </button>
-                      <button
-                        type="button"
-                        class="page2-manage-class"
-                        data-action="manage-class"
-                        data-item-id="{{id}}"
-                        title="Open {{name}} class"
-                      >
-                        Open {{name}}{{#if levels}} {{levels}}{{/if}}
-                      </button>
-                    {{/each}}
-                  </div>
-                {{/if}}
-
-                <div class="page2-feature-rows">
-                  {{#each rows}}
-                    <button
-                      type="button"
-                      class="page2-feature-row"
-                      data-action="open-feature"
-                      data-item-id="{{id}}"
-                      title="Open {{name}}"
-                    >
-                      <span class="page2-feature-name">{{name}}</span>
-                      {{#if typeLabel}}
-                        <span class="page2-feature-type">{{typeLabel}}</span>
-                      {{/if}}
-                    </button>
-                  {{else}}
-                    <div class="page2-empty-list">No features or traits have been granted yet.</div>
-                  {{/each}}
-                </div>
-              </div>
-            </section>
-          {{/if}}
-
-          {{#if isLanguageList}}
-            <section
-              class="overlay-field page2-list-panel page2-languages-panel {{#if opaquePanel}}opaque-panel{{/if}}"
-              style="{{style}}"
+              title="{{#if itemId}}Open class{{else}}Click to add a class{{/if}}"
+              data-item-id="{{itemId}}"
               data-component-key="{{key}}"
               data-layout-part="root"
-              aria-label="{{label}}"
-            >
-              <div class="page2-simple-rows">
-                {{#each rows}}
-                  <div class="page2-simple-row">{{this}}</div>
-                {{else}}
-                  <div class="page2-empty-list">No languages recorded.</div>
-                {{/each}}
-              </div>
-            </section>
+              data-action="class-level"
+              {{#unless editable}}disabled{{/unless}}
+            >{{value}}</button>
           {{/if}}
 
-          {{#if isProficiencyList}}
-            <section
-              class="overlay-field page2-list-panel page2-proficiencies-panel {{#if opaquePanel}}opaque-panel{{/if}}"
-              style="{{style}}"
-              data-component-key="{{key}}"
-              data-layout-part="root"
-              aria-label="{{label}}"
-            >
-              <div class="page2-proficiency-groups">
-                {{#each groups}}
-                  <div class="page2-proficiency-group">
-                    <strong>{{label}}</strong>
-                    {{#each rows}}
-                      <div class="page2-simple-row">{{this}}</div>
-                    {{/each}}
-                  </div>
-                {{else}}
-                  <div class="page2-empty-list">No proficiencies recorded.</div>
-                {{/each}}
-              </div>
-            </section>
-          {{/if}}
-
-
-{{#if isPage2LanguagesRegion}}
-            <section
-              class="overlay-field page2-rebuilt-region page2-rebuilt-languages {{#if opaquePanel}}opaque-panel{{/if}}"
-              style="{{style}}"
-              data-component-key="{{key}}"
-              data-layout-part="root"
-              aria-label="{{label}}"
-              tabindex="0"
-            >
-              <div class="page2-rebuilt-simple-list">
-                {{#each rows}}
-                  <div class="page2-simple-row">{{this}}</div>
-                {{else}}
-                  <div class="page2-empty-list">No languages recorded.</div>
-                {{/each}}
-              </div>
-            </section>
-          {{/if}}
-
-{{#if isItemSummary}}
+          {{#if isItemSummary}}
             <input
               class="overlay-field {{className}} item-summary-field"
               type="text"
@@ -579,50 +441,6 @@
         {{/each}}
       </div>
 
-      {{#if isPage2}}
-        <div class="brackenvale-page2-direct" data-page2-direct="true">
-          <section class="page2-direct-panel page2-direct-features">
-            <div class="page2-direct-scroll">
-              {{#each page2Data.classes}}
-                <button type="button" class="page2-manage-class" data-action="manage-class" data-item-id="{{id}}">
-                  Manage {{name}}{{#if levels}} {{levels}}{{/if}}
-                </button>
-              {{/each}}
-              {{#each page2Data.features}}
-                <button type="button" class="page2-feature-row" data-action="open-feature" data-item-id="{{id}}">
-                  <span class="page2-feature-name">{{name}}</span>
-                  {{#if type}}<span class="page2-feature-type">{{type}}</span>{{/if}}
-                </button>
-              {{else}}
-                <div class="page2-empty-list">No granted features yet. Use Manage Class → Advancement to add class features.</div>
-              {{/each}}
-            </div>
-          </section>
-
-          <section class="page2-direct-panel page2-direct-languages">
-            <div class="page2-direct-scroll">
-              {{#each page2Data.languages}}
-                <div class="page2-simple-row">{{this}}</div>
-              {{else}}
-                <div class="page2-empty-list">No languages recorded.</div>
-              {{/each}}
-            </div>
-          </section>
-
-          <section class="page2-direct-panel page2-direct-proficiencies">
-            <div class="page2-direct-scroll">
-              {{#each page2Data.proficiencyGroups}}
-                <div class="page2-proficiency-group">
-                  <strong>{{label}}</strong>
-                  {{#each values}}<div class="page2-simple-row">{{this}}</div>{{/each}}
-                </div>
-              {{else}}
-                <div class="page2-empty-list">No proficiencies recorded.</div>
-              {{/each}}
-            </div>
-          </section>
-        </div>
-      {{/if}}
 
     </div>
   {{/each}}
