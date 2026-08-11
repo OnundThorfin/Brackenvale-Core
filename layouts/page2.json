@@ -3,8 +3,7 @@
   "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-2.webp",
   "components": [
     {
-      "component": "page2Region",
-      "region": "features",
+      "component": "featureList",
       "key": "features-traits",
       "label": "Features & Traits",
       "left": 5.4,
@@ -14,8 +13,7 @@
       "opaquePanel": true
     },
     {
-      "component": "page2Region",
-      "region": "languages",
+      "component": "languageList",
       "key": "languages",
       "label": "Languages",
       "left": 58.1,
@@ -25,8 +23,7 @@
       "opaquePanel": true
     },
     {
-      "component": "page2Region",
-      "region": "proficiencies",
+      "component": "proficiencyList",
       "key": "proficiencies",
       "label": "Proficiencies",
       "left": 58.1,

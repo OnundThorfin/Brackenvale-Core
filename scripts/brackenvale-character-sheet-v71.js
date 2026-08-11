@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.95 PAGE2-REBUILD");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.96 LIVE-v71");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v95.hbs";
 const LAYOUT_ROOT =
