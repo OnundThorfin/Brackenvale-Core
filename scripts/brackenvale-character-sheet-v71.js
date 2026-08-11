@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.98 FORGE-ROOT");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.99 DIRECT-MOUNT");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v95.hbs";
 const LAYOUT_ROOT =
@@ -193,6 +193,7 @@ Hooks.once("init", () => {
       if (!root) return;
 
       this._activateArtworkPageTabs(root);
+      this._mountPage2DirectRebuild(root);
       this._activateItemEditors(root);
       this._activatePage2FeatureControls(root);
       this._activateClassIntegration(root);
@@ -665,6 +666,224 @@ Hooks.once("init", () => {
         classes: data.classes.length,
         languages: data.languages.length,
         proficiencyGroups: data.proficiencyGroups.length
+      });
+    }
+
+
+
+    _mountPage2DirectRebuild(root) {
+      const page = root.querySelector('.brackenvale-art-page[data-page="2"]');
+      if (!page) {
+        console.warn(`${MODULE_ID} | test.99 could not find Page 2`);
+        return;
+      }
+
+      // Prove this exact _onRender path is touching the visible page.
+      page.querySelectorAll(".bv99-page2-rebuild").forEach((node) => node.remove());
+
+      // Hide every prior Page 2 overlay implementation.
+      page.querySelectorAll(
+        ".brackenvale-page2-dom, .page2-list-panel, .page2-rebuilt-region, .bv97-page2-panel"
+      ).forEach((node) => {
+        node.style.display = "none";
+      });
+
+      const escape = foundry.utils.escapeHTML;
+
+      const classes = Array.from(this.actor.items ?? [])
+        .filter((item) => item.type === "class");
+
+      const feats = Array.from(this.actor.items ?? [])
+        .filter((item) => item.type === "feat")
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      const normalizeTraitValues = (value) => {
+        if (value == null) return [];
+        if (value instanceof Set) return Array.from(value);
+        if (Array.isArray(value)) return value.flatMap(normalizeTraitValues);
+        if (typeof value === "string") {
+          return value.split(/[;,]/).map((v) => v.trim()).filter(Boolean);
+        }
+        if (typeof value === "object") {
+          const result = [];
+          if (value.value != null) result.push(...normalizeTraitValues(value.value));
+          if (value.custom != null) result.push(...normalizeTraitValues(value.custom));
+          if (value.value == null && value.custom == null) {
+            for (const [key, enabled] of Object.entries(value)) {
+              if (enabled === true) result.push(key);
+              else if (typeof enabled === "string" && enabled.trim()) result.push(enabled.trim());
+            }
+          }
+          return result;
+        }
+        return [];
+      };
+
+      const localizeConfigured = (values, config = {}) =>
+        [...new Set(values.map((value) => {
+          const key = String(value ?? "").trim();
+          if (!key) return "";
+          const configured = config?.[key];
+          if (!configured) return key;
+          const raw = typeof configured === "string"
+            ? configured
+            : (configured.label ?? configured.name ?? key);
+          try {
+            return game.i18n?.localize(raw) ?? raw;
+          } catch (_error) {
+            return raw;
+          }
+        }).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+      const languages = localizeConfigured(
+        normalizeTraitValues(foundry.utils.getProperty(this.actor, "system.traits.languages")),
+        CONFIG.DND5E?.languages ?? {}
+      );
+
+      const proficiencyGroups = [
+        ["Armor", "system.traits.armorProf", CONFIG.DND5E?.armorProficiencies ?? {}],
+        ["Weapons", "system.traits.weaponProf", CONFIG.DND5E?.weaponProficiencies ?? {}],
+        ["Tools", "system.traits.toolProf", CONFIG.DND5E?.toolProficiencies ?? {}]
+      ].map(([label, path, config]) => ({
+        label,
+        rows: localizeConfigured(
+          normalizeTraitValues(foundry.utils.getProperty(this.actor, path)),
+          config
+        )
+      })).filter((group) => group.rows.length);
+
+      const featureHtml = [
+        ...classes.map((item) => `
+          <div class="bv99-class-actions">
+            <button
+              type="button"
+              data-action="run-class-advancement"
+              data-item-id="${escape(item.id)}"
+            >Run Advancement</button>
+            <button
+              type="button"
+              data-action="manage-class"
+              data-item-id="${escape(item.id)}"
+            >Open ${escape(item.name)}</button>
+          </div>
+        `),
+        ...feats.map((item) => `
+          <button
+            type="button"
+            class="bv99-feature-row"
+            data-action="open-feature"
+            data-item-id="${escape(item.id)}"
+          >${escape(item.name)}</button>
+        `)
+      ].join("") || `<div class="bv99-empty">No features or traits have been granted yet.</div>`;
+
+      const languageHtml = languages.length
+        ? languages.map((name) => `<div class="bv99-row">${escape(name)}</div>`).join("")
+        : `<div class="bv99-empty">No languages recorded.</div>`;
+
+      const proficiencyHtml = proficiencyGroups.length
+        ? proficiencyGroups.map((group) => `
+            <div class="bv99-prof-group">
+              <strong>${escape(group.label)}</strong>
+              ${group.rows.map((name) => `<div class="bv99-row">${escape(name)}</div>`).join("")}
+            </div>
+          `).join("")
+        : `<div class="bv99-empty">No proficiencies recorded.</div>`;
+
+      const marker = document.createElement("div");
+      marker.className = "bv99-page2-rebuild bv99-proof";
+      marker.textContent = "PAGE 2 REBUILD ACTIVE · v99";
+      page.append(marker);
+
+      const createPanel = (key, className, style, html) => {
+        const panel = document.createElement("section");
+        panel.className = `bv99-page2-rebuild bv99-panel ${className}`;
+        panel.dataset.bv99Key = key;
+        panel.style.cssText = style;
+        panel.innerHTML = `
+          <div class="bv99-move-label">MOVE ${key.toUpperCase()}</div>
+          <div class="bv99-content">${html}</div>
+        `;
+        page.append(panel);
+        return panel;
+      };
+
+      createPanel(
+        "features",
+        "bv99-features",
+        "left:5.4%;top:10%;width:48.1%;height:79.2%;",
+        featureHtml
+      );
+      createPanel(
+        "languages",
+        "bv99-languages",
+        "left:58.1%;top:10%;width:36.9%;height:28.9%;",
+        languageHtml
+      );
+      createPanel(
+        "proficiencies",
+        "bv99-proficiencies",
+        "left:58.1%;top:44.4%;width:36.9%;height:44.8%;",
+        proficiencyHtml
+      );
+
+      // Re-bind normal Page 2 feature/class buttons to the rebuilt DOM.
+      this._activatePage2FeatureControls(page);
+
+      // Direct drag behavior using the exact visible page element.
+      for (const panel of page.querySelectorAll(".bv99-panel")) {
+        panel.addEventListener("pointerdown", (event) => {
+          if (!this._calibrationMode || event.button !== 0) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          page.querySelectorAll(".bv99-panel").forEach((node) =>
+            node.classList.remove("bv99-selected")
+          );
+          panel.classList.add("bv99-selected");
+
+          const pageRect = page.getBoundingClientRect();
+          const panelRect = panel.getBoundingClientRect();
+          const startX = event.clientX;
+          const startY = event.clientY;
+          const startLeft = ((panelRect.left - pageRect.left) / pageRect.width) * 100;
+          const startTop = ((panelRect.top - pageRect.top) / pageRect.height) * 100;
+
+          panel.setPointerCapture?.(event.pointerId);
+
+          const move = (moveEvent) => {
+            const left = this._clamp(
+              startLeft + ((moveEvent.clientX - startX) / pageRect.width) * 100,
+              0,
+              100
+            );
+            const top = this._clamp(
+              startTop + ((moveEvent.clientY - startY) / pageRect.height) * 100,
+              0,
+              100
+            );
+            panel.style.left = `${left}%`;
+            panel.style.top = `${top}%`;
+          };
+
+          const finish = (upEvent) => {
+            panel.releasePointerCapture?.(upEvent.pointerId);
+            panel.removeEventListener("pointermove", move);
+            panel.removeEventListener("pointerup", finish);
+            panel.removeEventListener("pointercancel", finish);
+          };
+
+          panel.addEventListener("pointermove", move);
+          panel.addEventListener("pointerup", finish);
+          panel.addEventListener("pointercancel", finish);
+        });
+      }
+
+      console.info(`${MODULE_ID} | test.99 direct Page 2 rebuild mounted`, {
+        actor: this.actor.name,
+        page,
+        panels: page.querySelectorAll(".bv99-panel").length
       });
     }
 
