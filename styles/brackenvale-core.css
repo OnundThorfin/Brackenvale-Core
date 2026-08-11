@@ -444,3 +444,125 @@
 .brackenvale-page-fields .ability-modifier-field {
   border-radius: 50%;
 }
+
+
+/* test.97 — Page 2 hard override, deliberately independent of sheet CSS. */
+.bv97-proof {
+  position: absolute !important;
+  top: 5.5% !important;
+  left: 38% !important;
+  z-index: 50000 !important;
+  padding: 3px 8px !important;
+  background: #7b2e2e !important;
+  color: #fff !important;
+  border: 1px solid #3e1717 !important;
+  font: 700 10px/1 Arial, sans-serif !important;
+  pointer-events: none !important;
+}
+
+.bv97-page2-panel {
+  position: absolute !important;
+  z-index: 30000 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 4px 5px !important;
+  background: #fff !important;
+  color: #171612 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  pointer-events: auto !important;
+}
+
+.bv97-panel-content {
+  width: 100% !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.bv97-drag-label {
+  display: none !important;
+}
+
+.calibration-mode .bv97-page2-panel {
+  outline: 2px dashed #b32b2b !important;
+  cursor: move !important;
+  user-select: none !important;
+  touch-action: none !important;
+  z-index: 40000 !important;
+}
+
+.calibration-mode .bv97-page2-panel.bv97-selected {
+  outline: 3px solid #e31b1b !important;
+  z-index: 41000 !important;
+}
+
+.calibration-mode .bv97-page2-panel .bv97-panel-content {
+  pointer-events: none !important;
+}
+
+.calibration-mode .bv97-drag-label {
+  display: block !important;
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  right: 2px !important;
+  z-index: 42000 !important;
+  padding: 3px 5px !important;
+  background: #fff3c9 !important;
+  color: #4b320c !important;
+  border: 1px solid #8b5a14 !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  pointer-events: none !important;
+}
+
+.bv97-class-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 4px !important;
+  margin-bottom: 5px !important;
+}
+
+.bv97-class-actions button,
+.bv97-feature-row {
+  min-height: 22px !important;
+  padding: 1px 5px !important;
+  border: 1px solid rgba(0,0,0,.25) !important;
+  background: #f7f5ed !important;
+  color: #171612 !important;
+  font: inherit !important;
+  cursor: pointer !important;
+}
+
+.bv97-feature-row {
+  display: block !important;
+  width: 100% !important;
+  margin-bottom: 2px !important;
+  text-align: left !important;
+  background: #fff !important;
+}
+
+.bv97-row {
+  min-height: 20px !important;
+  padding: 2px 3px !important;
+  border-bottom: 1px solid rgba(0,0,0,.13) !important;
+}
+
+.bv97-prof-group {
+  margin-bottom: 8px !important;
+}
+
+.bv97-prof-group > strong {
+  display: block !important;
+  margin-bottom: 2px !important;
+  border-bottom: 1px solid rgba(0,0,0,.3) !important;
+}
+
+.bv97-empty {
+  padding: 5px 3px !important;
+  opacity: .6 !important;
+  font-style: italic !important;
+}

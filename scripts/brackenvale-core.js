@@ -565,3 +565,377 @@ Hooks.on("chatMessage", (_chatLog, message) => {
   game.brackenvaleCore.open();
   return false;
 });
+
+
+/* ========================================================================
+ * Brackenvale Core 0.5.4-test.97
+ * Page 2 hard override.
+ *
+ * This intentionally bypasses the character-sheet Page 2 renderer entirely.
+ * It watches for the already-rendered Brackenvale sheet and mounts three
+ * absolute overlay regions directly onto Page 2.
+ * ======================================================================== */
+(() => {
+  const PAGE2_OVERRIDE_VERSION = "0.5.4-test.97";
+  const PAGE2_FLAG = "page2OverrideLayout";
+
+  const DEFAULT_LAYOUT = {
+    features: {left: 5.4, top: 10, width: 48.1, height: 79.2},
+    languages: {left: 58.1, top: 10, width: 36.9, height: 28.9},
+    proficiencies: {left: 58.1, top: 44.4, width: 36.9, height: 44.8}
+  };
+
+  function getActorForPage(page) {
+    for (const actor of game.actors ?? []) {
+      try {
+        const element = actor.sheet?.element;
+        if (element && (element === page || element.contains?.(page))) return actor;
+      } catch (_err) {}
+    }
+    return null;
+  }
+
+  function normalizeTraitValues(value) {
+    if (value == null) return [];
+    if (value instanceof Set) return Array.from(value);
+    if (Array.isArray(value)) return value.flatMap(normalizeTraitValues);
+    if (typeof value === "string") {
+      return value.split(/[;,]/).map(v => v.trim()).filter(Boolean);
+    }
+    if (typeof value === "object") {
+      const result = [];
+      if (value.value != null) result.push(...normalizeTraitValues(value.value));
+      if (value.custom != null) result.push(...normalizeTraitValues(value.custom));
+      if (value.value == null && value.custom == null) {
+        for (const [key, enabled] of Object.entries(value)) {
+          if (enabled === true) result.push(key);
+          else if (typeof enabled === "string" && enabled.trim()) result.push(enabled.trim());
+        }
+      }
+      return result;
+    }
+    return [];
+  }
+
+  function localizeConfigured(values, config = {}) {
+    return [...new Set(values.map(value => {
+      const key = String(value ?? "").trim();
+      if (!key) return "";
+      const configured = config?.[key];
+      if (!configured) return key;
+      const raw = typeof configured === "string"
+        ? configured
+        : (configured.label ?? configured.name ?? key);
+      try { return game.i18n?.localize(raw) ?? raw; }
+      catch (_err) { return raw; }
+    }).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  }
+
+  function getLayout(actor) {
+    const stored = foundry.utils.getProperty(actor, `flags.brackenvale-core.${PAGE2_FLAG}`);
+    return {
+      features: {...DEFAULT_LAYOUT.features, ...(stored?.features ?? {})},
+      languages: {...DEFAULT_LAYOUT.languages, ...(stored?.languages ?? {})},
+      proficiencies: {...DEFAULT_LAYOUT.proficiencies, ...(stored?.proficiencies ?? {})}
+    };
+  }
+
+  function styleFromLayout(region) {
+    return `left:${region.left}%;top:${region.top}%;width:${region.width}%;height:${region.height}%;`;
+  }
+
+  function featureHtml(actor) {
+    const classes = Array.from(actor.items ?? []).filter(i => i.type === "class");
+    const feats = Array.from(actor.items ?? [])
+      .filter(i => i.type === "feat")
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const classActions = classes.map(item => `
+      <div class="bv97-class-actions">
+        <button type="button" data-bv97-run-advancement="${item.id}">Run Advancement</button>
+        <button type="button" data-bv97-open-item="${item.id}">Open ${foundry.utils.escapeHTML(item.name)}</button>
+      </div>
+    `).join("");
+
+    const featRows = feats.map(item => `
+      <button type="button" class="bv97-feature-row" data-bv97-open-item="${item.id}">
+        <span>${foundry.utils.escapeHTML(item.name)}</span>
+      </button>
+    `).join("");
+
+    return classActions + (featRows || `<div class="bv97-empty">No features or traits have been granted yet.</div>`);
+  }
+
+  function languageHtml(actor) {
+    const values = normalizeTraitValues(foundry.utils.getProperty(actor, "system.traits.languages"));
+    const rows = localizeConfigured(values, CONFIG.DND5E?.languages ?? {});
+    return rows.length
+      ? rows.map(v => `<div class="bv97-row">${foundry.utils.escapeHTML(v)}</div>`).join("")
+      : `<div class="bv97-empty">No languages recorded.</div>`;
+  }
+
+  function proficiencyHtml(actor) {
+    const groups = [
+      ["Armor", "system.traits.armorProf", CONFIG.DND5E?.armorProficiencies ?? {}],
+      ["Weapons", "system.traits.weaponProf", CONFIG.DND5E?.weaponProficiencies ?? {}],
+      ["Tools", "system.traits.toolProf", CONFIG.DND5E?.toolProficiencies ?? {}]
+    ];
+
+    const html = groups.map(([label, path, config]) => {
+      const rows = localizeConfigured(
+        normalizeTraitValues(foundry.utils.getProperty(actor, path)),
+        config
+      );
+      if (!rows.length) return "";
+      return `
+        <div class="bv97-prof-group">
+          <strong>${label}</strong>
+          ${rows.map(v => `<div class="bv97-row">${foundry.utils.escapeHTML(v)}</div>`).join("")}
+        </div>`;
+    }).join("");
+
+    return html || `<div class="bv97-empty">No proficiencies recorded.</div>`;
+  }
+
+  async function runAdvancement(actor, classItem) {
+    const sourceUuid =
+      foundry.utils.getProperty(classItem, "flags.core.sourceId")
+      ?? foundry.utils.getProperty(classItem, "_stats.compendiumSource")
+      ?? null;
+
+    if (!sourceUuid) {
+      ui.notifications?.warn(`${classItem.name} has no original compendium source. Open the class item instead.`);
+      classItem.sheet?.render(true);
+      return;
+    }
+
+    const source = await fromUuid(sourceUuid);
+    if (!source) {
+      ui.notifications?.warn(`Could not load the original ${classItem.name} class.`);
+      return;
+    }
+
+    const approved = window.confirm(
+      `Run ${classItem.name} through D&D5e Advancement?\n\nThis will remove the current class item and re-add the original compendium class through the native sheet drop workflow.`
+    );
+    if (!approved) return;
+
+    const sheet = actor.sheet;
+    const dragData = typeof source.toDragData === "function"
+      ? source.toDragData()
+      : {type: "Item", uuid: source.uuid};
+
+    await classItem.delete();
+
+    const page = sheet?.element?.querySelector?.('.brackenvale-art-page[data-page="2"]')
+      ?? sheet?.element
+      ?? document.body;
+
+    const event = {
+      target: page,
+      currentTarget: page,
+      preventDefault() {},
+      stopPropagation() {},
+      stopImmediatePropagation() {},
+      dataTransfer: {
+        getData(type) {
+          if (type === "text/plain" || type === "application/json") {
+            return JSON.stringify(dragData);
+          }
+          return "";
+        }
+      }
+    };
+
+    if (typeof sheet?._onDropItem === "function") {
+      await sheet._onDropItem(event, source);
+    } else if (typeof sheet?._onDrop === "function") {
+      await sheet._onDrop(event);
+    } else {
+      ui.notifications?.error("Native D&D5e Advancement drop handler was not available.");
+    }
+  }
+
+  function bindPanelActions(panel, actor) {
+    panel.querySelectorAll("[data-bv97-open-item]").forEach(button => {
+      button.addEventListener("click", event => {
+        if (panel.closest(".brackenvale-art-sheet")?.classList.contains("calibration-mode")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const item = actor.items.get(button.dataset.bv97OpenItem);
+        item?.sheet?.render(true);
+      });
+    });
+
+    panel.querySelectorAll("[data-bv97-run-advancement]").forEach(button => {
+      button.addEventListener("click", async event => {
+        if (panel.closest(".brackenvale-art-sheet")?.classList.contains("calibration-mode")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const item = actor.items.get(button.dataset.bv97RunAdvancement);
+        if (item) await runAdvancement(actor, item);
+      });
+    });
+  }
+
+  function bindDrag(panel, actor, key, page) {
+    if (panel.dataset.bv97DragBound === "true") return;
+    panel.dataset.bv97DragBound = "true";
+
+    panel.addEventListener("pointerdown", event => {
+      const form = panel.closest(".brackenvale-art-sheet");
+      if (!form?.classList.contains("calibration-mode")) return;
+      if (event.button !== 0) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      page.querySelectorAll(".bv97-page2-panel").forEach(el => el.classList.remove("bv97-selected"));
+      panel.classList.add("bv97-selected");
+
+      const pageRect = page.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const startLeft = ((panelRect.left - pageRect.left) / pageRect.width) * 100;
+      const startTop = ((panelRect.top - pageRect.top) / pageRect.height) * 100;
+
+      panel.setPointerCapture?.(event.pointerId);
+
+      const move = moveEvent => {
+        const left = Math.max(0, Math.min(100, startLeft + ((moveEvent.clientX - startX) / pageRect.width) * 100));
+        const top = Math.max(0, Math.min(100, startTop + ((moveEvent.clientY - startY) / pageRect.height) * 100));
+        panel.style.left = `${left}%`;
+        panel.style.top = `${top}%`;
+      };
+
+      const finish = async upEvent => {
+        panel.releasePointerCapture?.(upEvent.pointerId);
+        panel.removeEventListener("pointermove", move);
+        panel.removeEventListener("pointerup", finish);
+        panel.removeEventListener("pointercancel", finish);
+
+        const current = getLayout(actor);
+        current[key] = {
+          ...current[key],
+          left: parseFloat(panel.style.left),
+          top: parseFloat(panel.style.top),
+          width: parseFloat(panel.style.width),
+          height: parseFloat(panel.style.height)
+        };
+        await actor.update({[`flags.brackenvale-core.${PAGE2_FLAG}`]: current});
+      };
+
+      panel.addEventListener("pointermove", move);
+      panel.addEventListener("pointerup", finish);
+      panel.addEventListener("pointercancel", finish);
+    });
+  }
+
+  function exportPage2(actor, page) {
+    const layout = getLayout(actor);
+    const data = {
+      page: 2,
+      art: "modules/brackenvale-core/assets/character-sheet/character-sheet-page-2.webp",
+      components: [
+        {
+          component: "featureList",
+          key: "features-traits",
+          label: "Features & Traits",
+          ...layout.features,
+          opaquePanel: true
+        },
+        {
+          component: "languageList",
+          key: "languages",
+          label: "Languages",
+          ...layout.languages,
+          opaquePanel: true
+        },
+        {
+          component: "proficiencyList",
+          key: "proficiencies",
+          label: "Proficiencies",
+          ...layout.proficiencies,
+          opaquePanel: true
+        }
+      ]
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "page2.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function mountPage2(page) {
+    if (!page || page.dataset.bv97Mounted === "true") return;
+
+    const actor = getActorForPage(page);
+    if (!actor) return;
+
+    page.dataset.bv97Mounted = "true";
+
+    // Hide any earlier Page 2 injection instead of relying on it.
+    page.querySelectorAll(".brackenvale-page2-dom, .page2-rebuilt-region, .page2-list-panel")
+      .forEach(el => { el.style.display = "none"; });
+
+    const layout = getLayout(actor);
+
+    const marker = document.createElement("div");
+    marker.className = "bv97-proof";
+    marker.textContent = "PAGE 2 OVERRIDE · v97";
+    page.append(marker);
+
+    const specs = [
+      ["features", "Features & Traits", featureHtml(actor)],
+      ["languages", "Languages", languageHtml(actor)],
+      ["proficiencies", "Proficiencies", proficiencyHtml(actor)]
+    ];
+
+    for (const [key, label, inner] of specs) {
+      const panel = document.createElement("section");
+      panel.className = `bv97-page2-panel bv97-${key}`;
+      panel.dataset.bv97Key = key;
+      panel.style.cssText = styleFromLayout(layout[key]);
+      panel.innerHTML = `
+        <div class="bv97-drag-label">MOVE ${label.toUpperCase()}</div>
+        <div class="bv97-panel-content">${inner}</div>
+      `;
+      page.append(panel);
+      bindPanelActions(panel, actor);
+      bindDrag(panel, actor, key, page);
+    }
+
+    const exportButton = page.closest(".brackenvale-art-sheet")
+      ?.querySelector('[data-action="export-layout"]');
+    if (exportButton && exportButton.dataset.bv97Bound !== "true") {
+      exportButton.dataset.bv97Bound = "true";
+      exportButton.addEventListener("click", event => {
+        const activePage = page.closest(".brackenvale-art-sheet")
+          ?.querySelector(".brackenvale-art-page.active");
+        if (activePage?.dataset.page !== "2") return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        exportPage2(actor, page);
+      }, true);
+    }
+  }
+
+  function scan() {
+    document
+      .querySelectorAll('.brackenvale-art-page[data-page="2"]')
+      .forEach(mountPage2);
+  }
+
+  Hooks.once("ready", () => {
+    console.info(`brackenvale-core | PAGE 2 HARD OVERRIDE ${PAGE2_OVERRIDE_VERSION} active`);
+    scan();
+
+    const observer = new MutationObserver(() => scan());
+    observer.observe(document.body, {childList: true, subtree: true});
+  });
+})();
