@@ -32,9 +32,6 @@
       class="brackenvale-art-page {{#if active}}active{{/if}}"
       data-page="{{page}}"
     >
-      {{#if isPage2}}
-        <div class="page2-live-proof-v96">PAGE 2 LIVE v98 · FORGE ROOT</div>
-      {{/if}}
       <img
         class="brackenvale-page-art"
         src="{{art}}"
@@ -109,21 +106,12 @@
                     {{#each classItems}}
                       <button
                         type="button"
-                        class="page2-run-advancement"
-                        data-action="run-class-advancement"
-                        data-item-id="{{id}}"
-                        title="Run {{name}} through D&D5e Advancement"
-                      >
-                        Run Advancement
-                      </button>
-                      <button
-                        type="button"
                         class="page2-manage-class"
                         data-action="manage-class"
                         data-item-id="{{id}}"
-                        title="Open {{name}} class"
+                        title="Open {{name}} to manage class advancement"
                       >
-                        Open {{name}}{{#if levels}} {{levels}}{{/if}}
+                        Manage {{name}}{{#if levels}} {{levels}}{{/if}}
                       </button>
                     {{/each}}
                   </div>

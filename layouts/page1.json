@@ -1,6 +1,6 @@
 {
   "page": 1,
-  "art": "modules/brackenvale-core-dev100/assets/character-sheet/character-sheet-page-1.webp",
+  "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-1.webp",
   "components": [
     {
       "component": "nativeField",

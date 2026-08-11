@@ -1,13 +1,13 @@
 {
   "page": 2,
-  "art": "modules/brackenvale-core-dev100/assets/character-sheet/character-sheet-page-2.webp",
+  "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-2.webp",
   "components": [
     {
       "component": "featureList",
       "key": "features-traits",
       "label": "Features & Traits",
       "left": 5.4,
-      "top": 10,
+      "top": 10.0,
       "width": 48.1,
       "height": 79.2,
       "opaquePanel": true
@@ -17,7 +17,7 @@
       "key": "languages",
       "label": "Languages",
       "left": 58.1,
-      "top": 10,
+      "top": 10.0,
       "width": 36.9,
       "height": 28.9,
       "opaquePanel": true
