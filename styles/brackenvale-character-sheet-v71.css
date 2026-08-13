@@ -2107,18 +2107,11 @@ input[data-component-key="classLevel"].class-level-interactive {
     0 0 14px 6px rgba(227,27,27,.35) !important;
 }
 
-/* .113 simple Page 2 class actions */
-.page2-class-actions {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  margin-bottom: 5px;
-}
-.page2-class-actions .page2-advance-class,
-.page2-class-actions .page2-manage-class {
+/* Page 2 class advancement control */
+.page2-advance-class {
   width: auto;
-  margin: 0;
-  padding: 1px 5px;
+  margin: 0 4px 4px 0;
+  padding: 1px 6px;
   min-height: 18px;
   font-size: 9px;
   line-height: 14px;
