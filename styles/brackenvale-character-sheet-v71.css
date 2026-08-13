@@ -2132,3 +2132,9 @@ input[data-component-key="classLevel"].class-level-interactive {
   font: inherit !important;
   cursor: pointer !important;
 }
+
+
+/* test.111 — native D&D5e AdvancementManager controls */
+.page2-class-advancement {
+  white-space: nowrap !important;
+}
