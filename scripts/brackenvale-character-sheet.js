@@ -547,92 +547,6 @@ Hooks.once("init", () => {
       }
     }
 
-    _renderPage2DirectDOM(root) {
-      const page = root.querySelector('.brackenvale-art-page[data-page="2"]');
-      if (!page) {
-        console.warn(`${MODULE_ID} | Page 2 DOM container was not found.`);
-        return;
-      }
-
-      page.querySelectorAll(".brackenvale-page2-dom").forEach((node) => node.remove());
-
-      const data = this._preparePage2DirectData();
-      const escape = (value) => foundry.utils.escapeHTML(String(value ?? ""));
-
-      const featureRows = [
-        ...data.classes.map((entry) => `
-          <div class="page2-class-actions">
-            <button
-              type="button"
-              class="page2-advance-class"
-              data-action="advance-class"
-              data-item-id="${escape(entry.id)}"
-              title="Advance ${escape(entry.name)} one level"
-            >Advance +1</button>
-            <button
-              type="button"
-              class="page2-manage-class"
-              data-action="manage-class"
-              data-item-id="${escape(entry.id)}"
-              title="Open ${escape(entry.name)} class"
-            >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
-          </div>
-        `),
-        ...data.features.map((entry) => `
-          <button
-            type="button"
-            class="page2-feature-row"
-            data-action="open-feature"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)}"
-          >
-            <span class="page2-feature-name">${escape(entry.name)}</span>
-            ${entry.type ? `<span class="page2-feature-type">${escape(entry.type)}</span>` : ""}
-          </button>
-        `)
-      ].join("") || `
-        <div class="page2-empty-list">
-          No granted features yet. Open the class and use its Advancement tab.
-        </div>
-      `;
-
-      const languageRows = data.languages.length
-        ? data.languages.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")
-        : `<div class="page2-empty-list">No languages recorded.</div>`;
-
-      const proficiencyRows = data.proficiencyGroups.length
-        ? data.proficiencyGroups.map((group) => `
-            <div class="page2-proficiency-group">
-              <strong>${escape(group.label)}</strong>
-              ${group.values.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")}
-            </div>
-          `).join("")
-        : `<div class="page2-empty-list">No proficiencies recorded.</div>`;
-
-      const overlay = document.createElement("div");
-      overlay.className = "brackenvale-page2-dom";
-      overlay.innerHTML = `
-        <section class="page2-dom-panel page2-dom-features">
-          <div class="page2-dom-scroll">${featureRows}</div>
-        </section>
-        <section class="page2-dom-panel page2-dom-languages">
-          <div class="page2-dom-scroll">${languageRows}</div>
-        </section>
-        <section class="page2-dom-panel page2-dom-proficiencies">
-          <div class="page2-dom-scroll">${proficiencyRows}</div>
-        </section>
-      `;
-
-      page.append(overlay);
-      console.info(`${MODULE_ID} | Page 2 direct DOM overlay rendered`, {
-        features: data.features.length,
-        classes: data.classes.length,
-        languages: data.languages.length,
-        proficiencyGroups: data.proficiencyGroups.length
-      });
-    }
-
-
     _activatePage2FeatureControls(root) {
       for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
         button.addEventListener("click", (event) => {
@@ -648,7 +562,7 @@ Hooks.once("init", () => {
       }
 
       for (const button of root.querySelectorAll('[data-action="advance-class"]')) {
-        button.addEventListener("click", async (event) => {
+        button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
 
           event.preventDefault();
@@ -658,26 +572,36 @@ Hooks.once("init", () => {
           if (!classItem || classItem.type !== "class") return;
 
           const currentLevel = Number(classItem.system?.levels ?? 0);
-          if (currentLevel >= 20) {
-            ui.notifications?.warn(`${classItem.name} is already level 20.`);
+          if (currentLevel >= CONFIG.DND5E.maxLevel) {
+            ui.notifications?.warn(`${classItem.name} is already at maximum level.`);
             return;
           }
 
-          const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+          if (game.settings.get("dnd5e", "disableAdvancements")) {
+            classItem.update({"system.levels": currentLevel + 1});
+            return;
+          }
+
+          const Manager =
+            game.dnd5e?.applications?.advancement?.AdvancementManager;
+
           if (!Manager?.forLevelChange) {
             ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
             return;
           }
 
+          // Mirrors D&D5e 5.3.3 CharacterActorSheet:
+          // AdvancementManager.forLevelChange(actor, classId, levelDelta)
           const manager = Manager.forLevelChange(this.actor, classItem.id, 1);
-          if (!manager?.steps?.length) {
-            ui.notifications?.warn(
-              `No advancement steps were found for ${classItem.name} level ${currentLevel + 1}.`
-            );
+
+          if (manager.steps.length) {
+            manager.render({force: true});
             return;
           }
 
-          await manager.render(true);
+          // Native D&D5e also falls back to simply increasing the level
+          // when there are no advancement steps at that level.
+          classItem.update({"system.levels": currentLevel + 1});
         });
       }
 
@@ -777,7 +701,7 @@ Hooks.once("init", () => {
                 <p>Remove <strong>${foundry.utils.escapeHTML(classItem.name)}</strong>
                 from <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>?</p>
                 <p class="hint">This deletes the Class item from the character.
-                Features already granted by D&D advancement may need to be reviewed separately.</p>
+                Class features and other benefits granted through D&D advancement will be removed with the class.</p>
               `,
               yes: {label: "Remove Class"},
               no: {label: "Cancel"},
@@ -791,6 +715,24 @@ Hooks.once("init", () => {
 
           if (!approved) return;
 
+          const Manager =
+            game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+          if (
+            !game.settings.get("dnd5e", "disableAdvancements")
+            && Manager?.forDeletedItem
+          ) {
+            // D&D5e's native deletion flow reverses every advancement granted
+            // by the class (features, proficiencies, etc.) before deleting it.
+            const manager = Manager.forDeletedItem(this.actor, classItem.id);
+
+            if (manager.steps.length) {
+              await manager.render(true);
+              return;
+            }
+          }
+
+          // Fallback only when there are no advancement steps to reverse.
           await classItem.delete();
           ui.notifications?.info(`${classItem.name} removed from ${this.actor.name}.`);
           this.render();
@@ -1090,28 +1032,42 @@ Hooks.once("init", () => {
       if (!sourceItem || sourceItem.type !== "class") return;
 
       const existing = (this.actor.items ?? []).find((item) =>
-        item.type === "class" && item.name === sourceItem.name
+        item.type === "class"
+        && item.system?.identifier === sourceItem.system?.identifier
       );
+
       if (existing) {
         existing.sheet?.render(true);
-        return;
-      }
-
-      const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
-      if (!Manager?.forNewItem) {
-        ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
         return;
       }
 
       const itemData = sourceItem.toObject();
       delete itemData._id;
       itemData.system ??= {};
-      itemData.system.levels = Number(itemData.system.levels ?? 1) || 1;
+      itemData.system.levels = Math.max(1, Number(itemData.system.levels ?? 1));
 
-      const manager = Manager.forNewItem(this.actor, itemData);
-      if (manager?.steps?.length) {
-        await manager.render(true);
-        return;
+      const supportsAdvancement =
+        Boolean(this.actor.system?.metadata?.supportsAdvancement);
+      const hasAdvancement =
+        !foundry.utils.isEmpty(itemData.system.advancement);
+      const advancementsDisabled =
+        game.settings.get("dnd5e", "disableAdvancements");
+
+      if (supportsAdvancement && hasAdvancement && !advancementsDisabled) {
+        const Manager =
+          game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+        if (!Manager?.forNewItem) {
+          ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
+          return;
+        }
+
+        // Mirrors D&D5e 5.3.3 BaseActorSheet's new-item advancement path.
+        const manager = Manager.forNewItem(this.actor, itemData);
+        if (manager.steps.length) {
+          manager.render(true);
+          return;
+        }
       }
 
       await this.actor.createEmbeddedDocuments("Item", [itemData], {keepId: false});
