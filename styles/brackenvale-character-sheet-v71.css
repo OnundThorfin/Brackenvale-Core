@@ -2107,34 +2107,19 @@ input[data-component-key="classLevel"].class-level-interactive {
     0 0 14px 6px rgba(227,27,27,.35) !important;
 }
 
-
-/* test.109 — Page 2 class / native Advancement controls */
+/* .113 simple Page 2 class actions */
 .page2-class-actions {
-  display: grid !important;
-  grid-template-columns: auto 1fr 1fr !important;
-  align-items: center !important;
-  gap: 4px !important;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 5px;
 }
-
-.page2-class-label {
-  padding: 2px 4px !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-}
-
-.page2-class-advancement,
-.page2-manage-class {
-  min-height: 22px !important;
-  padding: 1px 4px !important;
-  border: 1px solid rgba(0,0,0,.25) !important;
-  background: #f7f5ed !important;
-  color: #171612 !important;
-  font: inherit !important;
-  cursor: pointer !important;
-}
-
-
-/* test.111 — native D&D5e AdvancementManager controls */
-.page2-class-advancement {
-  white-space: nowrap !important;
+.page2-class-actions .page2-advance-class,
+.page2-class-actions .page2-manage-class {
+  width: auto;
+  margin: 0;
+  padding: 1px 5px;
+  min-height: 18px;
+  font-size: 9px;
+  line-height: 14px;
 }

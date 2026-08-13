@@ -561,13 +561,22 @@ Hooks.once("init", () => {
 
       const featureRows = [
         ...data.classes.map((entry) => `
-          <button
-            type="button"
-            class="page2-manage-class"
-            data-action="manage-class"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)} class"
-          >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          <div class="page2-class-actions">
+            <button
+              type="button"
+              class="page2-advance-class"
+              data-action="advance-class"
+              data-item-id="${escape(entry.id)}"
+              title="Advance ${escape(entry.name)} by one level"
+            >Advance +1</button>
+            <button
+              type="button"
+              class="page2-manage-class"
+              data-action="manage-class"
+              data-item-id="${escape(entry.id)}"
+              title="Open ${escape(entry.name)} class"
+            >Open ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          </div>
         `),
         ...data.features.map((entry) => `
           <button
@@ -638,6 +647,38 @@ Hooks.once("init", () => {
         });
       }
 
+      for (const button of root.querySelectorAll('[data-action="advance-class"]')) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          const classItem = itemId ? this.actor.items.get(itemId) : null;
+          if (!classItem) return;
+
+          const currentLevel = Number(classItem.system?.levels ?? 0);
+          if (currentLevel >= 20) {
+            ui.notifications?.warn(`${classItem.name} is already level 20.`);
+            return;
+          }
+
+          const AdvancementManager =
+            game.dnd5e?.applications?.advancement?.AdvancementManager;
+          if (!AdvancementManager?.forLevelChange) {
+            ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
+            return;
+          }
+
+          await AdvancementManager.forLevelChange(
+            this.actor,
+            classItem,
+            currentLevel + 1
+          );
+        });
+      }
+
       for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
@@ -647,20 +688,10 @@ Hooks.once("init", () => {
 
           const itemId = button.dataset.itemId;
           if (!itemId) return;
+
+          // The native D&D Class item remains the source of truth for its
+          // Advancement configuration and feature choices.
           this.actor.items.get(itemId)?.sheet?.render(true);
-        });
-      }
-
-      for (const button of root.querySelectorAll('[data-action="class-advancement"]')) {
-        button.addEventListener("click", (event) => {
-          if (this._calibrationMode) return;
-
-          event.preventDefault();
-          event.stopPropagation();
-
-          const itemId = button.dataset.itemId;
-          if (!itemId) return;
-          this._openClassAdvancement(this.actor.items.get(itemId));
         });
       }
     }
@@ -1056,6 +1087,11 @@ Hooks.once("init", () => {
     async _addBrackenvaleClass(sourceItem) {
       if (!sourceItem || sourceItem.type !== "class") return;
 
+      if (sourceItem.parent === this.actor) {
+        sourceItem.sheet?.render(true);
+        return;
+      }
+
       const existing = (this.actor.items ?? []).find((item) =>
         item.type === "class"
         && (
@@ -1074,153 +1110,30 @@ Hooks.once("init", () => {
         return;
       }
 
-      const nativeSheetClass =
-        game.dnd5e?.applications?.actor?.CharacterActorSheet;
-
-      const nativeSingleItem =
-        nativeSheetClass?.prototype?._onDropSingleItem;
-
-      if (typeof nativeSingleItem !== "function") {
-        ui.notifications?.error(
-          "D&D5e's native class-add handler could not be found."
-        );
-        return;
-      }
-
+      // Create the genuine D&D Class item on the actor. This preserves the
+      // class's advancement configuration rather than creating Brackenvale
+      // duplicate class data.
       const itemData = sourceItem.toObject();
       delete itemData._id;
 
-      itemData.system ??= {};
-      itemData.system.levels = 1;
-
-      // This is the exact method the stock D&D5e CharacterActorSheet uses
-      // after it has resolved a dropped Item into raw item data. That native
-      // method checks supportsAdvancement, disableAdvancements, and the
-      // class's advancement data, then launches AdvancementManager.forNewItem.
-      const nativeEvent = {
-        target:
-          this.element?.querySelector?.('[data-component-key="classLevel"]')
-          ?? this.element
-          ?? document.body,
-        currentTarget:
-          this.element?.querySelector?.('[data-component-key="classLevel"]')
-          ?? this.element
-          ?? document.body,
-        preventDefault() {},
-        stopPropagation() {},
-        stopImmediatePropagation() {}
-      };
-
-      const result = await nativeSingleItem.call(this, nativeEvent, itemData);
-
-      // Native D&D5e returns false when AdvancementManager has taken over.
-      if (result === false) {
-        console.info(
-          `${MODULE_ID} | Native D&D5e class advancement took over`,
-          { actor: this.actor.name, class: sourceItem.name }
-        );
-        return;
-      }
-
-      // If D&D5e returns item data instead, the advancement condition was not
-      // met. Do not silently pretend advancement happened: report the exact
-      // runtime conditions, then create the class so the character is not
-      // left in a broken state.
-      const advancementData = itemData.system?.advancement;
-      const advancementCount =
-        advancementData instanceof Map
-          ? advancementData.size
-          : advancementData && typeof advancementData === "object"
-            ? Object.keys(advancementData).length
-            : 0;
-
-      const supportsAdvancement =
-        Boolean(this.actor.system.metadata?.supportsAdvancement);
-      const disabled =
-        Boolean(game.settings.get("dnd5e", "disableAdvancements"));
-
-      console.warn(`${MODULE_ID} | Native D&D5e did not start advancement`, {
-        supportsAdvancement,
-        disabled,
-        advancementCount,
-        itemData: result
-      });
-
-      ui.notifications?.warn(
-        `D&D5e did not start Advancement for ${sourceItem.name}. `
-        + `supportsAdvancement=${supportsAdvancement}; `
-        + `disableAdvancements=${disabled}; `
-        + `advancements=${advancementCount}.`
-      );
-
       const [created] = await this.actor.createEmbeddedDocuments(
         "Item",
-        [result || itemData],
-        { keepId: false }
+        [itemData],
+        {keepId: false}
       );
 
-      if (created) {
-        this.render();
-        created.sheet?.render(true);
-      }
-    }
-
-
-    async _openClassAdvancement(item) {
-      if (!item || item.type !== "class") return;
-
-      const currentLevel = Number(
-        foundry.utils.getProperty(item, "system.levels")
-        ?? 0
-      );
-
-      if (currentLevel >= 20) {
-        ui.notifications?.warn(`${item.name} is already level 20.`);
+      if (!created) {
+        ui.notifications?.error(`${sourceItem.name} could not be added.`);
         return;
       }
 
-      const nativeSheetClass =
-        game.dnd5e?.applications?.actor?.CharacterActorSheet;
-      const nativeSingleItem =
-        nativeSheetClass?.prototype?._onDropSingleItem;
+      ui.notifications?.info(`${created.name} added to ${this.actor.name}.`);
+      this.render();
 
-      if (typeof nativeSingleItem !== "function") {
-        ui.notifications?.error(
-          "D&D5e's native class advancement handler could not be found."
-        );
-        return;
-      }
-
-      // The stock CharacterActorSheet interprets dropping an already-owned
-      // class with levels=1 as a +1 level change and launches
-      // AdvancementManager.forLevelChange when advancement is enabled.
-      const levelData = item.toObject();
-      delete levelData._id;
-      levelData.system ??= {};
-      levelData.system.levels = 1;
-
-      const nativeEvent = {
-        target:
-          this.element?.querySelector?.('[data-component-key="classLevel"]')
-          ?? this.element
-          ?? document.body,
-        currentTarget:
-          this.element?.querySelector?.('[data-component-key="classLevel"]')
-          ?? this.element
-          ?? document.body,
-        preventDefault() {},
-        stopPropagation() {},
-        stopImmediatePropagation() {}
-      };
-
-      const result = await nativeSingleItem.call(this, nativeEvent, levelData);
-
-      // Existing-class advancement is completely handled inside D&D5e and
-      // normally returns undefined after opening the manager.
-      console.info(
-        `${MODULE_ID} | Native +1 class advancement requested`,
-        { actor: this.actor.name, class: item.name, from: currentLevel, result }
-      );
+      // Open the native D&D Class item immediately. If its advancement
+      // configuration requires choices, those remain available through the
+      // system-managed Class item rather than being reimplemented here.
+      created.sheet?.render(true);
     }
 
 

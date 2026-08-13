@@ -104,26 +104,14 @@
                 {{#if hasClass}}
                   <div class="page2-class-actions">
                     {{#each classItems}}
-                      <div class="page2-class-label">
-                        {{name}}{{#if levels}} {{levels}}{{/if}}
-                      </div>
-                      <button
-                        type="button"
-                        class="page2-class-advancement"
-                        data-action="class-advancement"
-                        data-item-id="{{id}}"
-                        title="Advance {{name}} by one level"
-                      >
-                        Advance +1
-                      </button>
                       <button
                         type="button"
                         class="page2-manage-class"
                         data-action="manage-class"
                         data-item-id="{{id}}"
-                        title="Open {{name}} class"
+                        title="Open {{name}} to manage class advancement"
                       >
-                        Open Class
+                        Manage {{name}}{{#if levels}} {{levels}}{{/if}}
                       </button>
                     {{/each}}
                   </div>
