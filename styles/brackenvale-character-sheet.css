@@ -2108,20 +2108,19 @@ input[data-component-key="classLevel"].class-level-interactive {
 }
 
 
-/* 0.5.4-test.119 — class advancement control */
+/* 0.5.4-test.120 — Page 2 class buttons */
 .page2-class-actions {
   display: flex !important;
   align-items: center !important;
   gap: 4px !important;
+  margin-bottom: 4px !important;
 }
-
-.page2-advance-class {
+.page2-advance-class,
+.page2-manage-class {
   display: inline-block !important;
   width: auto !important;
   min-height: 18px !important;
-  margin: 0 4px 0 0 !important;
-  padding: 1px 6px !important;
+  padding: 1px 5px !important;
   font-size: 9px !important;
   line-height: 14px !important;
-  pointer-events: auto !important;
 }

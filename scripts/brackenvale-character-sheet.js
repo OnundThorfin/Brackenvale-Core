@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.118");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.71");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet.hbs";
 const LAYOUT_ROOT =
@@ -561,13 +561,22 @@ Hooks.once("init", () => {
 
       const featureRows = [
         ...data.classes.map((entry) => `
-          <button
-            type="button"
-            class="page2-manage-class"
-            data-action="manage-class"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)} class"
-          >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          <div class="page2-class-actions">
+            <button
+              type="button"
+              class="page2-advance-class"
+              data-action="advance-class"
+              data-item-id="${escape(entry.id)}"
+              title="Advance ${escape(entry.name)} one level"
+            >Advance +1</button>
+            <button
+              type="button"
+              class="page2-manage-class"
+              data-action="manage-class"
+              data-item-id="${escape(entry.id)}"
+              title="Open ${escape(entry.name)} class"
+            >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          </div>
         `),
         ...data.features.map((entry) => `
           <button
@@ -648,30 +657,22 @@ Hooks.once("init", () => {
           const classItem = this.actor.items.get(button.dataset.itemId);
           if (!classItem || classItem.type !== "class") return;
 
-          if (Number(classItem.system?.levels ?? 0) >= 20) {
+          const currentLevel = Number(classItem.system?.levels ?? 0);
+          if (currentLevel >= 20) {
             ui.notifications?.warn(`${classItem.name} is already level 20.`);
             return;
           }
 
-          const AdvancementManager =
-            game.dnd5e?.applications?.advancement?.AdvancementManager;
-
-          if (!AdvancementManager?.forLevelChange) {
+          const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+          if (!Manager?.forLevelChange) {
             ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
             return;
           }
 
-          // D&D5e 5.3.3 signature:
-          // forLevelChange(actor, classId, levelDelta)
-          const manager = AdvancementManager.forLevelChange(
-            this.actor,
-            classItem.id,
-            1
-          );
-
-          if (!manager.steps?.length) {
+          const manager = Manager.forLevelChange(this.actor, classItem.id, 1);
+          if (!manager?.steps?.length) {
             ui.notifications?.warn(
-              `No advancement steps were found for ${classItem.name} level ${Number(classItem.system?.levels ?? 0) + 1}.`
+              `No advancement steps were found for ${classItem.name} level ${currentLevel + 1}.`
             );
             return;
           }
@@ -1089,27 +1090,15 @@ Hooks.once("init", () => {
       if (!sourceItem || sourceItem.type !== "class") return;
 
       const existing = (this.actor.items ?? []).find((item) =>
-        item.type === "class"
-        && (
-          item.name === sourceItem.name
-          || (
-            foundry.utils.getProperty(item, "system.identifier")
-            && foundry.utils.getProperty(item, "system.identifier")
-              === foundry.utils.getProperty(sourceItem, "system.identifier")
-          )
-        )
+        item.type === "class" && item.name === sourceItem.name
       );
-
       if (existing) {
-        ui.notifications?.info(`${existing.name} is already on this character.`);
         existing.sheet?.render(true);
         return;
       }
 
-      const AdvancementManager =
-        game.dnd5e?.applications?.advancement?.AdvancementManager;
-
-      if (!AdvancementManager?.forNewItem) {
+      const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+      if (!Manager?.forNewItem) {
         ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
         return;
       }
@@ -1119,22 +1108,14 @@ Hooks.once("init", () => {
       itemData.system ??= {};
       itemData.system.levels = Number(itemData.system.levels ?? 1) || 1;
 
-      const manager = AdvancementManager.forNewItem(this.actor, itemData);
-
-      if (!manager.steps?.length) {
-        const [created] = await this.actor.createEmbeddedDocuments(
-          "Item",
-          [itemData],
-          {keepId: false}
-        );
-        if (created) {
-          this.render();
-          created.sheet?.render(true);
-        }
+      const manager = Manager.forNewItem(this.actor, itemData);
+      if (manager?.steps?.length) {
+        await manager.render(true);
         return;
       }
 
-      await manager.render(true);
+      await this.actor.createEmbeddedDocuments("Item", [itemData], {keepId: false});
+      this.render();
     }
 
 
