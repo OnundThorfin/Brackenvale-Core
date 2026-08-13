@@ -32,6 +32,9 @@
       class="brackenvale-art-page {{#if active}}active{{/if}}"
       data-page="{{page}}"
     >
+      {{#if isPage2}}
+        <div class="page2-live-proof-v96">PAGE 2 LIVE v98 · FORGE ROOT</div>
+      {{/if}}
       <img
         class="brackenvale-page-art"
         src="{{art}}"
@@ -94,7 +97,7 @@
 
           {{#if isFeatureList}}
             <section
-              class="overlay-field calibration-page2-field page2-list-panel page2-features-panel {{#if opaquePanel}}opaque-panel{{/if}}"
+              class="overlay-field page2-list-panel page2-features-panel {{#if opaquePanel}}opaque-panel{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
@@ -106,19 +109,22 @@
                     {{#each classItems}}
                       <button
                         type="button"
-                        class="page2-advance-class"
-                        data-action="advance-class"
+                        class="page2-run-advancement"
+                        data-action="run-class-advancement"
                         data-item-id="{{id}}"
-                        title="Advance {{name}} one level"
-                      >Advance +1</button>
+                        title="Run {{name}} through D&D5e Advancement"
+                      >
+                        Run Advancement
+                      </button>
+                      <button type="button" class="page2-advance-class" data-action="advance-class" data-item-id="{{id}}" title="Advance one level">ADVANCE +1</button>
                       <button
                         type="button"
                         class="page2-manage-class"
                         data-action="manage-class"
                         data-item-id="{{id}}"
-                        title="Open {{name}} to manage class advancement"
+                        title="Open {{name}} class"
                       >
-                        Manage {{name}}{{#if levels}} {{levels}}{{/if}}
+                        Open {{name}}{{#if levels}} {{levels}}{{/if}}
                       </button>
                     {{/each}}
                   </div>
@@ -148,7 +154,7 @@
 
           {{#if isLanguageList}}
             <section
-              class="overlay-field calibration-page2-field page2-list-panel page2-languages-panel {{#if opaquePanel}}opaque-panel{{/if}}"
+              class="overlay-field page2-list-panel page2-languages-panel {{#if opaquePanel}}opaque-panel{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
@@ -166,7 +172,7 @@
 
           {{#if isProficiencyList}}
             <section
-              class="overlay-field calibration-page2-field page2-list-panel page2-proficiencies-panel {{#if opaquePanel}}opaque-panel{{/if}}"
+              class="overlay-field page2-list-panel page2-proficiencies-panel {{#if opaquePanel}}opaque-panel{{/if}}"
               style="{{style}}"
               data-component-key="{{key}}"
               data-layout-part="root"
@@ -562,8 +568,8 @@
           <section class="page2-direct-panel page2-direct-features">
             <div class="page2-direct-scroll">
               {{#each page2Data.classes}}
-                <button type="button" class="page2-advance-class" data-action="advance-class" data-item-id="{{id}}">Advance +1</button>
-                <button type="button" class="page2-manage-class" data-action="manage-class" data-item-id="{{id}}">
+                <button type="button" class="page2-advance-class" data-action="advance-class" data-item-id="{{id}}" title="Advance one level">ADVANCE +1</button>
+                      <button type="button" class="page2-manage-class" data-action="manage-class" data-item-id="{{id}}">
                   Manage {{name}}{{#if levels}} {{levels}}{{/if}}
                 </button>
               {{/each}}

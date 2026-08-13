@@ -1,6 +1,6 @@
 {
   "page": 2,
-  "art": "modules/brackenvale-core-dev100/assets/character-sheet/character-sheet-page-2.webp",
+  "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-2.webp",
   "components": [
     {
       "component": "featureList",
