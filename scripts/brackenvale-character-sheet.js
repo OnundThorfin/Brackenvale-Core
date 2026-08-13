@@ -547,92 +547,6 @@ Hooks.once("init", () => {
       }
     }
 
-    _renderPage2DirectDOM(root) {
-      const page = root.querySelector('.brackenvale-art-page[data-page="2"]');
-      if (!page) {
-        console.warn(`${MODULE_ID} | Page 2 DOM container was not found.`);
-        return;
-      }
-
-      page.querySelectorAll(".brackenvale-page2-dom").forEach((node) => node.remove());
-
-      const data = this._preparePage2DirectData();
-      const escape = (value) => foundry.utils.escapeHTML(String(value ?? ""));
-
-      const featureRows = [
-        ...data.classes.map((entry) => `
-          <div class="page2-class-actions">
-            <button
-              type="button"
-              class="page2-advance-class"
-              data-action="advance-class"
-              data-item-id="${escape(entry.id)}"
-              title="Advance ${escape(entry.name)} one level"
-            >Advance +1</button>
-            <button
-              type="button"
-              class="page2-manage-class"
-              data-action="manage-class"
-              data-item-id="${escape(entry.id)}"
-              title="Open ${escape(entry.name)} class"
-            >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
-          </div>
-        `),
-        ...data.features.map((entry) => `
-          <button
-            type="button"
-            class="page2-feature-row"
-            data-action="open-feature"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)}"
-          >
-            <span class="page2-feature-name">${escape(entry.name)}</span>
-            ${entry.type ? `<span class="page2-feature-type">${escape(entry.type)}</span>` : ""}
-          </button>
-        `)
-      ].join("") || `
-        <div class="page2-empty-list">
-          No granted features yet. Open the class and use its Advancement tab.
-        </div>
-      `;
-
-      const languageRows = data.languages.length
-        ? data.languages.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")
-        : `<div class="page2-empty-list">No languages recorded.</div>`;
-
-      const proficiencyRows = data.proficiencyGroups.length
-        ? data.proficiencyGroups.map((group) => `
-            <div class="page2-proficiency-group">
-              <strong>${escape(group.label)}</strong>
-              ${group.values.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")}
-            </div>
-          `).join("")
-        : `<div class="page2-empty-list">No proficiencies recorded.</div>`;
-
-      const overlay = document.createElement("div");
-      overlay.className = "brackenvale-page2-dom";
-      overlay.innerHTML = `
-        <section class="page2-dom-panel page2-dom-features">
-          <div class="page2-dom-scroll">${featureRows}</div>
-        </section>
-        <section class="page2-dom-panel page2-dom-languages">
-          <div class="page2-dom-scroll">${languageRows}</div>
-        </section>
-        <section class="page2-dom-panel page2-dom-proficiencies">
-          <div class="page2-dom-scroll">${proficiencyRows}</div>
-        </section>
-      `;
-
-      page.append(overlay);
-      console.info(`${MODULE_ID} | Page 2 direct DOM overlay rendered`, {
-        features: data.features.length,
-        classes: data.classes.length,
-        languages: data.languages.length,
-        proficiencyGroups: data.proficiencyGroups.length
-      });
-    }
-
-
     _activatePage2FeatureControls(root) {
       for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
         button.addEventListener("click", (event) => {
@@ -800,6 +714,17 @@ Hooks.once("init", () => {
           }
 
           if (!approved) return;
+
+          const Manager =
+            game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+          if (!game.settings.get("dnd5e", "disableAdvancements") && Manager?.forDeletedItem) {
+            const manager = Manager.forDeletedItem(this.actor, classItem.id);
+            if (manager.steps.length) {
+              manager.render({force: true});
+              return;
+            }
+          }
 
           await classItem.delete();
           ui.notifications?.info(`${classItem.name} removed from ${this.actor.name}.`);
