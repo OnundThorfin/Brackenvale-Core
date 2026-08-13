@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.115");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.71");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v70.hbs";
 const LAYOUT_ROOT =
@@ -561,13 +561,13 @@ Hooks.once("init", () => {
 
       const featureRows = [
         ...data.classes.map((entry) => `
-          <div class="page2-class-controls">
-            <button type="button" class="page2-advance-class" data-action="advance-class"
-              data-item-id="${escape(entry.id)}" title="Advance ${escape(entry.name)} one level">ADVANCE +1</button>
-            <button type="button" class="page2-manage-class" data-action="manage-class"
-              data-item-id="${escape(entry.id)}" title="Open ${escape(entry.name)} class"
-            >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
-          </div>
+          <button
+            type="button"
+            class="page2-manage-class"
+            data-action="manage-class"
+            data-item-id="${escape(entry.id)}"
+            title="Open ${escape(entry.name)} class"
+          >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
         `),
         ...data.features.map((entry) => `
           <button
