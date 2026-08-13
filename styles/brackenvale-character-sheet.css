@@ -1874,50 +1874,11 @@ input[data-component-key="classLevel"].class-level-interactive {
   padding: 5px 3px;
   opacity: 0.6;
   font-style: italic;
-}
-
-
-/* 0.5.4-test.70: direct Page 2 rendering, independent of layout components. */
-.brackenvale-page2-direct {
-  position: absolute;
-  inset: 0;
-  z-index: 500;
-  pointer-events: none;
-}
-.page2-direct-panel {
-  position: absolute;
-  z-index: 501;
-  box-sizing: border-box;
-  overflow: hidden;
-  padding: 4px 5px;
-  background: #fff !important;
-  color: #171612;
-  border: 0;
-  box-shadow: none;
-  pointer-events: auto;
-  font-family: Georgia, "Times New Roman", serif;
-}
-.page2-direct-features { left: 5.4%; top: 10%; width: 48.1%; height: 79.2%; }
-.page2-direct-languages { left: 58.1%; top: 10%; width: 36.9%; height: 28.9%; }
-.page2-direct-proficiencies { left: 58.1%; top: 44.4%; width: 36.9%; height: 44.8%; }
-.page2-direct-scroll { width:100%; height:100%; overflow-y:auto; overflow-x:hidden; }
-.page2-direct-panel .page2-manage-class { display:block; width:100%; margin:0 0 5px; }
-
-
-/* 0.5.4-test.71 — Page 2 is injected directly into the rendered DOM.
+}/* 0.5.4-test.71 — Page 2 is injected directly into the rendered DOM.
    This no longer depends on Handlebars page context or the layout component renderer. */
 .brackenvale-art-page[data-page="2"] {
   position: relative !important;
-}
-
-.brackenvale-page2-dom {
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 10000 !important;
-  pointer-events: none !important;
-}
-
-.page2-dom-panel {
+}.page2-dom-panel {
   position: absolute !important;
   z-index: 10001 !important;
   box-sizing: border-box !important;
