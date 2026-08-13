@@ -1540,3 +1540,594 @@ input[data-component-key="classLevel"].class-level-interactive {
   background: rgba(255, 255, 240, 0.78) !important;
   outline: 1px solid rgba(70, 70, 55, 0.4) !important;
 }
+
+
+/* 0.5.4-test.59: PHB-only class picker and class removal control */
+.class-remove-button {
+  position: absolute;
+  z-index: 25;
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  margin-left: calc(var(--overlay-width, 0px) - 18px);
+  padding: 0;
+  border: 0;
+  background: #ffffff;
+  color: #a51414;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.class-remove-button:hover,
+.class-remove-button:focus {
+  color: #710000;
+  background: #f7e8e8;
+}
+
+
+/* 0.5.4-test.61: fixed Brackenvale twelve-class chooser.
+   Uses radios rather than a native/select control so Foundry cannot inject
+   SRD or alternate class documents into the visible menu. */
+.brackenvale-class-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+  margin: 0.6rem 0;
+}
+
+.brackenvale-class-choice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 6px;
+  border: 1px solid rgba(70, 70, 60, 0.28);
+  background: #ffffff;
+  color: #171612;
+  cursor: pointer;
+}
+
+.brackenvale-class-choice:hover {
+  background: #f5f2e8;
+}
+
+.brackenvale-class-choice input {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.brackenvale-class-choice span {
+  color: #171612;
+}
+
+
+/* 0.5.4-test.62 diagnostic + hard class-control interception */
+.brackenvale-class-picker-version {
+  margin: 0 0 0.45rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(70, 70, 60, 0.35);
+  background: #f5f2e8;
+  color: #171612;
+  text-align: center;
+}
+
+[data-component-key="classLevel"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+
+/* 0.5.4-test.64: isolated Brackenvale class picker.
+   No DialogV2 and no native select menus are used. */
+.brackenvale-class-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.brackenvale-class-modal-panel {
+  width: min(520px, calc(100vw - 40px));
+  max-height: calc(100vh - 60px);
+  overflow: auto;
+  padding: 18px;
+  border: 2px solid #40382a;
+  background: #f5f0df;
+  color: #171612;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+.brackenvale-class-modal-panel h2 {
+  margin: 0 0 8px;
+  color: #171612;
+  text-align: center;
+}
+
+.brackenvale-class-modal-panel > p {
+  margin: 0 0 14px;
+  color: #171612;
+  text-align: center;
+}
+
+.brackenvale-class-button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.brackenvale-class-pick-button,
+.brackenvale-class-cancel-button {
+  min-height: 34px;
+  border: 1px solid #706653;
+  background: #ffffff;
+  color: #171612;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.brackenvale-class-pick-button:hover:not(:disabled),
+.brackenvale-class-cancel-button:hover {
+  background: #e9e1cb;
+}
+
+.brackenvale-class-pick-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.brackenvale-class-modal-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(64, 56, 42, 0.35);
+  text-align: center;
+}
+
+.brackenvale-class-modal-footer p {
+  margin: 0 0 8px;
+  color: #40382a;
+  font-size: 0.85em;
+}
+
+
+/* 0.5.4-test.65: dedicated Class & Level interaction overlay. */
+.class-level-wrapper {
+  position: absolute !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.class-level-display {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  color: #171612;
+  background: transparent;
+  font: inherit;
+  line-height: 1.1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.class-level-overlay-button {
+  position: absolute;
+  inset: -2px 0;
+  z-index: 100;
+  display: block;
+  width: 100%;
+  height: calc(100% + 4px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.class-level-overlay-button:hover,
+.class-level-overlay-button:focus {
+  background: rgba(255, 255, 240, 0.32);
+  outline: 1px solid rgba(70, 70, 55, 0.35);
+}
+
+.class-level-wrapper .class-remove-button {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 120 !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: translateY(-50%);
+  border: 0;
+  background: #ffffff;
+  color: #a51414;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.class-level-wrapper.class-drop-target {
+  background: rgba(236, 246, 230, 0.82) !important;
+  outline: 2px dashed rgba(45, 92, 45, 0.9) !important;
+  outline-offset: 1px;
+}
+
+
+/* 0.5.4-test.67: Page 2 Features, Languages, and Proficiencies.
+   Panels are opaque white so the printed guide lines are fully masked,
+   matching the Page 3 equipment treatment. */
+.page2-list-panel {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 4px 5px;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #171612;
+  font-family: inherit;
+}
+
+.page2-list-panel.opaque-panel {
+  background: #ffffff !important;
+}
+
+.page2-list-content,
+.page2-simple-rows,
+.page2-proficiency-groups {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.page2-class-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.22);
+}
+
+.page2-manage-class {
+  min-height: 22px;
+  padding: 1px 5px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  background: #f7f5ed;
+  color: #171612;
+  font: inherit;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.page2-feature-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.page2-feature-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 22px;
+  padding: 2px 3px;
+  border: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.13);
+  background: #ffffff;
+  color: #171612;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.page2-feature-row:hover {
+  background: #f3f0e7;
+}
+
+.page2-feature-name {
+  flex: 1 1 auto;
+  font-weight: 600;
+}
+
+.page2-feature-type {
+  flex: 0 0 auto;
+  opacity: 0.65;
+  font-size: 0.75em;
+}
+
+.page2-simple-row {
+  min-height: 20px;
+  padding: 2px 3px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.13);
+}
+
+.page2-proficiency-group {
+  margin-bottom: 8px;
+}
+
+.page2-proficiency-group > strong {
+  display: block;
+  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.page2-empty-list {
+  padding: 5px 3px;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+
+/* 0.5.4-test.70: direct Page 2 rendering, independent of layout components. */
+.brackenvale-page2-direct {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+.page2-direct-panel {
+  position: absolute;
+  z-index: 501;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 4px 5px;
+  background: #fff !important;
+  color: #171612;
+  border: 0;
+  box-shadow: none;
+  pointer-events: auto;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.page2-direct-features { left: 5.4%; top: 10%; width: 48.1%; height: 79.2%; }
+.page2-direct-languages { left: 58.1%; top: 10%; width: 36.9%; height: 28.9%; }
+.page2-direct-proficiencies { left: 58.1%; top: 44.4%; width: 36.9%; height: 44.8%; }
+.page2-direct-scroll { width:100%; height:100%; overflow-y:auto; overflow-x:hidden; }
+.page2-direct-panel .page2-manage-class { display:block; width:100%; margin:0 0 5px; }
+
+
+/* 0.5.4-test.71 — Page 2 is injected directly into the rendered DOM.
+   This no longer depends on Handlebars page context or the layout component renderer. */
+.brackenvale-art-page[data-page="2"] {
+  position: relative !important;
+}
+
+.brackenvale-page2-dom {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  pointer-events: none !important;
+}
+
+.page2-dom-panel {
+  position: absolute !important;
+  z-index: 10001 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 4px 5px !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+  color: #171612 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page2-dom-features {
+  left: 5.4% !important;
+  top: 10% !important;
+  width: 48.1% !important;
+  height: 79.2% !important;
+}
+
+.page2-dom-languages {
+  left: 58.1% !important;
+  top: 10% !important;
+  width: 36.9% !important;
+  height: 28.9% !important;
+}
+
+.page2-dom-proficiencies {
+  left: 58.1% !important;
+  top: 44.4% !important;
+  width: 36.9% !important;
+  height: 44.8% !important;
+}
+
+.page2-dom-scroll {
+  width: 100% !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.page2-dom-panel .page2-manage-class {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 5px !important;
+  min-height: 22px !important;
+  background: #f7f5ed !important;
+  color: #171612 !important;
+  border: 1px solid rgba(0,0,0,.28) !important;
+}
+
+.page2-dom-panel .page2-feature-row,
+.page2-dom-panel .page2-simple-row {
+  background: #ffffff !important;
+  color: #171612 !important;
+}
+
+
+/* test.107 — Page 2 only. Uses the same overlay-field/calibration model as working pages. */
+.page2-list-panel {
+  position: absolute !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 4px 5px !important;
+  background: #ffffff !important;
+  color: #171612 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+}
+
+.page2-list-content,
+.page2-simple-rows,
+.page2-proficiency-groups {
+  width: 100% !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.page2-class-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 4px !important;
+  margin-bottom: 5px !important;
+}
+
+.page2-run-advancement,
+.page2-manage-class {
+  min-height: 22px !important;
+  padding: 1px 4px !important;
+  border: 1px solid rgba(0,0,0,.25) !important;
+  background: #f7f5ed !important;
+  color: #171612 !important;
+  font: inherit !important;
+  cursor: pointer !important;
+}
+
+.page2-feature-row {
+  display: block !important;
+  width: 100% !important;
+  min-height: 20px !important;
+  margin: 0 0 2px !important;
+  padding: 2px 4px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,.14) !important;
+  background: #ffffff !important;
+  color: #171612 !important;
+  text-align: left !important;
+  font: inherit !important;
+  cursor: pointer !important;
+}
+
+.page2-feature-row small {
+  display: block !important;
+  opacity: .6 !important;
+  font-size: .78em !important;
+}
+
+.page2-simple-row {
+  min-height: 20px !important;
+  padding: 2px 3px !important;
+  border-bottom: 1px solid rgba(0,0,0,.13) !important;
+}
+
+.page2-proficiency-group {
+  margin-bottom: 7px !important;
+}
+
+.page2-proficiency-group > strong {
+  display: block !important;
+  margin-bottom: 2px !important;
+  border-bottom: 1px solid rgba(0,0,0,.28) !important;
+}
+
+.page2-empty-list {
+  padding: 5px 3px !important;
+  opacity: .58 !important;
+  font-style: italic !important;
+}
+
+.calibration-mode .page2-list-panel {
+  outline: 2px dashed rgba(179,43,43,.92) !important;
+  outline-offset: -1px !important;
+  cursor: move !important;
+  user-select: none !important;
+  touch-action: none !important;
+  z-index: 1000 !important;
+}
+
+.calibration-mode .page2-list-panel.calibration-selected {
+  outline: 3px solid #d22c2c !important;
+  z-index: 1100 !important;
+}
+
+.calibration-mode .page2-list-panel > * {
+  pointer-events: none !important;
+}
+
+
+/* test.108 — Page 2 uses the existing GM calibration system */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+  cursor: move !important;
+  touch-action: none !important;
+  user-select: none !important;
+  outline: 2px dashed rgba(179, 43, 43, 0.92) !important;
+  outline-offset: -1px !important;
+}
+
+/* During calibration the panel itself receives the pointer event, exactly
+   like the simple overlay fields on the other pages. */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel > * {
+  pointer-events: none !important;
+}
+
+/* Strong selection feedback, matching the rest of the sheet. */
+.brackenvale-art-sheet.calibration-mode .page2-list-panel.calibration-selected {
+  z-index: 1100 !important;
+  outline: 3px solid #e31b1b !important;
+  outline-offset: 1px !important;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.95),
+    0 0 0 5px rgba(227,27,27,.95),
+    0 0 14px 6px rgba(227,27,27,.35) !important;
+}
+
+
+/* 0.5.4-test.120 — Page 2 class buttons */
+.page2-class-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-bottom: 4px !important;
+}
+.page2-advance-class,
+.page2-manage-class {
+  display: inline-block !important;
+  width: auto !important;
+  min-height: 18px !important;
+  padding: 1px 5px !important;
+  font-size: 9px !important;
+  line-height: 14px !important;
+}
+
+
+/* 0.5.4-test.121 — Page 2 advancement control */
+.page2-class-actions .page2-advance-class {
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
