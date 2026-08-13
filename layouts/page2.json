@@ -6,30 +6,30 @@
       "component": "featureList",
       "key": "features-traits",
       "label": "Features & Traits",
-      "left": 5.4,
-      "top": 10.0,
+      "left": 4.585336079957274,
+      "top": 6.527525813397535,
       "width": 48.1,
-      "height": 79.2,
+      "height": 50.688,
       "opaquePanel": true
     },
     {
       "component": "languageList",
       "key": "languages",
       "label": "Languages",
-      "left": 58.1,
-      "top": 10.0,
+      "left": 56.63385976958877,
+      "top": 6.201997253352775,
       "width": 36.9,
-      "height": 28.9,
+      "height": 23.12,
       "opaquePanel": true
     },
     {
       "component": "proficiencyList",
       "key": "proficiencies",
       "label": "Proficiencies",
-      "left": 58.1,
-      "top": 44.4,
+      "left": 56.63385976958877,
+      "top": 34.63318695851206,
       "width": 36.9,
-      "height": 44.8,
+      "height": 28.672,
       "opaquePanel": true
     }
   ]
