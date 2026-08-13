@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.71");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.115");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-v70.hbs";
 const LAYOUT_ROOT =
@@ -561,20 +561,13 @@ Hooks.once("init", () => {
 
       const featureRows = [
         ...data.classes.map((entry) => `
-          <button
-            type="button"
-            class="page2-advance-class"
-            data-action="advance-class"
-            data-item-id="${escape(entry.id)}"
-            title="Advance this class by one level"
-          >Advance +1</button>
-          <button
-            type="button"
-            class="page2-manage-class"
-            data-action="manage-class"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)} class"
-          >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          <div class="page2-class-controls">
+            <button type="button" class="page2-advance-class" data-action="advance-class"
+              data-item-id="${escape(entry.id)}" title="Advance ${escape(entry.name)} one level">ADVANCE +1</button>
+            <button type="button" class="page2-manage-class" data-action="manage-class"
+              data-item-id="${escape(entry.id)}" title="Open ${escape(entry.name)} class"
+            >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
+          </div>
         `),
         ...data.features.map((entry) => `
           <button
@@ -650,27 +643,13 @@ Hooks.once("init", () => {
           if (this._calibrationMode) return;
           event.preventDefault();
           event.stopPropagation();
-
-          const itemId = button.dataset.itemId;
-          const classItem = itemId ? this.actor.items.get(itemId) : null;
-          if (!classItem) {
-            ui.notifications?.error("Class item not found.");
-            return;
-          }
-
+          const classItem = this.actor.items.get(button.dataset.itemId);
+          if (!classItem) return ui.notifications?.error("Class item not found.");
           const currentLevel = Number(classItem.system?.levels ?? 0);
-          if (currentLevel >= 20) {
-            ui.notifications?.warn(`${classItem.name} is already level 20.`);
-            return;
-          }
-
-          const AdvancementManager = game.dnd5e?.applications?.advancement?.AdvancementManager;
-          if (!AdvancementManager?.forLevelChange) {
-            ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
-            return;
-          }
-
-          await AdvancementManager.forLevelChange(this.actor, classItem, currentLevel + 1);
+          if (currentLevel >= 20) return ui.notifications?.warn(`${classItem.name} is already level 20.`);
+          const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+          if (!Manager?.forLevelChange) return ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
+          await Manager.forLevelChange(this.actor, classItem, currentLevel + 1);
         });
       }
 

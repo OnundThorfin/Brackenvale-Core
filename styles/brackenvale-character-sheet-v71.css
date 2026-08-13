@@ -2107,12 +2107,5 @@ input[data-component-key="classLevel"].class-level-interactive {
     0 0 14px 6px rgba(227,27,27,.35) !important;
 }
 
-/* Page 2 class advancement control */
-.page2-advance-class {
-  width: auto;
-  margin: 0 4px 4px 0;
-  padding: 1px 6px;
-  min-height: 18px;
-  font-size: 9px;
-  line-height: 14px;
-}
+.page2-class-controls { display:flex; align-items:center; gap:4px; margin-bottom:4px; }
+.page2-advance-class { width:auto; min-height:18px; padding:1px 6px; margin:0 4px 4px 0; font-size:9px; line-height:14px; }
