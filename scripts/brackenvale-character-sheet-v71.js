@@ -1056,11 +1056,6 @@ Hooks.once("init", () => {
     async _addBrackenvaleClass(sourceItem) {
       if (!sourceItem || sourceItem.type !== "class") return;
 
-      if (sourceItem.parent === this.actor) {
-        sourceItem.sheet?.render(true);
-        return;
-      }
-
       const existing = (this.actor.items ?? []).find((item) =>
         item.type === "class"
         && (
@@ -1079,92 +1074,103 @@ Hooks.once("init", () => {
         return;
       }
 
-      const AdvancementManager =
-        game.dnd5e?.applications?.advancement?.AdvancementManager
-        ?? dnd5e?.applications?.advancement?.AdvancementManager;
+      const nativeSheetClass =
+        game.dnd5e?.applications?.actor?.CharacterActorSheet;
 
-      if (!AdvancementManager?.forNewItem) {
-        console.error(
-          `${MODULE_ID} | D&D5e AdvancementManager.forNewItem is unavailable.`,
-          {AdvancementManager}
-        );
+      const nativeSingleItem =
+        nativeSheetClass?.prototype?._onDropSingleItem;
+
+      if (typeof nativeSingleItem !== "function") {
         ui.notifications?.error(
-          "D&D5e's Advancement Manager could not be found."
+          "D&D5e's native class-add handler could not be found."
         );
         return;
       }
 
-      // forNewItem is the D&D5e 5.3.3 factory specifically intended for a
-      // newly-added advancement-bearing Item. It clones the actor, stages the
-      // class at level 0, creates the level-change steps, and only commits the
-      // class + granted features after the Advancement Manager completes.
       const itemData = sourceItem.toObject();
       delete itemData._id;
 
-      // A newly chosen class should enter at level 1 unless the source itself
-      // explicitly requests another starting level.
       itemData.system ??= {};
-      itemData.system.levels = Number(itemData.system.levels ?? 1) || 1;
+      itemData.system.levels = 1;
 
-      const manager = AdvancementManager.forNewItem(
-        this.actor,
-        itemData,
-        {
-          automaticApplication: false
-        }
-      );
+      // This is the exact method the stock D&D5e CharacterActorSheet uses
+      // after it has resolved a dropped Item into raw item data. That native
+      // method checks supportsAdvancement, disableAdvancements, and the
+      // class's advancement data, then launches AdvancementManager.forNewItem.
+      const nativeEvent = {
+        target:
+          this.element?.querySelector?.('[data-component-key="classLevel"]')
+          ?? this.element
+          ?? document.body,
+        currentTarget:
+          this.element?.querySelector?.('[data-component-key="classLevel"]')
+          ?? this.element
+          ?? document.body,
+        preventDefault() {},
+        stopPropagation() {},
+        stopImmediatePropagation() {}
+      };
 
-      if (!manager.steps?.length) {
-        console.warn(
-          `${MODULE_ID} | No advancement steps were generated for ${sourceItem.name}.`,
-          {actor: this.actor, itemData}
+      const result = await nativeSingleItem.call(this, nativeEvent, itemData);
+
+      // Native D&D5e returns false when AdvancementManager has taken over.
+      if (result === false) {
+        console.info(
+          `${MODULE_ID} | Native D&D5e class advancement took over`,
+          { actor: this.actor.name, class: sourceItem.name }
         );
-
-        // No advancement exists to process. In that uncommon case, add the
-        // genuine class item normally rather than silently doing nothing.
-        const [created] = await this.actor.createEmbeddedDocuments(
-          "Item",
-          [itemData],
-          {keepId: false}
-        );
-
-        if (created) {
-          ui.notifications?.info(`${created.name} added to ${this.actor.name}.`);
-          this.render();
-        }
         return;
       }
 
-      console.info(
-        `${MODULE_ID} | Starting native D&D5e AdvancementManager.forNewItem`,
-        {
-          actor: this.actor.name,
-          class: sourceItem.name,
-          steps: manager.steps.length
-        }
+      // If D&D5e returns item data instead, the advancement condition was not
+      // met. Do not silently pretend advancement happened: report the exact
+      // runtime conditions, then create the class so the character is not
+      // left in a broken state.
+      const advancementData = itemData.system?.advancement;
+      const advancementCount =
+        advancementData instanceof Map
+          ? advancementData.size
+          : advancementData && typeof advancementData === "object"
+            ? Object.keys(advancementData).length
+            : 0;
+
+      const supportsAdvancement =
+        Boolean(this.actor.system.metadata?.supportsAdvancement);
+      const disabled =
+        Boolean(game.settings.get("dnd5e", "disableAdvancements"));
+
+      console.warn(`${MODULE_ID} | Native D&D5e did not start advancement`, {
+        supportsAdvancement,
+        disabled,
+        advancementCount,
+        itemData: result
+      });
+
+      ui.notifications?.warn(
+        `D&D5e did not start Advancement for ${sourceItem.name}. `
+        + `supportsAdvancement=${supportsAdvancement}; `
+        + `disableAdvancements=${disabled}; `
+        + `advancements=${advancementCount}.`
       );
 
-      await manager.render(true);
+      const [created] = await this.actor.createEmbeddedDocuments(
+        "Item",
+        [result || itemData],
+        { keepId: false }
+      );
+
+      if (created) {
+        this.render();
+        created.sheet?.render(true);
+      }
     }
 
 
     async _openClassAdvancement(item) {
       if (!item || item.type !== "class") return;
 
-      const AdvancementManager =
-        game.dnd5e?.applications?.advancement?.AdvancementManager
-        ?? dnd5e?.applications?.advancement?.AdvancementManager;
-
-      if (!AdvancementManager?.forLevelChange) {
-        ui.notifications?.error(
-          "D&D5e's Advancement Manager could not be found."
-        );
-        return;
-      }
-
       const currentLevel = Number(
         foundry.utils.getProperty(item, "system.levels")
-        ?? foundry.utils.getProperty(item, "system.level")
         ?? 0
       );
 
@@ -1173,34 +1179,48 @@ Hooks.once("init", () => {
         return;
       }
 
-      const manager = AdvancementManager.forLevelChange(
-        this.actor,
-        item.id,
-        1,
-        {
-          automaticApplication: false
-        }
-      );
+      const nativeSheetClass =
+        game.dnd5e?.applications?.actor?.CharacterActorSheet;
+      const nativeSingleItem =
+        nativeSheetClass?.prototype?._onDropSingleItem;
 
-      if (!manager.steps?.length) {
-        ui.notifications?.warn(
-          `D&D5e generated no advancement steps for ${item.name} ${currentLevel + 1}.`
+      if (typeof nativeSingleItem !== "function") {
+        ui.notifications?.error(
+          "D&D5e's native class advancement handler could not be found."
         );
         return;
       }
 
-      console.info(
-        `${MODULE_ID} | Starting native D&D5e class level advancement`,
-        {
-          actor: this.actor.name,
-          class: item.name,
-          from: currentLevel,
-          to: currentLevel + 1,
-          steps: manager.steps.length
-        }
-      );
+      // The stock CharacterActorSheet interprets dropping an already-owned
+      // class with levels=1 as a +1 level change and launches
+      // AdvancementManager.forLevelChange when advancement is enabled.
+      const levelData = item.toObject();
+      delete levelData._id;
+      levelData.system ??= {};
+      levelData.system.levels = 1;
 
-      await manager.render(true);
+      const nativeEvent = {
+        target:
+          this.element?.querySelector?.('[data-component-key="classLevel"]')
+          ?? this.element
+          ?? document.body,
+        currentTarget:
+          this.element?.querySelector?.('[data-component-key="classLevel"]')
+          ?? this.element
+          ?? document.body,
+        preventDefault() {},
+        stopPropagation() {},
+        stopImmediatePropagation() {}
+      };
+
+      const result = await nativeSingleItem.call(this, nativeEvent, levelData);
+
+      // Existing-class advancement is completely handled inside D&D5e and
+      // normally returns undefined after opening the manager.
+      console.info(
+        `${MODULE_ID} | Native +1 class advancement requested`,
+        { actor: this.actor.name, class: item.name, from: currentLevel, result }
+      );
     }
 
 
