@@ -2336,6 +2336,131 @@ delete itemData._id;
     }
 
     _activateEquipmentControls(root) {
+      for (const button of root.querySelectorAll(
+  "[data-action='add-equipment-item']"
+)) {
+  button.addEventListener("click", async (event) => {
+    if (this._calibrationMode || !this.isEditable) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const DialogV2 = foundry.applications?.api?.DialogV2;
+    if (!DialogV2) {
+      ui.notifications?.error("Brackenvale could not open the item creator.");
+      return;
+    }
+
+    const result = await DialogV2.wait({
+      window: {
+        title: "Add Item"
+      },
+
+      content: `
+        <form class="brackenvale-add-item-form">
+          <div class="form-group">
+            <label>Item Name</label>
+            <div class="form-fields">
+              <input
+                type="text"
+                name="name"
+                placeholder="Carved Antler Comb"
+                required
+                autofocus
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Slots</label>
+            <div class="form-fields">
+              <input
+                type="number"
+                name="slots"
+                value="1"
+                min="0"
+                step="1"
+              >
+            </div>
+          </div>
+
+          <div class="form-group stacked">
+            <label>Description</label>
+            <textarea
+              name="description"
+              rows="5"
+              placeholder="Describe the item..."
+            ></textarea>
+          </div>
+        </form>
+      `,
+
+      buttons: [
+        {
+          action: "create",
+          label: "Create Item",
+          icon: "fa-solid fa-plus",
+          default: true,
+          callback: (_event, button) => {
+            const form = button.form;
+            if (!form) return null;
+
+            const data = new FormData(form);
+
+            return {
+              name: String(data.get("name") ?? "").trim(),
+              slots: Math.max(
+                0,
+                Number.parseInt(data.get("slots"), 10) || 0
+              ),
+              description: String(
+                data.get("description") ?? ""
+              ).trim()
+            };
+          }
+        },
+        {
+          action: "cancel",
+          label: "Cancel"
+        }
+      ],
+
+      rejectClose: false
+    });
+
+    if (!result?.name) return;
+
+    const [item] = await this.actor.createEmbeddedDocuments("Item", [
+      {
+        name: result.name,
+        type: "loot",
+
+        system: {
+          quantity: 1,
+          description: {
+            value: result.description
+          }
+        },
+
+        flags: {
+          [MODULE_ID]: {
+            slots: result.slots,
+            equipmentZone: "packed"
+          }
+        }
+      }
+    ]);
+
+    if (!item) return;
+
+    ui.notifications?.info(
+      `${item.name} added to Packed Gear.`
+    );
+
+    this._activePage = 3;
+    this.render();
+  });
+}
       for (const button of root.querySelectorAll("[data-action='delete-equipment-item']")) {
         button.addEventListener("click", async (event) => {
           if (this._calibrationMode || !this.isEditable) return;
