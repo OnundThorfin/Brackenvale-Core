@@ -2133,13 +2133,3 @@ input[data-component-key="classLevel"].class-level-interactive {
   max-height: 55vh !important;
   overflow-y: auto !important;
 }
-
-
-
-
-
-/* 0.5.4-test.131 — origin picker only; visual field styling comes entirely from Class & Level rules. */
-.brackenvale-origin-button-grid {
-  max-height: 55vh !important;
-  overflow-y: auto !important;
-}
