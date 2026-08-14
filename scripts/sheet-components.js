@@ -318,14 +318,34 @@ function prepareItemSummary(component, actor, editable) {
       : items.map((item) => item.name).join(" / ");
   }
 
-  const isClassSummary =
+  const isClass =
     component.key === "classLevel"
     || (component.itemTypes ?? []).includes("class");
 
+  const isBackground =
+    component.key === "background"
+    || (component.itemTypes ?? []).includes("background");
+
+  const isSpecies =
+    component.key === "species"
+    || (component.itemTypes ?? []).some((type) => ["race", "species"].includes(type));
+
+  const summaryKind = isClass
+    ? "class"
+    : isBackground
+      ? "background"
+      : isSpecies
+        ? "species"
+        : component.key;
+
   return {
     ...component,
-    isItemSummary: !isClassSummary,
-    isClassSummary,
+    isItemSummary: false,
+    isClassSummary: false,
+    isSummaryControl: true,
+    summaryKind,
+    summaryAction: isClass ? "class-level-overlay" : "origin-summary",
+    removeAction: isClass ? "remove-class" : "remove-origin",
     value,
     itemId,
     editable,

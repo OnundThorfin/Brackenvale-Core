@@ -1874,160 +1874,74 @@ input[data-component-key="classLevel"].class-level-interactive {
   padding: 5px 3px;
   opacity: 0.6;
   font-style: italic;
+}/* 0.5.4-test.120 — Page 2 class buttons */
+.page2-class-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-bottom: 4px !important;
+}
+.page2-advance-class,
+.page2-manage-class {
+  display: inline-block !important;
+  width: auto !important;
+  min-height: 18px !important;
+  padding: 1px 5px !important;
+  font-size: 9px !important;
+  line-height: 14px !important;
 }
 
 
-/* 0.5.4-test.70: direct Page 2 rendering, independent of layout components. */
-.brackenvale-page2-direct {
-  position: absolute;
-  inset: 0;
-  z-index: 500;
-  pointer-events: none;
-}
-.page2-direct-panel {
-  position: absolute;
-  z-index: 501;
-  box-sizing: border-box;
-  overflow: hidden;
-  padding: 4px 5px;
-  background: #fff !important;
-  color: #171612;
-  border: 0;
-  box-shadow: none;
-  pointer-events: auto;
-  font-family: Georgia, "Times New Roman", serif;
-}
-.page2-direct-features { left: 5.4%; top: 10%; width: 48.1%; height: 79.2%; }
-.page2-direct-languages { left: 58.1%; top: 10%; width: 36.9%; height: 28.9%; }
-.page2-direct-proficiencies { left: 58.1%; top: 44.4%; width: 36.9%; height: 44.8%; }
-.page2-direct-scroll { width:100%; height:100%; overflow-y:auto; overflow-x:hidden; }
-.page2-direct-panel .page2-manage-class { display:block; width:100%; margin:0 0 5px; }
-
-
-/* 0.5.4-test.71 — Page 2 is injected directly into the rendered DOM.
-   This no longer depends on Handlebars page context or the layout component renderer. */
-.brackenvale-art-page[data-page="2"] {
-  position: relative !important;
+/* 0.5.4-test.121 — Page 2 advancement control */
+.page2-class-actions .page2-advance-class {
+  font-weight: 700 !important;
+  white-space: nowrap !important;
 }
 
-.brackenvale-page2-dom {
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 10000 !important;
-  pointer-events: none !important;
+
+
+
+/* 0.5.4-test.133 — origins share the exact Class & Level summary-control rendering. */
+.brackenvale-origin-button-grid {
+  max-height: 55vh !important;
+  overflow-y: auto !important;
 }
 
-.page2-dom-panel {
-  position: absolute !important;
-  z-index: 10001 !important;
+
+/* 0.5.4-test.134 — Character-Driven Experience fields */
+.character-driven-experience-field {
   box-sizing: border-box !important;
-  overflow: hidden !important;
-  padding: 4px 5px !important;
+  resize: none !important;
+  overflow-y: auto !important;
+  padding: 3px 5px !important;
   background: #ffffff !important;
+  color: #171612 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font: inherit !important;
+  line-height: 1.25 !important;
+}
+
+
+/* 0.5.4-test.135 — enforce current Page 2 layout + opaque experience fields */
+.character-driven-experience-field,
+.brackenvale-page-fields textarea.character-driven-experience-field {
+  z-index: 20 !important;
   opacity: 1 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
   color: #171612 !important;
   border: 0 !important;
   box-shadow: none !important;
-  pointer-events: auto !important;
-  font-family: Georgia, "Times New Roman", serif !important;
 }
 
-.page2-dom-features {
-  left: 5.4%;
-  top: 10%;
-  width: 48.1%;
-  height: 79.2%;
-}
-
-.page2-dom-languages {
-  left: 58.1%;
-  top: 10%;
-  width: 36.9%;
-  height: 28.9%;
-}
-
-.page2-dom-proficiencies {
-  left: 58.1%;
-  top: 44.4%;
-  width: 36.9%;
-  height: 44.8%;
-}
-
-.page2-dom-scroll {
-  width: 100% !important;
-  height: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.page2-dom-panel .page2-manage-class {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 0 5px !important;
-  min-height: 22px !important;
-  background: #f7f5ed !important;
-  color: #171612 !important;
-  border: 1px solid rgba(0,0,0,.28) !important;
-}
-
-.page2-dom-panel .page2-feature-row,
-.page2-dom-panel .page2-simple-row {
+.character-driven-experience-field:hover,
+.character-driven-experience-field:focus,
+.brackenvale-page-fields textarea.character-driven-experience-field:hover,
+.brackenvale-page-fields textarea.character-driven-experience-field:focus {
   background: #ffffff !important;
-  color: #171612 !important;
-}
-
-
-/* test.85 — direct v71 Page 2 calibration + native Advancement */
-.page2-class-actions {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 4px !important;
-  margin-bottom: 5px !important;
-}
-
-.page2-run-advancement,
-.page2-manage-class {
-  min-height: 22px !important;
-  padding: 1px 4px !important;
-  border: 1px solid rgba(0,0,0,.3) !important;
-  background: #f7f5ed !important;
-  color: #171612 !important;
-  font: inherit !important;
-  cursor: pointer !important;
-}
-
-.page2-calibration-handle {
-  display: none !important;
-}
-
-.calibration-mode .brackenvale-page2-dom {
-  pointer-events: auto !important;
-}
-
-.calibration-mode .page2-dom-panel {
-  z-index: 20000 !important;
-  pointer-events: auto !important;
-  cursor: move !important;
-  outline: 2px dashed #8b5a14 !important;
-}
-
-.calibration-mode .page2-calibration-handle {
-  display: block !important;
-  position: absolute !important;
-  top: 2px !important;
-  left: 2px !important;
-  right: 2px !important;
-  z-index: 30000 !important;
-  padding: 3px 5px !important;
-  background: #fff3c9 !important;
-  color: #4b320c !important;
-  border: 1px solid #8b5a14 !important;
-  font-size: 9px !important;
-  font-weight: 700 !important;
-  text-align: center !important;
-  pointer-events: none !important;
-}
-
-.calibration-mode .page2-dom-scroll {
-  pointer-events: none !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
 }
