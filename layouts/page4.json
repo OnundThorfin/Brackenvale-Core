@@ -1,5 +1,39 @@
 {
   "page": 4,
   "art": "modules/brackenvale-core/assets/character-sheet/character-sheet-page-4.webp",
-  "components": []
+  "components": [
+    {
+      "component": "derivedField",
+      "key": "spellcastingAbility",
+      "derive": "spellcastingAbility",
+      "className": "line-field",
+      "label": "Spellcasting Ability",
+      "left": 19.5,
+      "top": 6.35,
+      "width": 15,
+      "height": 2
+    },
+    {
+      "component": "derivedField",
+      "key": "spellSaveDC",
+      "derive": "spellSaveDC",
+      "className": "line-field",
+      "label": "Spell Save DC",
+      "left": 47.1,
+      "top": 6.35,
+      "width": 15,
+      "height": 2
+    },
+    {
+      "component": "derivedField",
+      "key": "spellAttackBonus",
+      "derive": "spellAttackBonus",
+      "className": "line-field",
+      "label": "Spell Attack Bonus",
+      "left": 76.3,
+      "top": 6.35,
+      "width": 15,
+      "height": 2
+    }
+  ]
 }

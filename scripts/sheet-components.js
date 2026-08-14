@@ -308,6 +308,40 @@ function prepareDerivedField(component, actor) {
       value = `${state.slotsUsed} / ${state.slotCapacity}`;
       break;
     }
+    case "spellcastingAbility": {
+  const abilityKey =
+    foundry.utils.getProperty(actor, "system.attributes.spellcasting")
+    ?? "";
+
+  value = abilityKey
+    ? String(CONFIG.DND5E?.abilities?.[abilityKey]?.label ?? abilityKey).toUpperCase()
+    : "";
+  break;
+}
+
+case "spellSaveDC": {
+  value =
+    foundry.utils.getProperty(actor, "system.attributes.spelldc")
+    ?? "";
+  break;
+}
+
+case "spellAttackBonus": {
+  const abilityKey =
+    foundry.utils.getProperty(actor, "system.attributes.spellcasting");
+
+  const abilityMod = abilityKey
+    ? Number(foundry.utils.getProperty(actor, `system.abilities.${abilityKey}.mod`) ?? 0)
+    : 0;
+
+  const proficiency =
+    Number(foundry.utils.getProperty(actor, "system.attributes.prof") ?? 0);
+
+  value = abilityKey
+    ? formatSignedNumber(abilityMod + proficiency)
+    : "";
+  break;
+}
     default:
       value = foundry.utils.getProperty(actor, component.path) ?? "";
   }
