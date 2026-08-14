@@ -32,7 +32,7 @@
       "height": 27.0,
       "opaquePanel": true
     },
-   {
+    {
       "component": "flagTextArea",
       "key": "belief",
       "flag": "belief",
@@ -75,6 +75,17 @@
       "top": 89.539,
       "width": 89.4,
       "height": 4.4
+    },
+    {
+      "component": "checkboxField",
+      "key": "illiterate",
+      "flag": "illiterate",
+      "label": "Illiterate",
+      "className": "illiterate-toggle",
+      "left": 58.45,
+      "top": 29.1,
+      "width": 2.2,
+      "height": 2.2
     }
   ]
 }

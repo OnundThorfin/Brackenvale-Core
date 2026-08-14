@@ -213,6 +213,7 @@ Hooks.once("init", () => {
         ["equipment controls", () => this._activateEquipmentControls(root)],
         ["equipment dragging", () => this._activateEquipmentDragging(root)],
         ["supplies", () => this._activateSupplyControls(root)],
+        ["illiterate toggle", () => this._activateIlliterateToggle(root)],
         ["flag text areas", () => this._activateFlagTextAreas(root)]
       ];
 
@@ -2084,6 +2085,22 @@ Hooks.once("init", () => {
         });
       }
     }
+
+    _activateIlliterateToggle(root) {
+      const toggle = root.querySelector(
+        'input[data-component-key="illiterate"]'
+      );
+      if (!toggle) return;
+
+      toggle.addEventListener("change", async (event) => {
+        if (this._calibrationMode || !this.isEditable) return;
+
+        await this.actor.update({
+          [`flags.${MODULE_ID}.illiterate`]: Boolean(event.currentTarget.checked)
+        });
+      });
+    }
+
 
     _activateCalibrationControls(root) {
       if (!game.user?.isGM) return;
