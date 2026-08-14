@@ -54,8 +54,6 @@ Hooks.once("init", () => {
       form: {template: TEMPLATE_PATH}
     };
 
-    static #layoutCache = null;
-
     _workingLayouts = null;
     _calibrationMode = false;
     _selectedCalibrationField = null;
@@ -64,10 +62,8 @@ Hooks.once("init", () => {
     async _prepareContext(options) {
       const context = await super._prepareContext(options);
 
-      if (!this._workingLayouts) {
-        const layouts = await this._loadLayouts();
-        this._workingLayouts = foundry.utils.deepClone(layouts);
-      }
+      const layouts = await this._loadLayouts();
+      this._workingLayouts = foundry.utils.deepClone(layouts);
 
       const editable = Boolean(this.isEditable);
 
@@ -167,28 +163,24 @@ Hooks.once("init", () => {
 
 
     async _loadLayouts() {
-      if (BrackenvaleCharacterSheet.#layoutCache) {
-        return BrackenvaleCharacterSheet.#layoutCache;
-      }
-
       const pageNumbers = [1, 2, 3, 4];
-      const layouts = await Promise.all(
+
+      return Promise.all(
         pageNumbers.map(async (pageNumber) => {
           const response = await fetch(
-            `${LAYOUT_ROOT}/page${pageNumber}.json`,
+            `${LAYOUT_ROOT}/page${pageNumber}.json?bv=${Date.now()}`,
             {cache: "no-store"}
           );
+
           if (!response.ok) {
             throw new Error(
               `${MODULE_ID} | Could not load page ${pageNumber} layout.`
             );
           }
+
           return response.json();
         })
       );
-
-      BrackenvaleCharacterSheet.#layoutCache = layouts;
-      return layouts;
     }
 
     _onRender(context, options) {
@@ -199,6 +191,7 @@ Hooks.once("init", () => {
       this._activateItemEditors(root);
       this._activatePage2FeatureControls(root);
       this._activateClassIntegration(root);
+      this._activateOriginIntegration(root);
       this._activateNativeDataBindings(root);
       this._activateCalibrationControls(root);
       this._activateAbilityRolls(root);
@@ -547,92 +540,6 @@ Hooks.once("init", () => {
       }
     }
 
-    _renderPage2DirectDOM(root) {
-      const page = root.querySelector('.brackenvale-art-page[data-page="2"]');
-      if (!page) {
-        console.warn(`${MODULE_ID} | Page 2 DOM container was not found.`);
-        return;
-      }
-
-      page.querySelectorAll(".brackenvale-page2-dom").forEach((node) => node.remove());
-
-      const data = this._preparePage2DirectData();
-      const escape = (value) => foundry.utils.escapeHTML(String(value ?? ""));
-
-      const featureRows = [
-        ...data.classes.map((entry) => `
-          <div class="page2-class-actions">
-            <button
-              type="button"
-              class="page2-advance-class"
-              data-action="advance-class"
-              data-item-id="${escape(entry.id)}"
-              title="Advance ${escape(entry.name)} one level"
-            >Advance +1</button>
-            <button
-              type="button"
-              class="page2-manage-class"
-              data-action="manage-class"
-              data-item-id="${escape(entry.id)}"
-              title="Open ${escape(entry.name)} class"
-            >Manage ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
-          </div>
-        `),
-        ...data.features.map((entry) => `
-          <button
-            type="button"
-            class="page2-feature-row"
-            data-action="open-feature"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)}"
-          >
-            <span class="page2-feature-name">${escape(entry.name)}</span>
-            ${entry.type ? `<span class="page2-feature-type">${escape(entry.type)}</span>` : ""}
-          </button>
-        `)
-      ].join("") || `
-        <div class="page2-empty-list">
-          No granted features yet. Open the class and use its Advancement tab.
-        </div>
-      `;
-
-      const languageRows = data.languages.length
-        ? data.languages.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")
-        : `<div class="page2-empty-list">No languages recorded.</div>`;
-
-      const proficiencyRows = data.proficiencyGroups.length
-        ? data.proficiencyGroups.map((group) => `
-            <div class="page2-proficiency-group">
-              <strong>${escape(group.label)}</strong>
-              ${group.values.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")}
-            </div>
-          `).join("")
-        : `<div class="page2-empty-list">No proficiencies recorded.</div>`;
-
-      const overlay = document.createElement("div");
-      overlay.className = "brackenvale-page2-dom";
-      overlay.innerHTML = `
-        <section class="page2-dom-panel page2-dom-features">
-          <div class="page2-dom-scroll">${featureRows}</div>
-        </section>
-        <section class="page2-dom-panel page2-dom-languages">
-          <div class="page2-dom-scroll">${languageRows}</div>
-        </section>
-        <section class="page2-dom-panel page2-dom-proficiencies">
-          <div class="page2-dom-scroll">${proficiencyRows}</div>
-        </section>
-      `;
-
-      page.append(overlay);
-      console.info(`${MODULE_ID} | Page 2 direct DOM overlay rendered`, {
-        features: data.features.length,
-        classes: data.classes.length,
-        languages: data.languages.length,
-        proficiencyGroups: data.proficiencyGroups.length
-      });
-    }
-
-
     _activatePage2FeatureControls(root) {
       for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
         button.addEventListener("click", (event) => {
@@ -801,6 +708,17 @@ Hooks.once("init", () => {
 
           if (!approved) return;
 
+          const Manager =
+            game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+          if (!game.settings.get("dnd5e", "disableAdvancements") && Manager?.forDeletedItem) {
+            const manager = Manager.forDeletedItem(this.actor, classItem.id);
+            if (manager.steps.length) {
+              manager.render({force: true});
+              return;
+            }
+          }
+
           await classItem.delete();
           ui.notifications?.info(`${classItem.name} removed from ${this.actor.name}.`);
           this.render();
@@ -866,6 +784,254 @@ Hooks.once("init", () => {
           ui.notifications?.error("Brackenvale could not add that class.");
         }
       });
+    }
+
+
+
+    _activateOriginIntegration(root) {
+      for (const button of root.querySelectorAll('[data-action="origin-summary"]')) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const kind = button.dataset.originKind;
+          const itemId = button.dataset.itemId;
+
+          if (itemId) {
+            this.actor.items.get(itemId)?.sheet?.render(true);
+            return;
+          }
+
+          if (kind === "background") {
+            await this._openBrackenvaleOriginPicker("background");
+          } else if (kind === "species") {
+            await this._openBrackenvaleOriginPicker("species");
+          }
+        });
+      }
+
+      for (const button of root.querySelectorAll('[data-action="remove-origin"]')) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const item = this.actor.items.get(button.dataset.itemId);
+          if (!item) return;
+
+          const label = button.dataset.originKind === "species" ? "Species" : "Background";
+          const DialogV2 = foundry.applications?.api?.DialogV2;
+          let approved = false;
+
+          if (DialogV2?.confirm) {
+            approved = await DialogV2.confirm({
+              window: {title: `Remove ${label}`},
+              content: `<p>Remove <strong>${foundry.utils.escapeHTML(item.name)}</strong> from <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>?</p>
+                <p class="hint">Benefits granted through D&D advancement will be reversed with it.</p>`,
+              yes: {label: `Remove ${label}`},
+              no: {label: "Cancel"},
+              modal: true
+            });
+          } else {
+            approved = window.confirm(`Remove ${item.name} from ${this.actor.name}?`);
+          }
+
+          if (!approved) return;
+          await this._removeAdvancementItem(item);
+        });
+      }
+    }
+
+
+    async _openBrackenvaleOriginPicker(kind) {
+      const itemTypes = kind === "background"
+        ? ["background"]
+        : ["race", "species"];
+
+      const title = kind === "background" ? "Choose a Background" : "Choose a Species";
+      const candidates = [];
+
+      for (const pack of game.packs ?? []) {
+        if (pack.documentName !== "Item") continue;
+
+        const label = String(pack.metadata?.label ?? pack.title ?? pack.collection ?? "").trim();
+        const collection = String(pack.collection ?? "").trim();
+        const packageName = String(
+          pack.metadata?.packageName
+          ?? pack.metadata?.package
+          ?? pack.metadata?.packageId
+          ?? ""
+        ).trim();
+
+        const sourceText = `${label} ${collection} ${packageName}`.toLowerCase();
+        if (
+          sourceText.includes("srd")
+          || sourceText.includes("legacy")
+          || sourceText.includes("2014")
+        ) continue;
+
+        try {
+          const index = await pack.getIndex({fields: ["type"]});
+
+          for (const entry of index) {
+            if (!itemTypes.includes(entry.type)) continue;
+
+            let score = 0;
+            if (label === "Character Origins") score += 100;
+            if (collection.toLowerCase().startsWith("dnd-players-handbook.")) score += 50;
+            if (packageName.toLowerCase() === "dnd-players-handbook") score += 50;
+
+            candidates.push({
+              id: entry._id,
+              name: entry.name,
+              uuid: `Compendium.${pack.collection}.${entry._id}`,
+              source: label || pack.collection,
+              score
+            });
+          }
+        } catch (error) {
+          console.debug(`${MODULE_ID} | Skipping unavailable origin compendium ${pack.collection}`, error);
+        }
+      }
+
+      const unique = new Map();
+      for (const candidate of candidates.sort((a, b) =>
+        b.score - a.score
+        || a.name.localeCompare(b.name)
+        || a.source.localeCompare(b.source)
+      )) {
+        const key = candidate.name.trim().toLowerCase();
+        if (!unique.has(key)) unique.set(key, candidate);
+      }
+
+      const choices = Array.from(unique.values()).sort((a, b) => a.name.localeCompare(b.name));
+      if (!choices.length) {
+        ui.notifications?.warn(`No modern 2024 / 5.5e ${kind} items were found.`);
+        return;
+      }
+
+      document.querySelector(".brackenvale-origin-modal")?.remove();
+
+      const overlay = document.createElement("div");
+      overlay.className = "brackenvale-class-modal brackenvale-origin-modal";
+
+      const panel = document.createElement("div");
+      panel.className = "brackenvale-class-modal-panel";
+
+      const heading = document.createElement("h2");
+      heading.textContent = title;
+
+      const intro = document.createElement("p");
+      intro.textContent = `Choose a 2024 / 5.5e ${kind} for ${this.actor.name}.`;
+
+      const grid = document.createElement("div");
+      grid.className = "brackenvale-class-button-grid brackenvale-origin-button-grid";
+
+      const closeModal = () => {
+        document.removeEventListener("keydown", onKeyDown, true);
+        overlay.remove();
+      };
+
+      const onKeyDown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          closeModal();
+        }
+      };
+
+      for (const choice of choices) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "brackenvale-class-pick-button";
+        button.textContent = choice.name;
+        button.title = choice.source;
+
+        button.addEventListener("click", async () => {
+          button.disabled = true;
+          try {
+            const sourceItem = await fromUuid(choice.uuid);
+            if (!sourceItem) throw new Error(`Could not resolve ${choice.uuid}`);
+            closeModal();
+            await this._addAdvancementItem(sourceItem);
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not add ${kind}`, error);
+            ui.notifications?.error(`Brackenvale could not add that ${kind}.`);
+            button.disabled = false;
+          }
+        });
+
+        grid.append(button);
+      }
+
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "brackenvale-class-modal-close";
+      close.textContent = "Cancel";
+      close.addEventListener("click", closeModal);
+
+      panel.append(heading, intro, grid, close);
+      overlay.append(panel);
+      document.body.append(overlay);
+      document.addEventListener("keydown", onKeyDown, true);
+    }
+
+
+    async _addAdvancementItem(sourceItem) {
+      if (!sourceItem) return;
+
+      const acceptedTypes = ["background", "race", "species"];
+      if (!acceptedTypes.includes(sourceItem.type)) return;
+
+      const existing = Array.from(this.actor.items ?? []).find((item) => {
+        if (sourceItem.type === "background") return item.type === "background";
+        return ["race", "species"].includes(item.type);
+      });
+
+      if (existing) {
+        ui.notifications?.warn(
+          `${this.actor.name} already has ${existing.name}. Remove it before choosing another.`
+        );
+        return;
+      }
+
+      const itemData = sourceItem.toObject();
+      delete itemData._id;
+
+      const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+      const supportsAdvancement = Boolean(this.actor.system?.metadata?.supportsAdvancement);
+      const hasAdvancement = !foundry.utils.isEmpty(itemData.system?.advancement);
+      const advancementsDisabled = game.settings.get("dnd5e", "disableAdvancements");
+
+      if (supportsAdvancement && hasAdvancement && !advancementsDisabled && Manager?.forNewItem) {
+        const manager = Manager.forNewItem(this.actor, itemData);
+        if (manager.steps.length) {
+          manager.render(true);
+          return;
+        }
+      }
+
+      await this.actor.createEmbeddedDocuments("Item", [itemData], {keepId: false});
+      this.render();
+    }
+
+
+    async _removeAdvancementItem(item) {
+      const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+      if (!game.settings.get("dnd5e", "disableAdvancements") && Manager?.forDeletedItem) {
+        const manager = Manager.forDeletedItem(this.actor, item.id);
+        if (manager.steps.length) {
+          manager.render({force: true});
+          return;
+        }
+      }
+
+      await item.delete();
+      this.render();
     }
 
 
