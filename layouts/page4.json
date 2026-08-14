@@ -8,8 +8,8 @@
       "derive": "spellcastingAbility",
       "className": "line-field",
       "label": "Spellcasting Ability",
-      "left": 19.5,
-      "top": 6.35,
+      "left": 19.986775514356196,
+      "top": 5.589935742018616,
       "width": 15,
       "height": 2
     },
@@ -19,8 +19,8 @@
       "derive": "spellSaveDC",
       "className": "line-field",
       "label": "Spell Save DC",
-      "left": 47.1,
-      "top": 6.35,
+      "left": 48.727143256783904,
+      "top": 5.589935742018616,
       "width": 15,
       "height": 2
     },
@@ -30,10 +30,31 @@
       "derive": "spellAttackBonus",
       "className": "line-field",
       "label": "Spell Attack Bonus",
-      "left": 76.3,
-      "top": 6.35,
+      "left": 80.52948805981536,
+      "top": 5.698445262033537,
       "width": 15,
       "height": 2
-    }
+    },
+    {
+  "component": "derivedField",
+  "key": "cantripsKnown",
+  "derive": "cantripsKnown",
+  "className": "line-field",
+  "label": "Cantrips Known",
+  "left": 7.5,
+  "top": 11.3,
+  "width": 5,
+  "height": 2
+},
+{
+  "component": "cantripList",
+  "key": "cantripList",
+  "label": "Cantrips",
+  "rows": 15,
+  "left": 4.8,
+  "top": 16.1,
+  "width": 12.2,
+  "height": 39
+}
   ]
 }

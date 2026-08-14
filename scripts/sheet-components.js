@@ -60,6 +60,8 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
       return prepareDefenseConditionBubble(component, actor, editable);
+     case "cantripList":
+  return prepareCantripList(component, actor); 
     default:
       console.warn(`${moduleId} | Unknown sheet component: ${component.component}`, component);
       return {...component, unsupported: true};
@@ -342,6 +344,16 @@ case "spellAttackBonus": {
     : "";
   break;
 }
+case "cantripsKnown": {
+  value = Array.from(actor.items ?? [])
+    .filter(item =>
+      item.type === "spell"
+      && Number(foundry.utils.getProperty(item, "system.level") ?? -1) === 0
+    )
+    .length;
+  break;
+}
+
     default:
       value = foundry.utils.getProperty(actor, component.path) ?? "";
   }
@@ -857,4 +869,24 @@ function formatSignedNumber(value) {
 
 function createPositionStyle(component) {
   return [`left:${component.left}%`, `top:${component.top}%`, `width:${component.width}%`, `height:${component.height}%`].join(";");
+}
+function prepareCantripList(component, actor) {
+  const rows = Array.from(actor.items ?? [])
+    .filter(item =>
+      item.type === "spell"
+      && Number(foundry.utils.getProperty(item, "system.level") ?? -1) === 0
+    )
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(item => ({
+      id: item.id,
+      name: item.name
+    }))
+    .slice(0, component.rows ?? 15);
+
+  return {
+    ...component,
+    isCantripList: true,
+    rows,
+    style: createPositionStyle(component)
+  };
 }

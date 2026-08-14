@@ -225,7 +225,8 @@ Hooks.once("init", () => {
         ["equipment dragging", () => this._activateEquipmentDragging(root)],
         ["supplies", () => this._activateSupplyControls(root)],
         ["illiterate toggle", () => this._activateIlliterateToggle(root)],
-        ["flag text areas", () => this._activateFlagTextAreas(root)]
+        ["flag text areas", () => this._activateFlagTextAreas(root)],
+        ["spell controls", () => this._activateSpellControls(root)],
       ];
 
       for (const [label, activate] of activators) {
@@ -582,9 +583,11 @@ Hooks.once("init", () => {
           const itemId = button.dataset.itemId;
           if (!itemId) return;
           this.actor.items.get(itemId)?.sheet?.render(true);
-        });
+        }
+      );
       }
-
+    
+      
       for (const button of root.querySelectorAll('[data-action="advance-class"]')) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
@@ -646,6 +649,21 @@ Hooks.once("init", () => {
       }
     }
 
+     _activateSpellControls(root) {
+      for (const button of root.querySelectorAll('[data-action="open-spell"]')) {
+        button.addEventListener("click", (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = button.dataset.itemId;
+          if (!itemId) return;
+
+          this.actor.items.get(itemId)?.sheet?.render(true);
+        });
+      }
+    }
 
     _activateClassIntegration(root) {
       const overlayButton = root.querySelector('[data-action="class-level-overlay"]');
