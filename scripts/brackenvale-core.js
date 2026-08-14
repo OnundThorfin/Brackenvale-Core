@@ -1,6 +1,55 @@
 const MODULE_ID = "brackenvale-core";
 const MODULE_VERSION = "0.2.2";
 
+// Brackenvale replaces the default D&D 5e language tree with campaign languages.
+// D&D 5e 5.3.x expects language choices to be grouped under non-selectable
+// category nodes with selectable entries in `children`. Secret tongues are
+// omitted because they may only be granted by specific features.
+const BRACKENVALE_LANGUAGES = {
+  common: {
+    label: "Common Languages",
+    selectable: false,
+    children: {
+      eldric: "Eldric",
+      valic: "Valic",
+      badawi: "Badawi",
+      nordskar: "Nordskar"
+    }
+  },
+  ancestral: {
+    label: "Ancestral Languages",
+    selectable: false,
+    children: {
+      olekwo: "Olekwo",
+      pawokti: "Pawokti",
+      ujaraki: "Ujaraki",
+      vezu: "Vezu",
+      dwarvish: "Dwarvish",
+      gnomish: "Gnomish",
+      halfling: "Halfling",
+      orc: "Orcish",
+      sylvan: "Sylvan"
+    }
+  },
+  ancient: {
+    label: "Ancient Languages",
+    selectable: false,
+    children: {
+      oldeldric: "Old Eldric",
+      liturgic: "Liturgic",
+      highdwarvish: "High Dwarvish",
+      primordial: "Primordial",
+      deep: "Deep Speech"
+    }
+  }
+};
+
+function installBrackenvaleLanguages() {
+  if (!CONFIG.DND5E) return;
+  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
+  console.info(`${MODULE_ID} | Installed Brackenvale language tree`, CONFIG.DND5E.languages);
+}
+
 const CALENDAR = {
   months: [
     { name: "Hearthswell", season: "Winter" },
@@ -506,6 +555,8 @@ class BrackenvaleOverlay {
 }
 
 Hooks.once("init", () => {
+  installBrackenvaleLanguages();
+
   game.settings.register(MODULE_ID, "state", {
     scope: "world",
     config: false,
