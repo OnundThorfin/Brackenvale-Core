@@ -138,12 +138,25 @@ function normalizeTraitValues(value) {
   return [];
 }
 
+function findConfiguredValue(config, key) {
+  if (!config || typeof config !== "object") return undefined;
+  if (Object.prototype.hasOwnProperty.call(config, key)) return config[key];
+
+  for (const entry of Object.values(config)) {
+    if (!entry || typeof entry !== "object" || !entry.children) continue;
+    const found = findConfiguredValue(entry.children, key);
+    if (found !== undefined) return found;
+  }
+
+  return undefined;
+}
+
 function localizeConfiguredValues(values, config = {}) {
   return values.map((value) => {
     const key = String(value ?? "").trim();
     if (!key) return "";
 
-    const configured = config?.[key];
+    const configured = findConfiguredValue(config, key);
     if (configured == null) return key;
 
     if (typeof configured === "string") {
