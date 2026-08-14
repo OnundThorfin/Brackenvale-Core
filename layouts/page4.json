@@ -36,25 +36,25 @@
       "height": 2
     },
     {
-  "component": "derivedField",
-  "key": "cantripsKnown",
-  "derive": "cantripsKnown",
-  "className": "line-field",
-  "label": "Cantrips Known",
-  "left": 7.5,
-  "top": 11.3,
-  "width": 5,
-  "height": 2
-},
-{
-  "component": "cantripList",
-  "key": "cantripList",
-  "label": "Cantrips",
-  "rows": 15,
-  "left": 4.8,
-  "top": 16.1,
-  "width": 12.2,
-  "height": 39
-}
+      "component": "derivedField",
+      "key": "cantripsKnown",
+      "derive": "cantripsKnown",
+      "className": "line-field",
+      "label": "Cantrips Known",
+      "left": 9.615726965234863,
+      "top": 13.902782251911633,
+      "width": 5,
+      "height": 2
+    },
+    {
+      "component": "cantripList",
+      "key": "cantripList",
+      "label": "Cantrips",
+      "rows": 15,
+      "left": 4.8,
+      "top": 16.1,
+      "width": 12.2,
+      "height": 39
+    }
   ]
 }

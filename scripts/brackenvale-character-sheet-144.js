@@ -649,22 +649,136 @@ Hooks.once("init", () => {
       }
     }
 
-     _activateSpellControls(root) {
-      for (const button of root.querySelectorAll('[data-action="open-spell"]')) {
-        button.addEventListener("click", (event) => {
-          if (this._calibrationMode) return;
+    _activateSpellControls(root) {
+  const cantripZone = root.querySelector('[data-component-key="cantripList"]');
 
-          event.preventDefault();
-          event.stopPropagation();
+  if (cantripZone) {
+    const clearHighlight = () => {
+      cantripZone.classList.remove("spell-drop-target");
+    };
 
-          const itemId = button.dataset.itemId;
-          if (!itemId) return;
+    cantripZone.addEventListener("dragenter", (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
+      event.preventDefault();
+      cantripZone.classList.add("spell-drop-target");
+    });
 
-          this.actor.items.get(itemId)?.sheet?.render(true);
-        });
+    cantripZone.addEventListener("dragover", (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+    });
+
+    cantripZone.addEventListener("dragleave", (event) => {
+      if (cantripZone.contains(event.relatedTarget)) return;
+      clearHighlight();
+    });
+
+    cantripZone.addEventListener("drop", async (event) => {
+      clearHighlight();
+
+      if (this._calibrationMode || !this.isEditable) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      let data = null;
+      const raw =
+        event.dataTransfer?.getData("application/json")
+        || event.dataTransfer?.getData("text/plain");
+
+      if (raw) {
+        try {
+          data = JSON.parse(raw);
+        } catch (_error) {
+          data = null;
+        }
       }
-    }
 
+      if (!data) return;
+
+      await this._handleCantripDrop(data);
+    });
+  }
+
+  for (const button of root.querySelectorAll('[data-action="open-spell"]')) {
+    button.addEventListener("click", (event) => {
+      if (this._calibrationMode) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const itemId = button.dataset.itemId;
+      if (!itemId) return;
+
+      this.actor.items.get(itemId)?.sheet?.render(true);
+    });
+  }
+}
+async _handleCantripDrop(data) {
+  if (!data || data.type !== "Item") {
+    ui.notifications?.warn("Only spells can be dropped into Cantrips.");
+    return;
+  }
+
+  let sourceItem = null;
+
+  if (data.id) {
+    sourceItem = this.actor.items.get(data.id) ?? null;
+  }
+
+  if (!sourceItem && data.uuid) {
+    sourceItem = await fromUuid(data.uuid);
+  }
+
+  if (!sourceItem || sourceItem.documentName !== "Item") {
+    ui.notifications?.warn("Brackenvale could not find that spell.");
+    return;
+  }
+
+  if (sourceItem.type !== "spell") {
+    ui.notifications?.warn("Only spells can be dropped into Cantrips.");
+    return;
+  }
+
+  const spellLevel = Number(
+    foundry.utils.getProperty(sourceItem, "system.level") ?? -1
+  );
+
+  if (spellLevel !== 0) {
+    ui.notifications?.warn("Only cantrips can be dropped into the Cantrips section.");
+    return;
+  }
+
+  const existing = Array.from(this.actor.items ?? []).find(
+    (item) =>
+      item.type === "spell"
+      && item.name === sourceItem.name
+      && Number(foundry.utils.getProperty(item, "system.level") ?? -1) === 0
+  );
+
+  if (existing) {
+    ui.notifications?.info(`${sourceItem.name} is already on this character.`);
+    return;
+  }
+
+  if (sourceItem.parent === this.actor) {
+    ui.notifications?.info(`${sourceItem.name} is already on this character.`);
+    return;
+  }
+
+  const itemData = sourceItem.toObject();
+  delete itemData._id;
+
+  await this.actor.createEmbeddedDocuments("Item", [itemData], {
+    keepId: false
+  });
+
+  ui.notifications?.info(`${sourceItem.name} added to Cantrips.`);
+
+  this._activePage = 4;
+  this.render();
+}
     _activateClassIntegration(root) {
       const overlayButton = root.querySelector('[data-action="class-level-overlay"]');
       if (!overlayButton) {

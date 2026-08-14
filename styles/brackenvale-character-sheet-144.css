@@ -1969,7 +1969,10 @@ input[data-component-key="classLevel"].class-level-interactive {
   background: transparent;
   border: 0;
 }
-
+.page4-cantrip-list.spell-drop-target {
+  background: rgba(60, 100, 60, 0.12);
+  outline: 2px dashed rgba(40, 80, 40, 0.75);
+}
 .page4-cantrip-row {
   width: 100%;
   min-width: 0;
