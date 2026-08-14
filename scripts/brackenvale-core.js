@@ -728,7 +728,6 @@ Hooks.on("renderApplicationV2", (application, element) => {
   const root = element instanceof HTMLElement ? element : element?.[0];
   if (!root) return;
 
-  // Prevent duplicate controls on rerender.
   if (root.querySelector(".brackenvale-item-slots")) return;
 
   const current = foundry.utils.getProperty(
@@ -739,25 +738,30 @@ Hooks.on("renderApplicationV2", (application, element) => {
   const wrapper = document.createElement("div");
   wrapper.className = "form-group brackenvale-item-slots";
 
-  const label = document.createElement("label");
-  label.textContent = "Brackenvale Slots";
+  wrapper.innerHTML = `
+    <label>Brackenvale Slots</label>
+    <div class="form-fields">
+      <input
+        type="number"
+        class="brackenvale-slot-input"
+        min="0"
+        step="1"
+        placeholder="Auto"
+        value="${current ?? ""}"
+      />
+    </div>
+    <p class="hint">
+      Leave blank to use Brackenvale's automatic slot calculation.
+    </p>
+  `;
 
-  const input = document.createElement("input");
-  input.type = "number";
-  input.min = "0";
-  input.step = "1";
-  input.placeholder = "Auto";
-  input.value =
-    current === undefined || current === null
-      ? ""
-      : String(current);
-
+  const input = wrapper.querySelector(".brackenvale-slot-input");
   input.disabled = !item.isOwner;
 
-  input.addEventListener("change", async () => {
+  input.addEventListener("change", async (event) => {
     if (!item.isOwner) return;
 
-    const raw = input.value.trim();
+    const raw = String(event.currentTarget.value ?? "").trim();
 
     if (raw === "") {
       await item.unsetFlag(MODULE_ID, "slots");
@@ -776,14 +780,17 @@ Hooks.on("renderApplicationV2", (application, element) => {
     );
   });
 
-  wrapper.append(label, input);
-
-  // Prefer the Details tab/form because this is item metadata.
-  const target =
-    root.querySelector('[data-tab="details"].active')
-    ?? root.querySelector('[data-tab="details"]')
-    ?? root.querySelector("form")
+  const form =
+    root.querySelector("form")
+    ?? root.querySelector(".window-content")
     ?? root;
 
-  target.append(wrapper);
+  const detailsTab =
+    root.querySelector('[data-tab="details"]');
+
+  if (detailsTab?.parentElement) {
+    detailsTab.parentElement.insertBefore(wrapper, detailsTab);
+  } else {
+    form.append(wrapper);
+  }
 });
