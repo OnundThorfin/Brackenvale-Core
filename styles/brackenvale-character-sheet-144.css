@@ -2050,3 +2050,15 @@ input[data-component-key="classLevel"].class-level-interactive {
   visibility: visible !important;
   pointer-events: auto !important;
 }
+/* ---------------------------------------------------------
+   Page 4 — Prepared Spells
+   --------------------------------------------------------- */
+
+.page4-prepared-spell-list {
+  display: block;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  overflow: hidden;
+}

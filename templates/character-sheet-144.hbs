@@ -75,6 +75,16 @@
     {{/each}}
   </section>
 {{/if}}
+{{#if isPreparedSpellList}}
+  <section
+    class="overlay-field page4-prepared-spell-list"
+    style="{{style}}"
+    data-component-key="{{key}}"
+    data-layout-part="root"
+    aria-label="{{label}}"
+  >
+  </section>
+{{/if}}
           {{#if isTextField}}
             <input
               class="overlay-field {{className}}"
