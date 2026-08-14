@@ -2094,26 +2094,42 @@ input[data-component-key="classLevel"].class-level-interactive {
 }
 
 
+/* 0.5.4-test.126 — Background & Species controls */
+.origin-summary-field {
+  display: flex !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
 
+.origin-summary-button {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  font: inherit !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
 
-/* 0.5.4-test.133 — origins share the exact Class & Level summary-control rendering. */
+.origin-remove-button {
+  position: absolute !important;
+  right: -12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 11px !important;
+  height: 11px !important;
+  min-width: 11px !important;
+  min-height: 11px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 9px !important;
+  font-size: 9px !important;
+  cursor: pointer !important;
+}
+
 .brackenvale-origin-button-grid {
   max-height: 55vh !important;
   overflow-y: auto !important;
-}
-
-
-/* 0.5.4-test.134 — Character-Driven Experience fields */
-.character-driven-experience-field {
-  box-sizing: border-box !important;
-  resize: none !important;
-  overflow-y: auto !important;
-  padding: 3px 5px !important;
-  background: #ffffff !important;
-  color: #171612 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  font: inherit !important;
-  line-height: 1.25 !important;
 }
