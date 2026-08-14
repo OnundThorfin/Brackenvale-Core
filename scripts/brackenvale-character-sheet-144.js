@@ -4,7 +4,7 @@
  * Foundry VTT 14 / D&D 5e 5.3.3
  */
 
-import { prepareSheetComponent } from "./sheet-components-v95.js";
+import { prepareSheetComponent } from "./sheet-components.js";
 import {
   deleteEquipmentItem,
   isArmorOrShieldItem,
@@ -12,12 +12,12 @@ import {
   setEquipmentDamage
 } from "./equipment-manager.js";
 
-const MODULE_ID = "brackenvale-core-dev100";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.95 PAGE2-REBUILD");
+const MODULE_ID = "brackenvale-core";
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.144");
 const TEMPLATE_PATH =
-  "modules/brackenvale-core-dev100/templates/character-sheet-v95.hbs";
+  "modules/brackenvale-core/templates/character-sheet-144.hbs";
 const LAYOUT_ROOT =
-  "modules/brackenvale-core-dev100/layouts";
+  "modules/brackenvale-core/layouts";
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | Registering Brackenvale Character Sheet (equipment repository repair)`);
@@ -78,18 +78,21 @@ Hooks.once("init", () => {
       context.isGM = Boolean(game.user?.isGM);
       context.calibrationMode = this._calibrationMode;
 
+      const page2Data = this._preparePage2DirectData();
+
       context.pages = this._workingLayouts.map((layout) => ({
         ...layout,
         active: Number(layout.page) === Number(this._activePage),
         isPage2: Number(layout.page) === 2,
+        page2Data: Number(layout.page) === 2 ? page2Data : null,
         components: layout.components.map((component) =>
-          prepareSheetComponent(
-            component,
-            this.actor,
-            MODULE_ID,
-            editable
-          )
-        )
+              prepareSheetComponent(
+                component,
+                this.actor,
+                MODULE_ID,
+                editable
+              )
+            )
       }));
 
       return context;
@@ -172,7 +175,7 @@ Hooks.once("init", () => {
       const layouts = await Promise.all(
         pageNumbers.map(async (pageNumber) => {
           const response = await fetch(
-            `${LAYOUT_ROOT}/page${pageNumber}-v69.json`,
+            `${LAYOUT_ROOT}/page${pageNumber}.json`,
             {cache: "no-store"}
           );
           if (!response.ok) {
@@ -192,24 +195,36 @@ Hooks.once("init", () => {
       const root = this.element;
       if (!root) return;
 
-      this._activateArtworkPageTabs(root);
-      this._activateItemEditors(root);
-      this._activatePage2FeatureControls(root);
-      this._activateClassIntegration(root);
-      this._activateNativeDataBindings(root);
-      this._activateCalibrationControls(root);
-      this._activateAbilityRolls(root);
-      this._activateProficiencyControls(root);
-      this._activateDeathSaveControls(root);
-      this._activateHitDiceControls(root);
-      this._activateWeaponControls(root);
-      this._activateEquipmentDamageControls(root);
-      this._activateEquipmentDropZones(root);
-      this._activateEquipmentControls(root);
-      this._activateEquipmentDragging(root);
-      this._activateSupplyControls(root);
-      this._activateFlagTextAreas(root);
+      const activators = [
+        ["page tabs", () => this._activateArtworkPageTabs(root)],
+        ["item editors", () => this._activateItemEditors(root)],
+        ["Page 2 controls", () => this._activatePage2FeatureControls(root)],
+        ["class controls", () => this._activateClassIntegration(root)],
+        ["background/species controls", () => this._activateOriginIntegration(root)],
+        ["native bindings", () => this._activateNativeDataBindings(root)],
+        ["calibration", () => this._activateCalibrationControls(root)],
+        ["ability rolls", () => this._activateAbilityRolls(root)],
+        ["proficiencies", () => this._activateProficiencyControls(root)],
+        ["death saves", () => this._activateDeathSaveControls(root)],
+        ["hit dice", () => this._activateHitDiceControls(root)],
+        ["weapons", () => this._activateWeaponControls(root)],
+        ["equipment damage", () => this._activateEquipmentDamageControls(root)],
+        ["equipment drop zones", () => this._activateEquipmentDropZones(root)],
+        ["equipment controls", () => this._activateEquipmentControls(root)],
+        ["equipment dragging", () => this._activateEquipmentDragging(root)],
+        ["supplies", () => this._activateSupplyControls(root)],
+        ["flag text areas", () => this._activateFlagTextAreas(root)]
+      ];
+
+      for (const [label, activate] of activators) {
+        try {
+          activate();
+        } catch (error) {
+          console.error(`${MODULE_ID} | Could not activate ${label}`, error);
+        }
+      }
     }
+
     _activateSupplyControls(root) {
       const getRows = () => {
         const stored = foundry.utils.getProperty(
@@ -544,167 +559,77 @@ Hooks.once("init", () => {
       }
     }
 
-    _renderPage2DirectDOM(root) {
-      const page = root.querySelector('.brackenvale-art-page[data-page="2"]');
-      if (!page) {
-        console.warn(`${MODULE_ID} | Page 2 DOM container was not found.`);
-        return;
-      }
-
-      page.querySelectorAll(".brackenvale-page2-dom").forEach((node) => node.remove());
-
-      const page2Layout = this._workingLayouts?.find(
-        (entry) => Number(entry.page) === 2
-      );
-      const componentByKey = (key) =>
-        page2Layout?.components?.find((entry) => entry.key === key);
-      const layoutStyle = (component, fallback) => {
-        const source = component ?? fallback;
-        return [
-          `left:${Number(source.left)}%`,
-          `top:${Number(source.top)}%`,
-          `width:${Number(source.width)}%`,
-          `height:${Number(source.height)}%`
-        ].join(";");
-      };
-
-      const data = this._preparePage2DirectData();
-      const escape = (value) => foundry.utils.escapeHTML(String(value ?? ""));
-
-      const featureRows = [
-        ...data.classes.map((entry) => `
-          <div class="page2-class-actions">
-            <button
-              type="button"
-              class="page2-run-advancement"
-              data-action="run-class-advancement"
-              data-item-id="${escape(entry.id)}"
-              title="Run ${escape(entry.name)} through D&D5e Advancement"
-            >Run Advancement</button>
-            <button
-              type="button"
-              class="page2-manage-class"
-              data-action="manage-class"
-              data-item-id="${escape(entry.id)}"
-              title="Open ${escape(entry.name)} class"
-            >Open ${escape(entry.name)}${entry.levels ? ` ${escape(entry.levels)}` : ""}</button>
-          </div>
-        `),
-        ...data.features.map((entry) => `
-          <button
-            type="button"
-            class="page2-feature-row"
-            data-action="open-feature"
-            data-item-id="${escape(entry.id)}"
-            title="Open ${escape(entry.name)}"
-          >
-            <span class="page2-feature-name">${escape(entry.name)}</span>
-            ${entry.type ? `<span class="page2-feature-type">${escape(entry.type)}</span>` : ""}
-          </button>
-        `)
-      ].join("") || `
-        <div class="page2-empty-list">
-          No granted features yet. Open the class and use its Advancement tab.
-        </div>
-      `;
-
-      const languageRows = data.languages.length
-        ? data.languages.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")
-        : `<div class="page2-empty-list">No languages recorded.</div>`;
-
-      const proficiencyRows = data.proficiencyGroups.length
-        ? data.proficiencyGroups.map((group) => `
-            <div class="page2-proficiency-group">
-              <strong>${escape(group.label)}</strong>
-              ${group.values.map((name) => `<div class="page2-simple-row">${escape(name)}</div>`).join("")}
-            </div>
-          `).join("")
-        : `<div class="page2-empty-list">No proficiencies recorded.</div>`;
-
-      const overlay = document.createElement("div");
-      overlay.className = "brackenvale-page2-dom";
-      overlay.innerHTML = `
-        <section
-          class="page2-dom-panel page2-dom-features overlay-field"
-          style="${layoutStyle(componentByKey("features-traits"), {left:5.4,top:10,width:48.1,height:79.2})}"
-          data-component-key="features-traits"
-          data-layout-part="root"
-          aria-label="Features & Traits"
-          tabindex="0"
-        >
-          <div class="page2-calibration-handle">MOVE FEATURES & TRAITS</div>
-          <div class="page2-dom-scroll">${featureRows}</div>
-        </section>
-        <section
-          class="page2-dom-panel page2-dom-languages overlay-field"
-          style="${layoutStyle(componentByKey("languages"), {left:58.1,top:10,width:36.9,height:28.9})}"
-          data-component-key="languages"
-          data-layout-part="root"
-          aria-label="Languages"
-          tabindex="0"
-        >
-          <div class="page2-calibration-handle">MOVE LANGUAGES</div>
-          <div class="page2-dom-scroll">${languageRows}</div>
-        </section>
-        <section
-          class="page2-dom-panel page2-dom-proficiencies overlay-field"
-          style="${layoutStyle(componentByKey("proficiencies"), {left:58.1,top:44.4,width:36.9,height:44.8})}"
-          data-component-key="proficiencies"
-          data-layout-part="root"
-          aria-label="Proficiencies"
-          tabindex="0"
-        >
-          <div class="page2-calibration-handle">MOVE PROFICIENCIES</div>
-          <div class="page2-dom-scroll">${proficiencyRows}</div>
-        </section>
-      `;
-
-      page.append(overlay);
-      console.info(`${MODULE_ID} | Page 2 direct DOM overlay rendered`, {
-        features: data.features.length,
-        classes: data.classes.length,
-        languages: data.languages.length,
-        proficiencyGroups: data.proficiencyGroups.length
-      });
-    }
-
-
     _activatePage2FeatureControls(root) {
       for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
+
           event.preventDefault();
           event.stopPropagation();
 
           const itemId = button.dataset.itemId;
           if (!itemId) return;
           this.actor.items.get(itemId)?.sheet?.render(true);
+        });
+      }
+
+      for (const button of root.querySelectorAll('[data-action="advance-class"]')) {
+        button.addEventListener("click", (event) => {
+          if (this._calibrationMode) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const classItem = this.actor.items.get(button.dataset.itemId);
+          if (!classItem || classItem.type !== "class") return;
+
+          const currentLevel = Number(classItem.system?.levels ?? 0);
+          if (currentLevel >= CONFIG.DND5E.maxLevel) {
+            ui.notifications?.warn(`${classItem.name} is already at maximum level.`);
+            return;
+          }
+
+          if (game.settings.get("dnd5e", "disableAdvancements")) {
+            classItem.update({"system.levels": currentLevel + 1});
+            return;
+          }
+
+          const Manager =
+            game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+          if (!Manager?.forLevelChange) {
+            ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
+            return;
+          }
+
+          // Mirrors D&D5e 5.3.3 CharacterActorSheet:
+          // AdvancementManager.forLevelChange(actor, classId, levelDelta)
+          const manager = Manager.forLevelChange(this.actor, classItem.id, 1);
+
+          if (manager.steps.length) {
+            manager.render({force: true});
+            return;
+          }
+
+          // Native D&D5e also falls back to simply increasing the level
+          // when there are no advancement steps at that level.
+          classItem.update({"system.levels": currentLevel + 1});
         });
       }
 
       for (const button of root.querySelectorAll('[data-action="manage-class"]')) {
         button.addEventListener("click", (event) => {
           if (this._calibrationMode) return;
+
           event.preventDefault();
           event.stopPropagation();
 
           const itemId = button.dataset.itemId;
           if (!itemId) return;
+
+          // The native D&D Class item remains the source of truth for its
+          // Advancement configuration and feature choices.
           this.actor.items.get(itemId)?.sheet?.render(true);
-        });
-      }
-
-      for (const button of root.querySelectorAll('[data-action="run-class-advancement"]')) {
-        button.addEventListener("click", async (event) => {
-          if (this._calibrationMode) return;
-          event.preventDefault();
-          event.stopPropagation();
-
-          const itemId = button.dataset.itemId;
-          const classItem = itemId ? this.actor.items.get(itemId) : null;
-          if (!classItem) return;
-
-          await this._rerunClassAdvancement(classItem);
         });
       }
     }
@@ -802,6 +727,17 @@ Hooks.once("init", () => {
 
           if (!approved) return;
 
+          const Manager =
+            game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+          if (!game.settings.get("dnd5e", "disableAdvancements") && Manager?.forDeletedItem) {
+            const manager = Manager.forDeletedItem(this.actor, classItem.id);
+            if (manager.steps.length) {
+              manager.render({force: true});
+              return;
+            }
+          }
+
           await classItem.delete();
           ui.notifications?.info(`${classItem.name} removed from ${this.actor.name}.`);
           this.render();
@@ -867,6 +803,254 @@ Hooks.once("init", () => {
           ui.notifications?.error("Brackenvale could not add that class.");
         }
       });
+    }
+
+
+
+    _activateOriginIntegration(root) {
+      for (const button of root.querySelectorAll('[data-action="origin-summary"]')) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const kind = button.dataset.originKind;
+          const itemId = button.dataset.itemId;
+
+          if (itemId) {
+            this.actor.items.get(itemId)?.sheet?.render(true);
+            return;
+          }
+
+          if (kind === "background") {
+            await this._openBrackenvaleOriginPicker("background");
+          } else if (kind === "species") {
+            await this._openBrackenvaleOriginPicker("species");
+          }
+        });
+      }
+
+      for (const button of root.querySelectorAll('[data-action="remove-origin"]')) {
+        button.addEventListener("click", async (event) => {
+          if (this._calibrationMode || !this.isEditable) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const item = this.actor.items.get(button.dataset.itemId);
+          if (!item) return;
+
+          const label = button.dataset.originKind === "species" ? "Species" : "Background";
+          const DialogV2 = foundry.applications?.api?.DialogV2;
+          let approved = false;
+
+          if (DialogV2?.confirm) {
+            approved = await DialogV2.confirm({
+              window: {title: `Remove ${label}`},
+              content: `<p>Remove <strong>${foundry.utils.escapeHTML(item.name)}</strong> from <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>?</p>
+                <p class="hint">Benefits granted through D&D advancement will be reversed with it.</p>`,
+              yes: {label: `Remove ${label}`},
+              no: {label: "Cancel"},
+              modal: true
+            });
+          } else {
+            approved = window.confirm(`Remove ${item.name} from ${this.actor.name}?`);
+          }
+
+          if (!approved) return;
+          await this._removeAdvancementItem(item);
+        });
+      }
+    }
+
+
+    async _openBrackenvaleOriginPicker(kind) {
+      const itemTypes = kind === "background"
+        ? ["background"]
+        : ["race", "species"];
+
+      const title = kind === "background" ? "Choose a Background" : "Choose a Species";
+      const candidates = [];
+
+      for (const pack of game.packs ?? []) {
+        if (pack.documentName !== "Item") continue;
+
+        const label = String(pack.metadata?.label ?? pack.title ?? pack.collection ?? "").trim();
+        const collection = String(pack.collection ?? "").trim();
+        const packageName = String(
+          pack.metadata?.packageName
+          ?? pack.metadata?.package
+          ?? pack.metadata?.packageId
+          ?? ""
+        ).trim();
+
+        const sourceText = `${label} ${collection} ${packageName}`.toLowerCase();
+        if (
+          sourceText.includes("srd")
+          || sourceText.includes("legacy")
+          || sourceText.includes("2014")
+        ) continue;
+
+        try {
+          const index = await pack.getIndex({fields: ["type"]});
+
+          for (const entry of index) {
+            if (!itemTypes.includes(entry.type)) continue;
+
+            let score = 0;
+            if (label === "Character Origins") score += 100;
+            if (collection.toLowerCase().startsWith("dnd-players-handbook.")) score += 50;
+            if (packageName.toLowerCase() === "dnd-players-handbook") score += 50;
+
+            candidates.push({
+              id: entry._id,
+              name: entry.name,
+              uuid: `Compendium.${pack.collection}.${entry._id}`,
+              source: label || pack.collection,
+              score
+            });
+          }
+        } catch (error) {
+          console.debug(`${MODULE_ID} | Skipping unavailable origin compendium ${pack.collection}`, error);
+        }
+      }
+
+      const unique = new Map();
+      for (const candidate of candidates.sort((a, b) =>
+        b.score - a.score
+        || a.name.localeCompare(b.name)
+        || a.source.localeCompare(b.source)
+      )) {
+        const key = candidate.name.trim().toLowerCase();
+        if (!unique.has(key)) unique.set(key, candidate);
+      }
+
+      const choices = Array.from(unique.values()).sort((a, b) => a.name.localeCompare(b.name));
+      if (!choices.length) {
+        ui.notifications?.warn(`No modern 2024 / 5.5e ${kind} items were found.`);
+        return;
+      }
+
+      document.querySelector(".brackenvale-origin-modal")?.remove();
+
+      const overlay = document.createElement("div");
+      overlay.className = "brackenvale-class-modal brackenvale-origin-modal";
+
+      const panel = document.createElement("div");
+      panel.className = "brackenvale-class-modal-panel";
+
+      const heading = document.createElement("h2");
+      heading.textContent = title;
+
+      const intro = document.createElement("p");
+      intro.textContent = `Choose a 2024 / 5.5e ${kind} for ${this.actor.name}.`;
+
+      const grid = document.createElement("div");
+      grid.className = "brackenvale-class-button-grid brackenvale-origin-button-grid";
+
+      const closeModal = () => {
+        document.removeEventListener("keydown", onKeyDown, true);
+        overlay.remove();
+      };
+
+      const onKeyDown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          closeModal();
+        }
+      };
+
+      for (const choice of choices) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "brackenvale-class-pick-button";
+        button.textContent = choice.name;
+        button.title = choice.source;
+
+        button.addEventListener("click", async () => {
+          button.disabled = true;
+          try {
+            const sourceItem = await fromUuid(choice.uuid);
+            if (!sourceItem) throw new Error(`Could not resolve ${choice.uuid}`);
+            closeModal();
+            await this._addAdvancementItem(sourceItem);
+          } catch (error) {
+            console.error(`${MODULE_ID} | Could not add ${kind}`, error);
+            ui.notifications?.error(`Brackenvale could not add that ${kind}.`);
+            button.disabled = false;
+          }
+        });
+
+        grid.append(button);
+      }
+
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "brackenvale-class-modal-close";
+      close.textContent = "Cancel";
+      close.addEventListener("click", closeModal);
+
+      panel.append(heading, intro, grid, close);
+      overlay.append(panel);
+      document.body.append(overlay);
+      document.addEventListener("keydown", onKeyDown, true);
+    }
+
+
+    async _addAdvancementItem(sourceItem) {
+      if (!sourceItem) return;
+
+      const acceptedTypes = ["background", "race", "species"];
+      if (!acceptedTypes.includes(sourceItem.type)) return;
+
+      const existing = Array.from(this.actor.items ?? []).find((item) => {
+        if (sourceItem.type === "background") return item.type === "background";
+        return ["race", "species"].includes(item.type);
+      });
+
+      if (existing) {
+        ui.notifications?.warn(
+          `${this.actor.name} already has ${existing.name}. Remove it before choosing another.`
+        );
+        return;
+      }
+
+      const itemData = sourceItem.toObject();
+      delete itemData._id;
+
+      const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+      const supportsAdvancement = Boolean(this.actor.system?.metadata?.supportsAdvancement);
+      const hasAdvancement = !foundry.utils.isEmpty(itemData.system?.advancement);
+      const advancementsDisabled = game.settings.get("dnd5e", "disableAdvancements");
+
+      if (supportsAdvancement && hasAdvancement && !advancementsDisabled && Manager?.forNewItem) {
+        const manager = Manager.forNewItem(this.actor, itemData);
+        if (manager.steps.length) {
+          manager.render(true);
+          return;
+        }
+      }
+
+      await this.actor.createEmbeddedDocuments("Item", [itemData], {keepId: false});
+      this.render();
+    }
+
+
+    async _removeAdvancementItem(item) {
+      const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+      if (!game.settings.get("dnd5e", "disableAdvancements") && Manager?.forDeletedItem) {
+        const manager = Manager.forDeletedItem(this.actor, item.id);
+        if (manager.steps.length) {
+          manager.render({force: true});
+          return;
+        }
+      }
+
+      await item.delete();
+      this.render();
     }
 
 
@@ -1100,133 +1284,47 @@ Hooks.once("init", () => {
     async _addBrackenvaleClass(sourceItem) {
       if (!sourceItem || sourceItem.type !== "class") return;
 
-      if (sourceItem.parent === this.actor) {
-        sourceItem.sheet?.render(true);
-        return;
-      }
-
       const existing = (this.actor.items ?? []).find((item) =>
         item.type === "class"
-        && (
-          item.name === sourceItem.name
-          || (
-            foundry.utils.getProperty(item, "system.identifier")
-            && foundry.utils.getProperty(item, "system.identifier")
-              === foundry.utils.getProperty(sourceItem, "system.identifier")
-          )
-        )
+        && item.system?.identifier === sourceItem.system?.identifier
       );
 
       if (existing) {
-        ui.notifications?.info(
-          `${existing.name} is already on this character. Use Run Advancement on Page 2 to repair an older class.`
-        );
+        existing.sheet?.render(true);
         return;
       }
 
-      await this._runNativeClassDrop(sourceItem);
-    }
+      const itemData = sourceItem.toObject();
+      delete itemData._id;
+      itemData.system ??= {};
+      itemData.system.levels = Math.max(1, Number(itemData.system.levels ?? 1));
 
-    async _runNativeClassDrop(sourceItem) {
-      if (!sourceItem || sourceItem.type !== "class") return false;
+      const supportsAdvancement =
+        Boolean(this.actor.system?.metadata?.supportsAdvancement);
+      const hasAdvancement =
+        !foundry.utils.isEmpty(itemData.system.advancement);
+      const advancementsDisabled =
+        game.settings.get("dnd5e", "disableAdvancements");
 
-      const dragData =
-        typeof sourceItem.toDragData === "function"
-          ? sourceItem.toDragData()
-          : {type: "Item", uuid: sourceItem.uuid};
+      if (supportsAdvancement && hasAdvancement && !advancementsDisabled) {
+        const Manager =
+          game.dnd5e?.applications?.advancement?.AdvancementManager;
 
-      const target =
-        this.element?.querySelector?.(".brackenvale-art-page.active")
-        ?? this.element
-        ?? document.body;
-
-      const fakeEvent = {
-        target,
-        currentTarget: target,
-        preventDefault() {},
-        stopPropagation() {},
-        stopImmediatePropagation() {},
-        dataTransfer: {
-          getData(type) {
-            if (type === "text/plain" || type === "application/json") {
-              return JSON.stringify(dragData);
-            }
-            return "";
-          }
-        }
-      };
-
-      try {
-        // CharacterActorSheet's native item-drop path is what invokes the
-        // D&D5e Advancement Manager for classes, subclasses, and backgrounds.
-        if (typeof this._onDropItem === "function") {
-          await this._onDropItem(fakeEvent, sourceItem);
-          return true;
+        if (!Manager?.forNewItem) {
+          ui.notifications?.error("D&D5e Advancement Manager is unavailable.");
+          return;
         }
 
-        if (typeof this._onDrop === "function") {
-          await this._onDrop(fakeEvent);
-          return true;
+        // Mirrors D&D5e 5.3.3 BaseActorSheet's new-item advancement path.
+        const manager = Manager.forNewItem(this.actor, itemData);
+        if (manager.steps.length) {
+          manager.render(true);
+          return;
         }
-
-        throw new Error("No native D&D5e drop handler is available on this sheet.");
-      } catch (error) {
-        console.error(`${MODULE_ID} | Native class Advancement drop failed`, error);
-        ui.notifications?.error(
-          `D&D5e could not start Advancement for ${sourceItem.name}.`
-        );
-        return false;
-      }
-    }
-
-    async _rerunClassAdvancement(classItem) {
-      if (!classItem || classItem.type !== "class") return;
-
-      const sourceUuid =
-        foundry.utils.getProperty(classItem, "flags.core.sourceId")
-        ?? foundry.utils.getProperty(classItem, "_stats.compendiumSource")
-        ?? null;
-
-      if (!sourceUuid) {
-        ui.notifications?.warn(
-          `${classItem.name} has no original compendium source recorded. Remove it and add it again with the Brackenvale class picker.`
-        );
-        return;
       }
 
-      const sourceItem = await fromUuid(sourceUuid);
-      if (!sourceItem || sourceItem.type !== "class") {
-        ui.notifications?.warn(
-          `Brackenvale could not load the original ${classItem.name} class.`
-        );
-        return;
-      }
-
-      const DialogV2 = foundry.applications?.api?.DialogV2;
-      let approved = false;
-
-      if (DialogV2?.confirm) {
-        approved = await DialogV2.confirm({
-          window: {title: `Run ${classItem.name} Advancement`},
-          content: `
-            <p>This class was added before Brackenvale used D&D5e's native Advancement workflow.</p>
-            <p>Brackenvale will remove the embedded <strong>${foundry.utils.escapeHTML(classItem.name)}</strong>
-            class and immediately re-add its original compendium class through D&D5e Advancement.</p>
-          `,
-          yes: {label: "Run Advancement"},
-          no: {label: "Cancel"},
-          modal: true
-        });
-      } else {
-        approved = window.confirm(
-          `Re-add ${classItem.name} through D&D5e Advancement?`
-        );
-      }
-
-      if (!approved) return;
-
-      await classItem.delete();
-      await this._runNativeClassDrop(sourceItem);
+      await this.actor.createEmbeddedDocuments("Item", [itemData], {keepId: false});
+      this.render();
     }
 
 
@@ -2021,7 +2119,7 @@ Hooks.once("init", () => {
         if (!this._calibrationMode) return;
 
         const field = event.target.closest(
-          ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
+          ".brackenvale-page-fields .overlay-field[data-component-key]"
         );
         if (!field || !root.contains(field)) return;
 
@@ -2030,7 +2128,7 @@ Hooks.once("init", () => {
         if (
           field.classList.contains("equipment-slot-only-region")
           || field.classList.contains("slot-summary-field")
-          || field.classList.contains("page2-dom-panel")
+          || field.classList.contains("page2-list-panel")
         ) {
           this._selectCalibrationField(root, field);
         }
@@ -2041,7 +2139,7 @@ Hooks.once("init", () => {
       root.classList.toggle("calibration-mode", this._calibrationMode);
 
       for (const field of root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field, .brackenvale-page2-dom .overlay-field"
+        ".brackenvale-page-fields .overlay-field"
       )) {
         if (this._calibrationMode) {
           field.dataset.wasDisabled = String(field.disabled);
@@ -2061,7 +2159,7 @@ Hooks.once("init", () => {
             || field.classList.contains("supply-widget")
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
-            || field.classList.contains("page2-dom-panel")
+            || field.classList.contains("page2-list-panel")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";
@@ -2082,7 +2180,7 @@ Hooks.once("init", () => {
 
     _activateCalibrationDragging(root) {
       const fields = root.querySelectorAll(
-        ".brackenvale-page-fields .overlay-field[data-component-key], .brackenvale-page2-dom .overlay-field[data-component-key]"
+        ".brackenvale-page-fields .overlay-field[data-component-key]"
       );
 
       for (const field of fields) {
