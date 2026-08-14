@@ -956,12 +956,13 @@ function prepareCantripList(component, actor) {
     rows,
     style: createPositionStyle(component)
   };
-  function preparePreparedSpellList(component, actor) {
+}
+
+function preparePreparedSpellList(component, actor) {
   return {
     ...component,
     isPreparedSpellList: true,
     rows: [],
     style: createPositionStyle(component)
   };
-}
 }
