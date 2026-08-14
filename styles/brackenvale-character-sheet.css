@@ -2133,14 +2133,3 @@ input[data-component-key="classLevel"].class-level-interactive {
   max-height: 55vh !important;
   overflow-y: auto !important;
 }
-
-
-
-/* 0.5.4-test.128 — Background/Species use the exact Class & Level visual structure. */
-.origin-summary-field .origin-summary-display {
-  padding-right: 18px;
-}
-
-.origin-summary-field .origin-remove-button {
-  right: 0 !important;
-}
