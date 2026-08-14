@@ -29,11 +29,11 @@
   },
   "esmodules": [
     "scripts/brackenvale-core.js",
-    "scripts/brackenvale-character-sheet-147.js"
+    "scripts/brackenvale-character-sheet-144.js"
   ],
   "styles": [
     "styles/brackenvale-core.css",
-    "styles/brackenvale-character-sheet-147.css"
+    "styles/brackenvale-character-sheet-144.css"
   ],
   "languages": [
     {
