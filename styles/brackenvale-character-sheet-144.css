@@ -1958,3 +1958,42 @@ input[data-component-key="classLevel"].class-level-interactive {
   opacity: 1 !important;
   cursor: pointer !important;
 }
+/* ------------------------------------------------------------
+   Page 4 — Cantrips
+   ------------------------------------------------------------ */
+
+.page4-cantrip-list {
+  display: grid;
+  grid-template-rows: repeat(15, 1fr);
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.page4-cantrip-list.spell-drop-target {
+  background: rgba(60, 100, 60, 0.12);
+  outline: 2px dashed rgba(40, 80, 40, 0.75);
+}
+.page4-cantrip-row {
+  width: 100%;
+  min-width: 0;
+  padding: 0 2px;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+
+  font: inherit;
+  font-size: 9px;
+  line-height: 1;
+  text-align: left;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  cursor: pointer;
+}
+
+.page4-cantrip-row:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
