@@ -6,31 +6,75 @@
       "component": "featureList",
       "key": "features-traits",
       "label": "Features & Traits",
-      "left": 5.4,
-      "top": 10.0,
+      "left": 4.585336079957274,
+      "top": 6.527525813397535,
       "width": 48.1,
-      "height": 79.2,
+      "height": 52.0,
       "opaquePanel": true
     },
     {
       "component": "languageList",
       "key": "languages",
       "label": "Languages",
-      "left": 58.1,
-      "top": 10.0,
+      "left": 56.63385976958877,
+      "top": 6.201997253352775,
       "width": 36.9,
-      "height": 28.9,
+      "height": 23.12,
       "opaquePanel": true
     },
     {
       "component": "proficiencyList",
       "key": "proficiencies",
       "label": "Proficiencies",
-      "left": 58.1,
-      "top": 44.4,
+      "left": 56.63385976958877,
+      "top": 34.63318695851206,
       "width": 36.9,
-      "height": 44.8,
+      "height": 24.0,
       "opaquePanel": true
+    },
+    {
+      "component": "flagTextArea",
+      "key": "belief",
+      "flag": "belief",
+      "label": "Belief",
+      "className": "character-driven-experience-field",
+      "left": 5.3,
+      "top": 70.35,
+      "width": 89.4,
+      "height": 4.4
+    },
+    {
+      "component": "flagTextArea",
+      "key": "goal",
+      "flag": "goal",
+      "label": "Goal",
+      "className": "character-driven-experience-field",
+      "left": 5.3,
+      "top": 77.0,
+      "width": 89.4,
+      "height": 4.4
+    },
+    {
+      "component": "flagTextArea",
+      "key": "instinct",
+      "flag": "instinct",
+      "label": "Instinct",
+      "className": "character-driven-experience-field",
+      "left": 5.3,
+      "top": 83.65,
+      "width": 89.4,
+      "height": 4.4
+    },
+    {
+      "component": "flagTextArea",
+      "key": "flaw",
+      "flag": "flaw",
+      "label": "Flaw",
+      "className": "character-driven-experience-field",
+      "left": 5.3,
+      "top": 90.3,
+      "width": 89.4,
+      "height": 4.4
     }
   ]
 }
