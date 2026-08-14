@@ -1981,6 +1981,10 @@ input[data-component-key="classLevel"].class-level-interactive {
   border: 0;
   background: transparent;
   box-shadow: none;
+  color: #171612 !important;
+-webkit-text-fill-color: #171612 !important;
+opacity: 1 !important;
+font-weight: 600;
 
   font: inherit;
   font-size: 9px;

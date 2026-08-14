@@ -745,10 +745,44 @@ async _handleCantripDrop(data) {
     foundry.utils.getProperty(sourceItem, "system.level") ?? -1
   );
 
-  if (spellLevel !== 0) {
-    ui.notifications?.warn("Only cantrips can be dropped into the Cantrips section.");
+ if (spellLevel !== 0) {
+  ui.notifications?.warn("Only cantrips can be dropped into the Cantrips section.");
+  return;
+}
+
+// Only allow cantrips that belong to one of this actor's class spell lists.
+const actorClassIds = Array.from(this.actor.items ?? [])
+  .filter((item) => item.type === "class")
+  .map((item) =>
+    String(
+      foundry.utils.getProperty(item, "system.identifier")
+      ?? item.name
+      ?? ""
+    ).toLowerCase()
+  )
+  .filter(Boolean);
+
+const spellLists = game.dnd5e?.registry?.spellLists;
+
+if (spellLists?.forSpell && actorClassIds.length) {
+  const validForActor = [...spellLists.forSpell(sourceItem.uuid)].some((list) => {
+    const listId = String(
+      list.identifier
+      ?? list.metadata?.identifier
+      ?? list.name
+      ?? ""
+    ).toLowerCase();
+
+    return actorClassIds.includes(listId);
+  });
+
+  if (!validForActor) {
+    ui.notifications?.warn(
+      `${sourceItem.name} is not on this character's class spell list.`
+    );
     return;
   }
+}
 
   const existing = Array.from(this.actor.items ?? []).find(
     (item) =>
