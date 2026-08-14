@@ -703,3 +703,87 @@ Hooks.on("chatMessage", (_chatLog, message) => {
   game.brackenvaleCore.open();
   return false;
 });
+/**
+ * Add Brackenvale inventory-slot controls to D&D5e Item sheets.
+ *
+ * The equipment manager already reads flags.brackenvale-core.slots.
+ * This simply gives GMs and item owners a UI for setting that value.
+ */
+Hooks.on("renderApplicationV2", (application, element) => {
+  const item = application?.document;
+
+  if (!(item instanceof Item)) return;
+
+  const inventoryTypes = new Set([
+    "weapon",
+    "equipment",
+    "consumable",
+    "tool",
+    "loot",
+    "container"
+  ]);
+
+  if (!inventoryTypes.has(item.type)) return;
+
+  const root = element instanceof HTMLElement ? element : element?.[0];
+  if (!root) return;
+
+  // Prevent duplicate controls on rerender.
+  if (root.querySelector(".brackenvale-item-slots")) return;
+
+  const current = foundry.utils.getProperty(
+    item,
+    `flags.${MODULE_ID}.slots`
+  );
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "form-group brackenvale-item-slots";
+
+  const label = document.createElement("label");
+  label.textContent = "Brackenvale Slots";
+
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "0";
+  input.step = "1";
+  input.placeholder = "Auto";
+  input.value =
+    current === undefined || current === null
+      ? ""
+      : String(current);
+
+  input.disabled = !item.isOwner;
+
+  input.addEventListener("change", async () => {
+    if (!item.isOwner) return;
+
+    const raw = input.value.trim();
+
+    if (raw === "") {
+      await item.unsetFlag(MODULE_ID, "slots");
+      ui.notifications?.info(
+        `${item.name} now uses automatic slot calculation.`
+      );
+      return;
+    }
+
+    const slots = Math.max(0, Number.parseInt(raw, 10) || 0);
+
+    await item.setFlag(MODULE_ID, "slots", slots);
+
+    ui.notifications?.info(
+      `${item.name} now uses ${slots} inventory slot${slots === 1 ? "" : "s"}.`
+    );
+  });
+
+  wrapper.append(label, input);
+
+  // Prefer the Details tab/form because this is item metadata.
+  const target =
+    root.querySelector('[data-tab="details"].active')
+    ?? root.querySelector('[data-tab="details"]')
+    ?? root.querySelector("form")
+    ?? root;
+
+  target.append(wrapper);
+});
