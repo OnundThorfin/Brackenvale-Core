@@ -1,5 +1,5 @@
 const MODULE_ID = "brackenvale-core";
-const MODULE_VERSION = "0.5.4-test.162";
+const MODULE_VERSION = "0.5.4-test.161";
 
 // Brackenvale replaces the default D&D 5e language choices with campaign languages.
 // Important compatibility detail: official 2024 backgrounds use the wildcard
@@ -35,31 +35,41 @@ const BRACKENVALE_LANGUAGES = {
   }
 };
 
-function installBrackenvaleLanguages(stage = "runtime") {
+function installBrackenvaleLanguages() {
   if (!CONFIG.DND5E) return;
-
-  // Mutate the existing object rather than replacing it. Some dnd5e 5.3.x
-  // applications retain references to CONFIG.DND5E.languages during startup.
-  // Clearing and rebuilding the same object keeps those references valid.
-  const target = CONFIG.DND5E.languages ??= {};
-  for (const key of Object.keys(target)) delete target[key];
-  foundry.utils.mergeObject(target, foundry.utils.deepClone(BRACKENVALE_LANGUAGES), {
-    inplace: true,
-    insertKeys: true,
-    insertValues: true,
-    overwrite: true,
-    recursive: true
-  });
-
-  console.info(`${MODULE_ID} | Brackenvale languages installed (${stage})`, target);
+  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
+  console.info(`${MODULE_ID} | Installed Brackenvale languages under languages.standard`, CONFIG.DND5E.languages);
 }
 
+// Brackenvale replaces the default D&D 5e language list with the languages
+// available to player characters in the campaign. Secret tongues are omitted
+// because they may only be granted by specific features.
+const BRACKENVALE_LANGUAGES = {
+  eldric: "Eldric",
+  valic: "Valic",
+  badawi: "Badawi",
+  nordskar: "Nordskar",
+  olekwo: "Olekwo",
+  pawokti: "Pawokti",
+  ujaraki: "Ujaraki",
+  vezu: "Vezu",
+  dwarvish: "Dwarvish",
+  gnomish: "Gnomish",
+  halfling: "Halfling",
+  orc: "Orcish",
+  sylvan: "Sylvan",
+  oldEldric: "Old Eldric",
+  liturgic: "Liturgic",
+  highDwarvish: "High Dwarvish",
+  primordial: "Primordial",
+  deep: "Deep Speech"
+};
 
-// dnd5e performs additional configuration work during startup. Re-apply the
-// campaign language table after those phases so the Advancement UI cannot
-// restore the system defaults after Brackenvale has changed them.
-Hooks.once("setup", () => installBrackenvaleLanguages("setup"));
-Hooks.once("ready", () => installBrackenvaleLanguages("ready"));
+function installBrackenvaleLanguages() {
+  if (!CONFIG.DND5E) return;
+  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
+  console.info(`${MODULE_ID} | Installed Brackenvale language list`, CONFIG.DND5E.languages);
+}
 
 const CALENDAR = {
   months: [
@@ -566,7 +576,7 @@ class BrackenvaleOverlay {
 }
 
 Hooks.once("init", () => {
-  installBrackenvaleLanguages("init");
+  installBrackenvaleLanguages();
 
   game.settings.register(MODULE_ID, "state", {
     scope: "world",
