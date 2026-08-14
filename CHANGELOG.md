@@ -1,3 +1,10 @@
+## v0.5.4-test.166
+
+- Clean release-package baseline.
+- Removed repository metadata, stray shell/git artifacts, development-only files, and unreferenced historical sheet copies from the distributable ZIP.
+- Preserved the active `-144` character-sheet JS/CSS/template files referenced by `module.json`.
+- No intentional character-sheet behavior changes from test.165.
+
 # Brackenvale Core Changelog
 
 All notable changes to the Brackenvale Core module are documented here.
