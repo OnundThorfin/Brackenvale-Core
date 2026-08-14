@@ -1,6 +1,36 @@
 const MODULE_ID = "brackenvale-core";
 const MODULE_VERSION = "0.2.2";
 
+// Brackenvale replaces the default D&D 5e language list with the languages
+// available to player characters in the campaign. Secret tongues are omitted
+// because they may only be granted by specific features.
+const BRACKENVALE_LANGUAGES = {
+  eldric: "Eldric",
+  valic: "Valic",
+  badawi: "Badawi",
+  nordskar: "Nordskar",
+  olekwo: "Olekwo",
+  pawokti: "Pawokti",
+  ujaraki: "Ujaraki",
+  vezu: "Vezu",
+  dwarvish: "Dwarvish",
+  gnomish: "Gnomish",
+  halfling: "Halfling",
+  orc: "Orcish",
+  sylvan: "Sylvan",
+  oldEldric: "Old Eldric",
+  liturgic: "Liturgic",
+  highDwarvish: "High Dwarvish",
+  primordial: "Primordial",
+  deep: "Deep Speech"
+};
+
+function installBrackenvaleLanguages() {
+  if (!CONFIG.DND5E) return;
+  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
+  console.info(`${MODULE_ID} | Installed Brackenvale language list`, CONFIG.DND5E.languages);
+}
+
 const CALENDAR = {
   months: [
     { name: "Hearthswell", season: "Winter" },
@@ -506,6 +536,8 @@ class BrackenvaleOverlay {
 }
 
 Hooks.once("init", () => {
+  installBrackenvaleLanguages();
+
   game.settings.register(MODULE_ID, "state", {
     scope: "world",
     config: false,
