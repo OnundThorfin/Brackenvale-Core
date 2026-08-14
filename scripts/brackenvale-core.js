@@ -1,5 +1,5 @@
 const MODULE_ID = "brackenvale-core";
-const MODULE_VERSION = "0.5.4-test.161";
+const MODULE_VERSION = "0.5.4-test.167";
 
 // Brackenvale replaces the default D&D 5e language choices with campaign languages.
 // Important compatibility detail: official 2024 backgrounds use the wildcard
@@ -9,43 +9,7 @@ const MODULE_VERSION = "0.5.4-test.161";
 // grant Common automatically grant/display Eldric instead. Secret tongues are
 // omitted because they may only be granted by specific features.
 const BRACKENVALE_LANGUAGES = {
-  standard: {
-    label: "Brackenvale Languages",
-    selectable: false,
-    children: {
-      common: "Eldric",
-      valic: "Valic",
-      badawi: "Badawi",
-      nordskar: "Nordskar",
-      olekwo: "Olekwo",
-      pawokti: "Pawokti",
-      ujaraki: "Ujaraki",
-      vezu: "Vezu",
-      dwarvish: "Dwarvish",
-      gnomish: "Gnomish",
-      halfling: "Halfling",
-      orc: "Orcish",
-      sylvan: "Sylvan",
-      oldeldric: "Old Eldric",
-      liturgic: "Liturgic",
-      highdwarvish: "High Dwarvish",
-      primordial: "Primordial",
-      deep: "Deep Speech"
-    }
-  }
-};
-
-function installBrackenvaleLanguages() {
-  if (!CONFIG.DND5E) return;
-  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
-  console.info(`${MODULE_ID} | Installed Brackenvale languages under languages.standard`, CONFIG.DND5E.languages);
-}
-
-// Brackenvale replaces the default D&D 5e language list with the languages
-// available to player characters in the campaign. Secret tongues are omitted
-// because they may only be granted by specific features.
-const BRACKENVALE_LANGUAGES = {
-  eldric: "Eldric",
+  common: "Eldric",
   valic: "Valic",
   badawi: "Badawi",
   nordskar: "Nordskar",
@@ -58,17 +22,27 @@ const BRACKENVALE_LANGUAGES = {
   halfling: "Halfling",
   orc: "Orcish",
   sylvan: "Sylvan",
-  oldEldric: "Old Eldric",
+  oldeldric: "Old Eldric",
   liturgic: "Liturgic",
-  highDwarvish: "High Dwarvish",
+  highdwarvish: "High Dwarvish",
   primordial: "Primordial",
   deep: "Deep Speech"
 };
 
 function installBrackenvaleLanguages() {
-  if (!CONFIG.DND5E) return;
-  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
-  console.info(`${MODULE_ID} | Installed Brackenvale language list`, CONFIG.DND5E.languages);
+  const languages = CONFIG.DND5E?.languages;
+  if (!languages?.standard) return;
+
+  languages.standard.children = { ...BRACKENVALE_LANGUAGES };
+
+  if (game.dnd5e?.config?.languages?.standard) {
+    game.dnd5e.config.languages.standard.children = { ...BRACKENVALE_LANGUAGES };
+  }
+
+  console.info(
+    `${MODULE_ID} | Installed Brackenvale languages`,
+    languages.standard.children
+  );
 }
 
 const CALENDAR = {
@@ -604,6 +578,8 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
+  installBrackenvaleLanguages();
+
   const dashboard = new BrackenvaleDashboard();
   const overlay = new BrackenvaleOverlay();
   game.brackenvaleCore = {
