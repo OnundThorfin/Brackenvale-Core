@@ -702,6 +702,25 @@ Hooks.once("init", () => {
   }
 
   for (const button of root.querySelectorAll('[data-action="open-spell"]')) {
+    for (const button of root.querySelectorAll('[data-action="delete-spell"]')) {
+  button.addEventListener("click", async (event) => {
+    if (this._calibrationMode || !this.isEditable) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const itemId = button.dataset.itemId;
+    const spell = this.actor.items.get(itemId);
+
+    if (!spell || spell.type !== "spell") return;
+
+    await spell.delete();
+
+    ui.notifications?.info(`${spell.name} removed.`);
+    this._activePage = 4;
+    this.render();
+  });
+}
     button.addEventListener("click", (event) => {
       if (this._calibrationMode) return;
 
@@ -800,7 +819,18 @@ if (spellLists?.forSpell && actorClassIds.length) {
     ui.notifications?.info(`${sourceItem.name} is already on this character.`);
     return;
   }
+const matchingClassIds = actorClassIds.filter((classId) =>
+  [...spellLists.forSpell(sourceItem.uuid)].some((list) => {
+    const listId = String(
+      list.identifier
+      ?? list.metadata?.identifier
+      ?? list.name
+      ?? ""
+    ).toLowerCase();
 
+    return listId === classId;
+  })
+);
   const itemData = sourceItem.toObject();
   delete itemData._id;
 
@@ -1195,8 +1225,12 @@ if (spellLists?.forSpell && actorClassIds.length) {
         return;
       }
 
-      const itemData = sourceItem.toObject();
-      delete itemData._id;
+     const itemData = sourceItem.toObject();
+delete itemData._id;
+
+itemData.flags ??= {};
+itemData.flags[MODULE_ID] ??= {};
+itemData.flags[MODULE_ID].spellClassIds = matchingClassIds;
 
       const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
       const supportsAdvancement = Boolean(this.actor.system?.metadata?.supportsAdvancement);
@@ -2571,4 +2605,51 @@ if (spellLists?.forSpell && actorClassIds.length) {
   game.brackenvaleCore ??= {};
   game.brackenvaleCore.BrackenvaleCharacterSheet =
     BrackenvaleCharacterSheet;
+Hooks.on("deleteItem", async (item) => {
+  if (item.type !== "class") return;
+
+  const actor = item.parent;
+  if (!actor || actor.documentName !== "Actor") return;
+
+  const removedClassId = String(
+    foundry.utils.getProperty(item, "system.identifier")
+    ?? item.name
+    ?? ""
+  ).toLowerCase();
+
+  if (!removedClassId) return;
+
+  const remainingClasses = Array.from(actor.items ?? [])
+    .filter((owned) => owned.type === "class");
+
+  const spells = Array.from(actor.items ?? [])
+    .filter((owned) => owned.type === "spell");
+
+  const spellIdsToDelete = spells
+    .filter((spell) => {
+      const sourceClasses =
+        foundry.utils.getProperty(
+          spell,
+          `flags.${MODULE_ID}.spellClassIds`
+        ) ?? [];
+
+      // For a single-class character, changing/removing the class clears
+      // the character's spell list completely.
+      if (!remainingClasses.length) return true;
+
+      // For multiclass characters, only remove spells tagged to the
+      // class that was actually deleted.
+      return Array.isArray(sourceClasses)
+        && sourceClasses.includes(removedClassId);
+    })
+    .map((spell) => spell.id);
+
+  if (!spellIdsToDelete.length) return;
+
+  await actor.deleteEmbeddedDocuments("Item", spellIdsToDelete);
+
+  ui.notifications?.info(
+    `Removed spells associated with ${item.name}.`
+  );
 });
+  });

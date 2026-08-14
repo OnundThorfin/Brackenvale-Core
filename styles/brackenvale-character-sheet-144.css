@@ -2000,4 +2000,34 @@ font-weight: 600;
 
 .page4-cantrip-row:hover {
   background: rgba(0, 0, 0, 0.06);
+.page4-spell-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 14px;
+  align-items: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+.page4-spell-delete {
+  width: 14px;
+  min-width: 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  color: #8a1919 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 12px;
+  text-align: center;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.page4-spell-row:hover .page4-spell-delete,
+.page4-spell-delete:focus-visible {
+  opacity: 1;
+}
 }
