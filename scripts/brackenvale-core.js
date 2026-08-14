@@ -45,6 +45,94 @@ function installBrackenvaleLanguages() {
   );
 }
 
+const BRACKENVALE_LANGUAGE_GROUPS = [
+  {
+    label: "Common Languages",
+    keys: ["common", "valic", "badawi", "nordskar"]
+  },
+  {
+    label: "Ancestral Languages",
+    keys: [
+      "olekwo",
+      "pawokti",
+      "ujaraki",
+      "vezu",
+      "dwarvish",
+      "gnomish",
+      "halfling",
+      "orc",
+      "sylvan"
+    ]
+  },
+  {
+    label: "Ancient Languages",
+    keys: [
+      "oldeldric",
+      "liturgic",
+      "highdwarvish",
+      "primordial",
+      "deep"
+    ]
+  }
+];
+
+function groupBrackenvaleLanguageSelects(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  const selects = root.matches("select")
+    ? [root]
+    : [...root.querySelectorAll("select")];
+
+  for (const select of selects) {
+    if (select.dataset.brackenvaleLanguageGroups === "true") continue;
+
+    const options = [...select.options];
+
+    const languageOptions = options.filter(option =>
+      option.value?.startsWith("languages:standard:")
+    );
+
+    if (!languageOptions.length) continue;
+
+    const unrelatedOptions = options.filter(option =>
+      option.value &&
+      !option.value.startsWith("languages:standard:")
+    );
+
+    if (unrelatedOptions.length) continue;
+
+    const placeholder = options.find(option => !option.value);
+
+    const optionsByKey = new Map(
+      languageOptions.map(option => [
+        option.value.split(":").at(-1),
+        option
+      ])
+    );
+
+    select.replaceChildren();
+
+    if (placeholder) {
+      select.append(placeholder);
+    }
+
+    for (const group of BRACKENVALE_LANGUAGE_GROUPS) {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = group.label;
+
+      for (const key of group.keys) {
+        const option = optionsByKey.get(key);
+        if (option) optgroup.append(option);
+      }
+
+      if (optgroup.children.length) {
+        select.append(optgroup);
+      }
+    }
+
+    select.dataset.brackenvaleLanguageGroups = "true";
+  }
+}
 const CALENDAR = {
   months: [
     { name: "Hearthswell", season: "Winter" },
@@ -596,7 +684,9 @@ Hooks.once("ready", () => {
     ui.notifications.warn("Brackenvale Core was designed for the D&D Fifth Edition system.");
   }
 });
-
+Hooks.on("renderApplicationV2", (_application, element) => {
+  groupBrackenvaleLanguageSelects(element);
+});
 Hooks.on("renderSettings", (_app, html) => {
   const root = html instanceof HTMLElement ? html : html?.[0];
   if (!root || root.querySelector("#brackenvale-core-launcher")) return;
