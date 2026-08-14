@@ -26,6 +26,8 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareNativeField(component, actor, editable);
     case "derivedField":
       return prepareDerivedField(component, actor);
+    case "cantripList":
+      return prepareCantripList(component, actor);
     case "itemSummary":
       return prepareItemSummary(component, actor, editable);
     case "checkboxField":
@@ -60,6 +62,8 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
       return prepareDefenseConditionBubble(component, actor, editable);
+     case "cantripList":
+  return prepareCantripList(component, actor); 
     default:
       console.warn(`${moduleId} | Unknown sheet component: ${component.component}`, component);
       return {...component, unsupported: true};
@@ -308,40 +312,39 @@ function prepareDerivedField(component, actor) {
       value = `${state.slotsUsed} / ${state.slotCapacity}`;
       break;
     }
-    case "spellcastingAbility": {
-  const abilityKey =
-    foundry.utils.getProperty(actor, "system.attributes.spellcasting")
+  case "spellcastingAbility": {
+  value =
+    foundry.utils.getProperty(actor, "system.attributes.spell.abilityLabel")
     ?? "";
-
-  value = abilityKey
-    ? String(CONFIG.DND5E?.abilities?.[abilityKey]?.label ?? abilityKey).toUpperCase()
-    : "";
   break;
 }
 
 case "spellSaveDC": {
   value =
-    foundry.utils.getProperty(actor, "system.attributes.spelldc")
+    foundry.utils.getProperty(actor, "system.attributes.spell.dc")
     ?? "";
   break;
 }
 
 case "spellAttackBonus": {
-  const abilityKey =
-    foundry.utils.getProperty(actor, "system.attributes.spellcasting");
+  const attack =
+    foundry.utils.getProperty(actor, "system.attributes.spell.attack");
 
-  const abilityMod = abilityKey
-    ? Number(foundry.utils.getProperty(actor, `system.abilities.${abilityKey}.mod`) ?? 0)
-    : 0;
-
-  const proficiency =
-    Number(foundry.utils.getProperty(actor, "system.attributes.prof") ?? 0);
-
-  value = abilityKey
-    ? formatSignedNumber(abilityMod + proficiency)
-    : "";
+  value = attack === null || attack === undefined || attack === ""
+    ? ""
+    : formatSignedNumber(Number(attack));
   break;
 }
+case "cantripsKnown": {
+  value = Array.from(actor.items ?? [])
+    .filter(item =>
+      item.type === "spell"
+      && Number(foundry.utils.getProperty(item, "system.level") ?? -1) === 0
+    )
+    .length;
+  break;
+}
+
     default:
       value = foundry.utils.getProperty(actor, component.path) ?? "";
   }
@@ -857,4 +860,24 @@ function formatSignedNumber(value) {
 
 function createPositionStyle(component) {
   return [`left:${component.left}%`, `top:${component.top}%`, `width:${component.width}%`, `height:${component.height}%`].join(";");
+}
+function prepareCantripList(component, actor) {
+  const rows = Array.from(actor.items ?? [])
+    .filter(item =>
+      item.type === "spell"
+      && Number(foundry.utils.getProperty(item, "system.level") ?? -1) === 0
+    )
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(item => ({
+      id: item.id,
+      name: item.name
+    }))
+    .slice(0, component.rows ?? 15);
+
+  return {
+    ...component,
+    isCantripList: true,
+    rows,
+    style: createPositionStyle(component)
+  };
 }
