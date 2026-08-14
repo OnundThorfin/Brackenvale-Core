@@ -313,26 +313,100 @@ function prepareDerivedField(component, actor) {
       break;
     }
   case "spellcastingAbility": {
-  value =
-    foundry.utils.getProperty(actor, "system.attributes.spell.abilityLabel")
+  const casterClass = Array.from(actor.items ?? [])
+    .filter((item) => item.type === "class")
+    .map((item) => ({
+      item,
+      data: item.toObject()
+    }))
+    .find(({ data }) =>
+      data.system?.spellcasting?.ability
+    );
+
+  const abilityKey =
+    casterClass?.data?.system?.spellcasting?.ability
     ?? "";
+
+  const abilityConfig = CONFIG.DND5E?.abilities?.[abilityKey];
+
+  value = abilityKey
+    ? game.i18n?.localize(
+        abilityConfig?.label ?? abilityConfig ?? abilityKey
+      )
+    : "";
+
   break;
 }
 
 case "spellSaveDC": {
-  value =
-    foundry.utils.getProperty(actor, "system.attributes.spell.dc")
+  const casterClass = Array.from(actor.items ?? [])
+    .filter((item) => item.type === "class")
+    .map((item) => ({
+      item,
+      data: item.toObject()
+    }))
+    .find(({ data }) =>
+      data.system?.spellcasting?.ability
+    );
+
+  const abilityKey =
+    casterClass?.data?.system?.spellcasting?.ability
     ?? "";
+
+  const abilityMod = Number(
+    foundry.utils.getProperty(
+      actor,
+      `system.abilities.${abilityKey}.mod`
+    ) ?? 0
+  );
+
+  const proficiency = Number(
+    foundry.utils.getProperty(
+      actor,
+      "system.attributes.prof"
+    ) ?? 0
+  );
+
+  value = abilityKey
+    ? 8 + abilityMod + proficiency
+    : "";
+
   break;
 }
 
 case "spellAttackBonus": {
-  const attack =
-    foundry.utils.getProperty(actor, "system.attributes.spell.attack");
+  const casterClass = Array.from(actor.items ?? [])
+    .filter((item) => item.type === "class")
+    .map((item) => ({
+      item,
+      data: item.toObject()
+    }))
+    .find(({ data }) =>
+      data.system?.spellcasting?.ability
+    );
 
-  value = attack === null || attack === undefined || attack === ""
-    ? ""
-    : formatSignedNumber(Number(attack));
+  const abilityKey =
+    casterClass?.data?.system?.spellcasting?.ability
+    ?? "";
+
+  const abilityMod = Number(
+    foundry.utils.getProperty(
+      actor,
+      `system.abilities.${abilityKey}.mod`
+    ) ?? 0
+  );
+
+  const proficiency = Number(
+    foundry.utils.getProperty(
+      actor,
+      "system.attributes.prof"
+    ) ?? 0
+  );
+
+  value = abilityKey
+    ? formatSignedNumber(abilityMod + proficiency)
+    : "";
+
   break;
 }
 case "cantripsKnown": {
