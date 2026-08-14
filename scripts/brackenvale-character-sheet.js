@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.71");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.138");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet.hbs";
 const LAYOUT_ROOT =
@@ -54,8 +54,6 @@ Hooks.once("init", () => {
       form: {template: TEMPLATE_PATH}
     };
 
-    static #layoutCache = null;
-
     _workingLayouts = null;
     _calibrationMode = false;
     _selectedCalibrationField = null;
@@ -64,10 +62,8 @@ Hooks.once("init", () => {
     async _prepareContext(options) {
       const context = await super._prepareContext(options);
 
-      if (!this._workingLayouts) {
-        const layouts = await this._loadLayouts();
-        this._workingLayouts = foundry.utils.deepClone(layouts);
-      }
+      const layouts = await this._loadLayouts();
+      this._workingLayouts = foundry.utils.deepClone(layouts);
 
       const editable = Boolean(this.isEditable);
 
@@ -167,28 +163,24 @@ Hooks.once("init", () => {
 
 
     async _loadLayouts() {
-      if (BrackenvaleCharacterSheet.#layoutCache) {
-        return BrackenvaleCharacterSheet.#layoutCache;
-      }
-
       const pageNumbers = [1, 2, 3, 4];
-      const layouts = await Promise.all(
+
+      return Promise.all(
         pageNumbers.map(async (pageNumber) => {
           const response = await fetch(
-            `${LAYOUT_ROOT}/page${pageNumber}.json`,
+            `${LAYOUT_ROOT}/page${pageNumber}.json?bv=${Date.now()}`,
             {cache: "no-store"}
           );
+
           if (!response.ok) {
             throw new Error(
               `${MODULE_ID} | Could not load page ${pageNumber} layout.`
             );
           }
+
           return response.json();
         })
       );
-
-      BrackenvaleCharacterSheet.#layoutCache = layouts;
-      return layouts;
     }
 
     _onRender(context, options) {
@@ -198,6 +190,7 @@ Hooks.once("init", () => {
       this._activateArtworkPageTabs(root);
       this._activateItemEditors(root);
       this._activatePage2FeatureControls(root);
+      this._applyPage2PanelGeometry(root);
       this._activateClassIntegration(root);
       this._activateOriginIntegration(root);
       this._activateNativeDataBindings(root);
