@@ -1005,8 +1005,8 @@ function preparePreparedSpellList(component, actor) {
         level: Number(foundry.utils.getProperty(item, "system.level") ?? 0),
         castingTime,
         range: rangeText,
-        vocal: propertySet.has("vocal"),
-        somatic: propertySet.has("somatic"),
+        concentration: propertySet.has("concentration"),
+        ritual: propertySet.has("ritual"),
         material: propertySet.has("material")
       };
     });
