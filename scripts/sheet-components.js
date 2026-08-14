@@ -28,6 +28,8 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
       return prepareDerivedField(component, actor);
     case "cantripList":
       return prepareCantripList(component, actor);
+      case "preparedSpellList":
+  return preparePreparedSpellList(component, actor);
     case "itemSummary":
       return prepareItemSummary(component, actor, editable);
     case "checkboxField":
@@ -954,4 +956,12 @@ function prepareCantripList(component, actor) {
     rows,
     style: createPositionStyle(component)
   };
+  function preparePreparedSpellList(component, actor) {
+  return {
+    ...component,
+    isPreparedSpellList: true,
+    rows: [],
+    style: createPositionStyle(component)
+  };
+}
 }
