@@ -2079,17 +2079,20 @@ input[data-component-key="classLevel"].class-level-interactive {
 .page4-prepared-spell-row {
   position: relative;
   display: grid;
+
   grid-template-columns:
-    minmax(0, 1.9fr)
-    minmax(0, 0.8fr)
-    minmax(0, 0.8fr)
-    0.35fr
-    0.35fr
-    0.35fr;
+    36%
+    14%
+    14%
+    12%
+    12%
+    12%;
+
   align-items: center;
+  width: 100%;
   min-width: 0;
   min-height: 0;
-  padding-right: 14px;
+  padding: 0;
 }
 
 .page4-prepared-name {
