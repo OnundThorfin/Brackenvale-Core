@@ -959,10 +959,62 @@ function prepareCantripList(component, actor) {
 }
 
 function preparePreparedSpellList(component, actor) {
+  const spells = Array.from(actor.items ?? [])
+    .filter(item =>
+      item.type === "spell"
+      && Number(foundry.utils.getProperty(item, "system.level") ?? 0) > 0
+    )
+    .sort((a, b) => {
+      const levelA = Number(foundry.utils.getProperty(a, "system.level") ?? 0);
+      const levelB = Number(foundry.utils.getProperty(b, "system.level") ?? 0);
+
+      if (levelA !== levelB) return levelA - levelB;
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, component.rows ?? 15)
+    .map(item => {
+      const activation =
+        foundry.utils.getProperty(item, "system.activation") ?? {};
+
+      const range =
+        foundry.utils.getProperty(item, "system.range") ?? {};
+
+      const properties =
+        foundry.utils.getProperty(item, "system.properties");
+
+      const propertySet = new Set(
+        properties && typeof properties[Symbol.iterator] === "function"
+          ? Array.from(properties)
+          : []
+      );
+
+      const castingTime =
+        activation.type === "action" ? "Action" :
+        activation.type === "bonus" ? "Bonus" :
+        activation.type === "reaction" ? "Reaction" :
+        activation.type ?? "";
+
+      const rangeText =
+        range.value != null
+          ? `${range.value}${range.units ? ` ${range.units}` : ""}`
+          : range.units ?? range.special ?? "";
+
+      return {
+        id: item.id,
+        name: item.name,
+        level: Number(foundry.utils.getProperty(item, "system.level") ?? 0),
+        castingTime,
+        range: rangeText,
+        vocal: propertySet.has("vocal"),
+        somatic: propertySet.has("somatic"),
+        material: propertySet.has("material")
+      };
+    });
+
   return {
     ...component,
     isPreparedSpellList: true,
-    rows: [],
+    rows: spells,
     style: createPositionStyle(component)
   };
 }

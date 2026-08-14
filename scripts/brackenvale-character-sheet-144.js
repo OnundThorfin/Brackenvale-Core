@@ -650,31 +650,34 @@ Hooks.once("init", () => {
     }
 
     _activateSpellControls(root) {
-  const cantripZone = root.querySelector('[data-component-key="cantripList"]');
+  const setupDropZone = (zone, handler) => {
+    if (!zone) return;
 
-  if (cantripZone) {
     const clearHighlight = () => {
-      cantripZone.classList.remove("spell-drop-target");
+      zone.classList.remove("spell-drop-target");
     };
 
-    cantripZone.addEventListener("dragenter", (event) => {
+    zone.addEventListener("dragenter", (event) => {
       if (this._calibrationMode || !this.isEditable) return;
       event.preventDefault();
-      cantripZone.classList.add("spell-drop-target");
+      zone.classList.add("spell-drop-target");
     });
 
-    cantripZone.addEventListener("dragover", (event) => {
+    zone.addEventListener("dragover", (event) => {
       if (this._calibrationMode || !this.isEditable) return;
       event.preventDefault();
-      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "copy";
+      }
     });
 
-    cantripZone.addEventListener("dragleave", (event) => {
-      if (cantripZone.contains(event.relatedTarget)) return;
+    zone.addEventListener("dragleave", (event) => {
+      if (zone.contains(event.relatedTarget)) return;
       clearHighlight();
     });
 
-    cantripZone.addEventListener("drop", async (event) => {
+    zone.addEventListener("drop", async (event) => {
       clearHighlight();
 
       if (this._calibrationMode || !this.isEditable) return;
@@ -683,6 +686,7 @@ Hooks.once("init", () => {
       event.stopPropagation();
 
       let data = null;
+
       const raw =
         event.dataTransfer?.getData("application/json")
         || event.dataTransfer?.getData("text/plain");
@@ -697,30 +701,21 @@ Hooks.once("init", () => {
 
       if (!data) return;
 
-      await this._handleCantripDrop(data);
+      await handler.call(this, data);
     });
-  }
+  };
+
+  setupDropZone(
+    root.querySelector('[data-component-key="cantripList"]'),
+    this._handleCantripDrop
+  );
+
+  setupDropZone(
+    root.querySelector('[data-component-key="preparedSpellList"]'),
+    this._handlePreparedSpellDrop
+  );
 
   for (const button of root.querySelectorAll('[data-action="open-spell"]')) {
-    for (const button of root.querySelectorAll('[data-action="delete-spell"]')) {
-  button.addEventListener("click", async (event) => {
-    if (this._calibrationMode || !this.isEditable) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const itemId = button.dataset.itemId;
-    const spell = this.actor.items.get(itemId);
-
-    if (!spell || spell.type !== "spell") return;
-
-    await spell.delete();
-
-    ui.notifications?.info(`${spell.name} removed.`);
-    this._activePage = 4;
-    this.render();
-  });
-}
     button.addEventListener("click", (event) => {
       if (this._calibrationMode) return;
 
@@ -733,12 +728,33 @@ Hooks.once("init", () => {
       this.actor.items.get(itemId)?.sheet?.render(true);
     });
   }
-}
-async _handleCantripDrop(data) {
-  if (!data || data.type !== "Item") {
-    ui.notifications?.warn("Only spells can be dropped into Cantrips.");
-    return;
+
+  for (const button of root.querySelectorAll('[data-action="delete-spell"]')) {
+    button.addEventListener("click", async (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const itemId = button.dataset.itemId;
+      const spell = this.actor.items.get(itemId);
+
+      if (!spell || spell.type !== "spell") return;
+
+      const spellName = spell.name;
+
+      await spell.delete();
+
+      ui.notifications?.info(`${spellName} removed.`);
+
+      this._activePage = 4;
+      this.render();
+    });
   }
+}
+
+async _resolveDroppedSpell(data) {
+  if (!data || data.type !== "Item") return null;
 
   let sourceItem = null;
 
@@ -750,12 +766,103 @@ async _handleCantripDrop(data) {
     sourceItem = await fromUuid(data.uuid);
   }
 
-  if (!sourceItem || sourceItem.documentName !== "Item") {
-    ui.notifications?.warn("Brackenvale could not find that spell.");
+  if (
+    !sourceItem
+    || sourceItem.documentName !== "Item"
+    || sourceItem.type !== "spell"
+  ) {
+    return null;
+  }
+
+  return sourceItem;
+}
+
+_getActorSpellClassIds() {
+  return Array.from(this.actor.items ?? [])
+    .filter((item) => item.type === "class")
+    .map((item) =>
+      String(
+        foundry.utils.getProperty(item, "system.identifier")
+        ?? item.name
+        ?? ""
+      ).toLowerCase()
+    )
+    .filter(Boolean);
+}
+
+_getMatchingSpellClassIds(sourceItem) {
+  const actorClassIds = this._getActorSpellClassIds();
+  const spellLists = game.dnd5e?.registry?.spellLists;
+
+  if (!spellLists?.forSpell || !actorClassIds.length) {
+    return [];
+  }
+
+  const lists = [...spellLists.forSpell(sourceItem.uuid)];
+
+  return actorClassIds.filter((classId) =>
+    lists.some((list) => {
+      const listId = String(
+        list.identifier
+        ?? list.metadata?.identifier
+        ?? list.name
+        ?? ""
+      ).toLowerCase();
+
+      return listId === classId;
+    })
+  );
+}
+
+async _importSpellToActor(sourceItem, sectionName) {
+  const existing = Array.from(this.actor.items ?? []).find(
+    (item) =>
+      item.type === "spell"
+      && item.name === sourceItem.name
+      && Number(foundry.utils.getProperty(item, "system.level") ?? -1)
+        === Number(foundry.utils.getProperty(sourceItem, "system.level") ?? -1)
+  );
+
+  if (existing || sourceItem.parent === this.actor) {
+    ui.notifications?.info(
+      `${sourceItem.name} is already on this character.`
+    );
     return;
   }
 
-  if (sourceItem.type !== "spell") {
+  const actorClassIds = this._getActorSpellClassIds();
+  const matchingClassIds = this._getMatchingSpellClassIds(sourceItem);
+
+  if (actorClassIds.length && !matchingClassIds.length) {
+    ui.notifications?.warn(
+      `${sourceItem.name} is not on this character's class spell list.`
+    );
+    return;
+  }
+
+  const itemData = sourceItem.toObject();
+  delete itemData._id;
+
+  itemData.flags ??= {};
+  itemData.flags[MODULE_ID] ??= {};
+  itemData.flags[MODULE_ID].spellClassIds = matchingClassIds;
+
+  await this.actor.createEmbeddedDocuments("Item", [itemData], {
+    keepId: false
+  });
+
+  ui.notifications?.info(
+    `${sourceItem.name} added to ${sectionName}.`
+  );
+
+  this._activePage = 4;
+  this.render();
+}
+
+async _handleCantripDrop(data) {
+  const sourceItem = await this._resolveDroppedSpell(data);
+
+  if (!sourceItem) {
     ui.notifications?.warn("Only spells can be dropped into Cantrips.");
     return;
   }
@@ -764,84 +871,38 @@ async _handleCantripDrop(data) {
     foundry.utils.getProperty(sourceItem, "system.level") ?? -1
   );
 
- if (spellLevel !== 0) {
-  ui.notifications?.warn("Only cantrips can be dropped into the Cantrips section.");
-  return;
-}
-
-// Only allow cantrips that belong to one of this actor's class spell lists.
-const actorClassIds = Array.from(this.actor.items ?? [])
-  .filter((item) => item.type === "class")
-  .map((item) =>
-    String(
-      foundry.utils.getProperty(item, "system.identifier")
-      ?? item.name
-      ?? ""
-    ).toLowerCase()
-  )
-  .filter(Boolean);
-
-const spellLists = game.dnd5e?.registry?.spellLists;
-
-if (spellLists?.forSpell && actorClassIds.length) {
-  const validForActor = [...spellLists.forSpell(sourceItem.uuid)].some((list) => {
-    const listId = String(
-      list.identifier
-      ?? list.metadata?.identifier
-      ?? list.name
-      ?? ""
-    ).toLowerCase();
-
-    return actorClassIds.includes(listId);
-  });
-
-  if (!validForActor) {
+  if (spellLevel !== 0) {
     ui.notifications?.warn(
-      `${sourceItem.name} is not on this character's class spell list.`
+      "Only cantrips can be dropped into the Cantrips section."
     );
     return;
   }
+
+  await this._importSpellToActor(sourceItem, "Cantrips");
 }
 
-  const existing = Array.from(this.actor.items ?? []).find(
-    (item) =>
-      item.type === "spell"
-      && item.name === sourceItem.name
-      && Number(foundry.utils.getProperty(item, "system.level") ?? -1) === 0
+async _handlePreparedSpellDrop(data) {
+  const sourceItem = await this._resolveDroppedSpell(data);
+
+  if (!sourceItem) {
+    ui.notifications?.warn(
+      "Only spells can be dropped into Prepared Spells."
+    );
+    return;
+  }
+
+  const spellLevel = Number(
+    foundry.utils.getProperty(sourceItem, "system.level") ?? -1
   );
 
-  if (existing) {
-    ui.notifications?.info(`${sourceItem.name} is already on this character.`);
+  if (spellLevel < 1) {
+    ui.notifications?.warn(
+      "Cantrips belong in the Cantrips section."
+    );
     return;
   }
 
-  if (sourceItem.parent === this.actor) {
-    ui.notifications?.info(`${sourceItem.name} is already on this character.`);
-    return;
-  }
-const matchingClassIds = actorClassIds.filter((classId) =>
-  [...spellLists.forSpell(sourceItem.uuid)].some((list) => {
-    const listId = String(
-      list.identifier
-      ?? list.metadata?.identifier
-      ?? list.name
-      ?? ""
-    ).toLowerCase();
-
-    return listId === classId;
-  })
-);
-  const itemData = sourceItem.toObject();
-  delete itemData._id;
-
-  await this.actor.createEmbeddedDocuments("Item", [itemData], {
-    keepId: false
-  });
-
-  ui.notifications?.info(`${sourceItem.name} added to Cantrips.`);
-
-  this._activePage = 4;
-  this.render();
+  await this._importSpellToActor(sourceItem, "Prepared Spells");
 }
     _activateClassIntegration(root) {
       const overlayButton = root.querySelector('[data-action="class-level-overlay"]');

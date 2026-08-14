@@ -83,6 +83,52 @@
     data-layout-part="root"
     aria-label="{{label}}"
   >
+    <div class="page4-prepared-grid">
+      {{#each rows}}
+        <div class="page4-prepared-spell-row">
+          <button
+            type="button"
+            class="page4-prepared-name"
+            data-action="open-spell"
+            data-item-id="{{id}}"
+            title="Open {{name}}"
+          >
+            {{name}}
+          </button>
+
+          <div class="page4-prepared-casting">
+            {{castingTime}}
+          </div>
+
+          <div class="page4-prepared-range">
+            {{range}}
+          </div>
+
+          <div class="page4-prepared-component">
+            {{#if vocal}}●{{/if}}
+          </div>
+
+          <div class="page4-prepared-component">
+            {{#if somatic}}●{{/if}}
+          </div>
+
+          <div class="page4-prepared-component">
+            {{#if material}}●{{/if}}
+          </div>
+
+          <button
+            type="button"
+            class="page4-spell-delete"
+            data-action="delete-spell"
+            data-item-id="{{id}}"
+            title="Remove {{name}}"
+            aria-label="Remove {{name}}"
+          >
+            ×
+          </button>
+        </div>
+      {{/each}}
+    </div>
   </section>
 {{/if}}
           {{#if isTextField}}
