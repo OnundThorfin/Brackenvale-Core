@@ -182,19 +182,43 @@
           {{/if}}
 
           {{#if isItemSummary}}
-            <input
-              class="overlay-field {{className}} item-summary-field"
-              type="text"
-              value="{{value}}"
+            <div
+              class="overlay-field {{className}} class-level-wrapper"
               style="{{style}}"
-              aria-label="{{label}}"
-              title="Double-click to open the native D&D item"
-              data-item-id="{{itemId}}"
               data-component-key="{{key}}"
               data-layout-part="root"
-              {{#if itemTypes}}data-item-summary-types="{{itemTypes}}"{{/if}}
-              readonly
             >
+              <span
+                class="class-level-display"
+                data-item-id="{{itemId}}"
+              >{{value}}</span>
+
+              <button
+                type="button"
+                class="class-level-overlay-button"
+                data-action="origin-summary"
+                data-origin-kind="{{key}}"
+                data-item-id="{{itemId}}"
+                aria-label="{{label}}"
+                title="{{#if itemId}}Open {{value}}{{else}}Choose {{label}}{{/if}}"
+                {{#unless editable}}disabled{{/unless}}
+              ></button>
+
+              {{#if itemId}}
+                <button
+                  type="button"
+                  class="class-remove-button"
+                  data-action="remove-origin"
+                  data-origin-kind="{{key}}"
+                  data-item-id="{{itemId}}"
+                  aria-label="Remove {{value}}"
+                  title="Remove {{label}}"
+                  {{#unless editable}}disabled{{/unless}}
+                >×</button>
+              {{/if}}
+            </div>
+          {{/if}}
+            </div>
           {{/if}}
 
           {{#if isCheckboxField}}
@@ -551,52 +575,6 @@
         {{/each}}
       </div>
 
-      {{#if isPage2}}
-        <div class="brackenvale-page2-direct" data-page2-direct="true">
-          <section class="page2-direct-panel page2-direct-features">
-            <div class="page2-direct-scroll">
-              {{#each page2Data.classes}}
-                <button type="button" class="page2-advance-class" data-action="advance-class" data-item-id="{{id}}" title="Advance {{name}} one level">Advance +1</button>
-                      <button type="button" class="page2-manage-class" data-action="manage-class" data-item-id="{{id}}">
-                  Manage {{name}}{{#if levels}} {{levels}}{{/if}}
-                </button>
-              {{/each}}
-              {{#each page2Data.features}}
-                <button type="button" class="page2-feature-row" data-action="open-feature" data-item-id="{{id}}">
-                  <span class="page2-feature-name">{{name}}</span>
-                  {{#if type}}<span class="page2-feature-type">{{type}}</span>{{/if}}
-                </button>
-              {{else}}
-                <div class="page2-empty-list">No granted features yet. Use Manage Class → Advancement to add class features.</div>
-              {{/each}}
-            </div>
-          </section>
-
-          <section class="page2-direct-panel page2-direct-languages">
-            <div class="page2-direct-scroll">
-              {{#each page2Data.languages}}
-                <div class="page2-simple-row">{{this}}</div>
-              {{else}}
-                <div class="page2-empty-list">No languages recorded.</div>
-              {{/each}}
-            </div>
-          </section>
-
-          <section class="page2-direct-panel page2-direct-proficiencies">
-            <div class="page2-direct-scroll">
-              {{#each page2Data.proficiencyGroups}}
-                <div class="page2-proficiency-group">
-                  <strong>{{label}}</strong>
-                  {{#each values}}<div class="page2-simple-row">{{this}}</div>{{/each}}
-                </div>
-              {{else}}
-                <div class="page2-empty-list">No proficiencies recorded.</div>
-              {{/each}}
-            </div>
-          </section>
-        </div>
-      {{/if}}
-
-    </div>
+</div>
   {{/each}}
 </form>
