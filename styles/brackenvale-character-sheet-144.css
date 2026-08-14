@@ -1969,25 +1969,36 @@ input[data-component-key="classLevel"].class-level-interactive {
   background: transparent;
   border: 0;
 }
+
 .page4-cantrip-list.spell-drop-target {
   background: rgba(60, 100, 60, 0.12);
   outline: 2px dashed rgba(40, 80, 40, 0.75);
 }
+
+.page4-spell-row {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
 .page4-cantrip-row {
   width: 100%;
   min-width: 0;
-  padding: 0 2px;
   margin: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  padding: 0 16px 0 2px;
+
   color: #171612 !important;
--webkit-text-fill-color: #171612 !important;
-opacity: 1 !important;
-font-weight: 600;
+  -webkit-text-fill-color: #171612 !important;
+  opacity: 1 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 
   font: inherit;
   font-size: 9px;
+  font-weight: 600;
   line-height: 1;
   text-align: left;
 
@@ -1999,39 +2010,43 @@ font-weight: 600;
 }
 
 .page4-cantrip-row:hover {
-  background: rgba(0, 0, 0, 0.06);
-.page4-spell-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 14px;
-  align-items: center;
-  min-width: 0;
-  min-height: 0;
+  background: rgba(0, 0, 0, 0.06) !important;
 }
 
 .page4-spell-delete {
-  width: 14px;
-  min-width: 14px;
-  height: 14px;
-  margin: 0;
-  padding: 0;
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  right: 0;
+
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  transform: translateY(-50%);
+
   color: #8a1919 !important;
-  background: transparent !important;
+  background: #ffffff !important;
   border: 0 !important;
   box-shadow: none !important;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 12px;
-  text-align: center;
+
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 14px !important;
+  text-align: center !important;
+
   opacity: 0 !important;
-visibility: hidden;
-pointer-events: none;
+  visibility: hidden !important;
+  pointer-events: none !important;
+
   cursor: pointer;
 }
 
 .page4-spell-row:hover .page4-spell-delete,
 .page4-spell-delete:focus-visible {
   opacity: 1 !important;
-  visibility: visible;
-  pointer-events: auto;
-}
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
