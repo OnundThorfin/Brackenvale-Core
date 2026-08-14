@@ -41,7 +41,7 @@
 
       <div class="brackenvale-page-fields">
         {{#each components}}
-        {{#if isCantripList}}
+       {{#if isCantripList}}
   <section
     class="overlay-field page4-cantrip-list"
     style="{{style}}"
@@ -50,15 +50,28 @@
     aria-label="{{label}}"
   >
     {{#each rows}}
-      <button
-        type="button"
-        class="page4-cantrip-row"
-        data-action="open-spell"
-        data-item-id="{{id}}"
-        title="Open {{name}}"
-      >
-        {{name}}
-      </button>
+      <div class="page4-spell-row">
+        <button
+          type="button"
+          class="page4-cantrip-row"
+          data-action="open-spell"
+          data-item-id="{{id}}"
+          title="Open {{name}}"
+        >
+          {{name}}
+        </button>
+
+        <button
+          type="button"
+          class="page4-spell-delete"
+          data-action="delete-spell"
+          data-item-id="{{id}}"
+          title="Remove {{name}}"
+          aria-label="Remove {{name}}"
+        >
+          ×
+        </button>
+      </div>
     {{/each}}
   </section>
 {{/if}}
