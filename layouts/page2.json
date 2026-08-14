@@ -9,7 +9,7 @@
       "left": 4.585336079957274,
       "top": 6.527525813397535,
       "width": 48.1,
-      "height": 55.0,
+      "height": 58.0,
       "opaquePanel": true
     },
     {
@@ -29,7 +29,7 @@
       "left": 56.63385976958877,
       "top": 34.63318695851206,
       "width": 36.9,
-      "height": 30.0,
+      "height": 28.0,
       "opaquePanel": true
     },
    {
@@ -71,8 +71,8 @@
       "flag": "flaw",
       "label": "Flaw",
       "className": "character-driven-experience-field",
-      "left": 5.3,
-      "top": 90.3,
+      "left": 5.2999703201851425,
+      "top": 89.539,
       "width": 89.4,
       "height": 4.4
     }
