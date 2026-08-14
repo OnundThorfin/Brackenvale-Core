@@ -1289,9 +1289,7 @@ async _handlePreparedSpellDrop(data) {
      const itemData = sourceItem.toObject();
 delete itemData._id;
 
-itemData.flags ??= {};
-itemData.flags[MODULE_ID] ??= {};
-itemData.flags[MODULE_ID].spellClassIds = matchingClassIds;
+
 
       const Manager = game.dnd5e?.applications?.advancement?.AdvancementManager;
       const supportsAdvancement = Boolean(this.actor.system?.metadata?.supportsAdvancement);
