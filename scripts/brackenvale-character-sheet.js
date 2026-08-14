@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.140");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.138");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet.hbs";
 const LAYOUT_ROOT =
@@ -62,10 +62,8 @@ Hooks.once("init", () => {
     async _prepareContext(options) {
       const context = await super._prepareContext(options);
 
-      if (!this._workingLayouts) {
-        const layouts = await this._loadLayouts();
-        this._workingLayouts = foundry.utils.deepClone(layouts);
-      }
+      const layouts = await this._loadLayouts();
+      this._workingLayouts = foundry.utils.deepClone(layouts);
 
       const editable = Boolean(this.isEditable);
 
@@ -185,36 +183,6 @@ Hooks.once("init", () => {
       );
     }
 
-    async _onFirstRender(context, options) {
-      await super._onFirstRender(context, options);
-
-      const viewportWidth = window.innerWidth || 1920;
-      const viewportHeight = window.innerHeight || 1080;
-
-      const width = Math.min(1080, Math.max(720, viewportWidth - 120));
-      const height = Math.min(900, Math.max(640, viewportHeight - 140));
-
-      const current = this.position ?? {};
-      const offscreenOrPinned =
-        !Number.isFinite(current.left)
-        || !Number.isFinite(current.top)
-        || current.left <= 10
-        || current.top <= 10;
-
-      if (offscreenOrPinned) {
-        const left = Math.max(40, Math.round((viewportWidth - width) / 2));
-        const top = Math.max(60, Math.round((viewportHeight - height) / 2));
-
-        this.setPosition({
-          left,
-          top,
-          width,
-          height
-        });
-      }
-    }
-
-
     _onRender(context, options) {
       const root = this.element;
       if (!root) return;
@@ -222,6 +190,7 @@ Hooks.once("init", () => {
       this._activateArtworkPageTabs(root);
       this._activateItemEditors(root);
       this._activatePage2FeatureControls(root);
+      this._applyPage2PanelGeometry(root);
       this._activateClassIntegration(root);
       this._activateOriginIntegration(root);
       this._activateNativeDataBindings(root);
