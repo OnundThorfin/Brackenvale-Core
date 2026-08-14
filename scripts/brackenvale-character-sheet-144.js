@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.144");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.157");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-144.hbs";
 const LAYOUT_ROOT =
@@ -213,6 +213,7 @@ Hooks.once("init", () => {
         ["equipment controls", () => this._activateEquipmentControls(root)],
         ["equipment dragging", () => this._activateEquipmentDragging(root)],
         ["supplies", () => this._activateSupplyControls(root)],
+        ["illiterate toggle", () => this._activateIlliterateToggle(root)],
         ["flag text areas", () => this._activateFlagTextAreas(root)]
       ];
 
@@ -2085,6 +2086,22 @@ Hooks.once("init", () => {
       }
     }
 
+    _activateIlliterateToggle(root) {
+      const toggle = root.querySelector(
+        'input[data-component-key="illiterate"]'
+      );
+      if (!toggle) return;
+
+      toggle.addEventListener("change", async (event) => {
+        if (this._calibrationMode || !this.isEditable) return;
+
+        await this.actor.update({
+          [`flags.${MODULE_ID}.illiterate`]: Boolean(event.currentTarget.checked)
+        });
+      });
+    }
+
+
     _activateCalibrationControls(root) {
       if (!game.user?.isGM) return;
 
@@ -2160,6 +2177,7 @@ Hooks.once("init", () => {
             || field.classList.contains("flag-text-area")
             || field.classList.contains("slot-summary-field")
             || field.classList.contains("page2-list-panel")
+            || field.classList.contains("illiterate-toggle")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";
