@@ -541,28 +541,6 @@ Hooks.once("init", () => {
       }
     }
 
-    _applyPage2PanelGeometry(root) {
-      const apply = (key, {top, height}) => {
-        const element = root.querySelector(`[data-component-key="${key}"]`);
-        if (!element) return;
-
-        element.style.setProperty("top", `${top}%`, "important");
-        element.style.setProperty("height", `${height}%`, "important");
-        element.style.setProperty("max-height", `${height}%`, "important");
-      };
-
-      apply("features-traits", {
-        top: 6.527525813397535,
-        height: 52
-      });
-
-      apply("proficiencies", {
-        top: 34.63318695851206,
-        height: 24
-      });
-    }
-
-
     _activatePage2FeatureControls(root) {
       for (const button of root.querySelectorAll('[data-action="open-feature"]')) {
         button.addEventListener("click", (event) => {

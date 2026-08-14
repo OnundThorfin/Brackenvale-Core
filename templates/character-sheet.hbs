@@ -183,6 +183,40 @@
             </section>
           {{/if}}
 
+          {{#if isItemSummary}}
+            <div
+              class="overlay-field {{className}} item-summary-field origin-summary-field"
+              style="{{style}}"
+              data-component-key="{{key}}"
+              data-layout-part="root"
+              data-item-id="{{itemId}}"
+              {{#if itemTypes}}data-item-summary-types="{{itemTypes}}"{{/if}}
+            >
+              <button
+                type="button"
+                class="origin-summary-button"
+                data-action="origin-summary"
+                data-origin-kind="{{key}}"
+                data-item-id="{{itemId}}"
+                title="{{#if itemId}}Open {{value}}{{else}}Choose {{label}}{{/if}}"
+                {{#unless editable}}disabled{{/unless}}
+              >{{value}}</button>
+
+              {{#if itemId}}
+                <button
+                  type="button"
+                  class="origin-remove-button"
+                  data-action="remove-origin"
+                  data-origin-kind="{{key}}"
+                  data-item-id="{{itemId}}"
+                  aria-label="Remove {{value}}"
+                  title="Remove {{label}}"
+                  {{#unless editable}}disabled{{/unless}}
+                >×</button>
+              {{/if}}
+            </div>
+          {{/if}}
+
           {{#if isCheckboxField}}
             <input
               class="overlay-field {{className}}"
