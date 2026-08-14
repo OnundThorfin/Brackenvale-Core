@@ -1,5 +1,45 @@
 const MODULE_ID = "brackenvale-core";
-const MODULE_VERSION = "0.2.2";
+const MODULE_VERSION = "0.5.4-test.161";
+
+// Brackenvale replaces the default D&D 5e language choices with campaign languages.
+// Important compatibility detail: official 2024 backgrounds use the wildcard
+// `languages:standard:*` in their Trait Advancement. Therefore Brackenvale's
+// selectable languages must remain children of the native `standard` category.
+// We repurpose the native `common` key as Eldric so built-in advancements that
+// grant Common automatically grant/display Eldric instead. Secret tongues are
+// omitted because they may only be granted by specific features.
+const BRACKENVALE_LANGUAGES = {
+  standard: {
+    label: "Brackenvale Languages",
+    selectable: false,
+    children: {
+      common: "Eldric",
+      valic: "Valic",
+      badawi: "Badawi",
+      nordskar: "Nordskar",
+      olekwo: "Olekwo",
+      pawokti: "Pawokti",
+      ujaraki: "Ujaraki",
+      vezu: "Vezu",
+      dwarvish: "Dwarvish",
+      gnomish: "Gnomish",
+      halfling: "Halfling",
+      orc: "Orcish",
+      sylvan: "Sylvan",
+      oldeldric: "Old Eldric",
+      liturgic: "Liturgic",
+      highdwarvish: "High Dwarvish",
+      primordial: "Primordial",
+      deep: "Deep Speech"
+    }
+  }
+};
+
+function installBrackenvaleLanguages() {
+  if (!CONFIG.DND5E) return;
+  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
+  console.info(`${MODULE_ID} | Installed Brackenvale languages under languages.standard`, CONFIG.DND5E.languages);
+}
 
 const CALENDAR = {
   months: [
@@ -506,6 +546,8 @@ class BrackenvaleOverlay {
 }
 
 Hooks.once("init", () => {
+  installBrackenvaleLanguages();
+
   game.settings.register(MODULE_ID, "state", {
     scope: "world",
     config: false,

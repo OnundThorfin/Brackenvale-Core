@@ -13,7 +13,7 @@ import {
 } from "./equipment-manager.js";
 
 const MODULE_ID = "brackenvale-core";
-console.info("Brackenvale Core character sheet runtime: 0.5.4-test.157");
+console.info("Brackenvale Core character sheet runtime: 0.5.4-test.159");
 const TEMPLATE_PATH =
   "modules/brackenvale-core/templates/character-sheet-144.hbs";
 const LAYOUT_ROOT =
@@ -137,9 +137,20 @@ Hooks.once("init", () => {
         return list.map((v) => String(v ?? "").trim()).filter(Boolean);
       };
 
+      const findConfiguredValue = (config, key) => {
+        if (!config || typeof config !== "object") return undefined;
+        if (Object.prototype.hasOwnProperty.call(config, key)) return config[key];
+        for (const entry of Object.values(config)) {
+          if (!entry || typeof entry !== "object" || !entry.children) continue;
+          const found = findConfiguredValue(entry.children, key);
+          if (found !== undefined) return found;
+        }
+        return undefined;
+      };
+
       const localizeValues = (values, config = {}) =>
         Array.from(new Set(values.map((value) => {
-          const configured = config?.[value];
+          const configured = findConfiguredValue(config, value);
           if (typeof configured === "string") return game.i18n?.localize(configured) ?? configured;
           if (configured && typeof configured === "object") {
             const label = configured.label ?? configured.name ?? value;
