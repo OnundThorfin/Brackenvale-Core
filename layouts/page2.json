@@ -9,7 +9,7 @@
       "left": 4.585336079957274,
       "top": 6.527525813397535,
       "width": 48.1,
-      "height": 50.0,
+      "height": 55.0,
       "opaquePanel": true
     },
     {
@@ -29,17 +29,17 @@
       "left": 56.63385976958877,
       "top": 34.63318695851206,
       "width": 36.9,
-      "height": 25.0,
+      "height": 30.0,
       "opaquePanel": true
     },
-    {
+   {
       "component": "flagTextArea",
       "key": "belief",
       "flag": "belief",
       "label": "Belief",
       "className": "character-driven-experience-field",
-      "left": 5.3,
-      "top": 70.35,
+      "left": 5.29996693878589,
+      "top": 69.69871653583357,
       "width": 89.4,
       "height": 4.4
     },
@@ -49,8 +49,8 @@
       "flag": "goal",
       "label": "Goal",
       "className": "character-driven-experience-field",
-      "left": 5.3,
-      "top": 77.0,
+      "left": 5.462729839017319,
+      "top": 76.3483155592479,
       "width": 89.4,
       "height": 4.4
     },
@@ -60,8 +60,8 @@
       "flag": "instinct",
       "label": "Instinct",
       "className": "character-driven-experience-field",
-      "left": 5.3,
-      "top": 83.65,
+      "left": 5.29996693878589,
+      "top": 82.8894050626473,
       "width": 89.4,
       "height": 4.4
     },
