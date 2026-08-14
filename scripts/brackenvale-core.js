@@ -1,5 +1,5 @@
 const MODULE_ID = "brackenvale-core";
-const MODULE_VERSION = "0.5.4-test.164";
+const MODULE_VERSION = "0.5.4-test.161";
 
 // Brackenvale replaces the default D&D 5e language choices with campaign languages.
 // Important compatibility detail: official 2024 backgrounds use the wildcard
@@ -35,39 +35,41 @@ const BRACKENVALE_LANGUAGES = {
   }
 };
 
-function installBrackenvaleLanguages(stage = "runtime") {
-  if (!CONFIG.DND5E?.languages) return;
-
-  // D&D 5e 5.3.x Trait Advancement resolves language wildcards from
-  // CONFIG.DND5E.languages at render time. Mutate that live config directly.
-  // Do not use mergeObject here: the system may have already localized and
-  // normalized its configuration by the time modules run.
-  const target = CONFIG.DND5E.languages;
-
-  // Remove every native category so generic language pickers cannot fall back
-  // to the normal 5e exotic-language list. Official 2024 backgrounds ask for
-  // `languages:standard:*`, so all player-selectable Brackenvale languages live
-  // under `standard`.
-  for (const key of Object.keys(target)) delete target[key];
-  target.standard = {
-    label: "Brackenvale Languages",
-    selectable: false,
-    children: { ...BRACKENVALE_LANGUAGES.standard.children }
-  };
-
-  console.info(`${MODULE_ID} | Brackenvale languages installed (${stage})`, target.standard.children);
+function installBrackenvaleLanguages() {
+  if (!CONFIG.DND5E) return;
+  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
+  console.info(`${MODULE_ID} | Installed Brackenvale languages under languages.standard`, CONFIG.DND5E.languages);
 }
 
+// Brackenvale replaces the default D&D 5e language list with the languages
+// available to player characters in the campaign. Secret tongues are omitted
+// because they may only be granted by specific features.
+const BRACKENVALE_LANGUAGES = {
+  eldric: "Eldric",
+  valic: "Valic",
+  badawi: "Badawi",
+  nordskar: "Nordskar",
+  olekwo: "Olekwo",
+  pawokti: "Pawokti",
+  ujaraki: "Ujaraki",
+  vezu: "Vezu",
+  dwarvish: "Dwarvish",
+  gnomish: "Gnomish",
+  halfling: "Halfling",
+  orc: "Orcish",
+  sylvan: "Sylvan",
+  oldEldric: "Old Eldric",
+  liturgic: "Liturgic",
+  highDwarvish: "High Dwarvish",
+  primordial: "Primordial",
+  deep: "Deep Speech"
+};
 
-// Keep the live D&D language registry pointed at Brackenvale. The dnd5e 5.3
-// Advancement Manager exposes a dedicated pre-render hook; applying the
-// override there guarantees Trait Advancement resolves `languages:standard:*`
-// against Brackenvale immediately before building the choice list.
-Hooks.once("setup", () => installBrackenvaleLanguages("setup"));
-Hooks.on("dnd5e.preAdvancementManagerRender", () => {
-  installBrackenvaleLanguages("pre-advancement-render");
-});
-Hooks.once("ready", () => installBrackenvaleLanguages("ready"));
+function installBrackenvaleLanguages() {
+  if (!CONFIG.DND5E) return;
+  CONFIG.DND5E.languages = foundry.utils.deepClone(BRACKENVALE_LANGUAGES);
+  console.info(`${MODULE_ID} | Installed Brackenvale language list`, CONFIG.DND5E.languages);
+}
 
 const CALENDAR = {
   months: [
@@ -574,7 +576,7 @@ class BrackenvaleOverlay {
 }
 
 Hooks.once("init", () => {
-  installBrackenvaleLanguages("init");
+  installBrackenvaleLanguages();
 
   game.settings.register(MODULE_ID, "state", {
     scope: "world",
