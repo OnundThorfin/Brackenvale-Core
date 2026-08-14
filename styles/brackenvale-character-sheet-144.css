@@ -1958,15 +1958,3 @@ input[data-component-key="classLevel"].class-level-interactive {
   opacity: 1 !important;
   cursor: pointer !important;
 }
-
-
-/* 0.5.4-test.157 — keep Illiterate toggle selectable and calibratable */
-.illiterate-toggle {
-  z-index: 50 !important;
-  pointer-events: auto !important;
-}
-
-.calibration-mode .illiterate-toggle {
-  z-index: 1100 !important;
-  cursor: move !important;
-}
