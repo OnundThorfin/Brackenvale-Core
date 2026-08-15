@@ -212,6 +212,7 @@ Hooks.once("init", () => {
         ["Page 2 controls", () => this._activatePage2FeatureControls(root)],
         ["class controls", () => this._activateClassIntegration(root)],
         ["background/species controls", () => this._activateOriginIntegration(root)],
+        ["cultural feature", () => this._activateCulturalFeatureControl(root)],
         ["native bindings", () => this._activateNativeDataBindings(root)],
         ["calibration", () => this._activateCalibrationControls(root)],
         ["ability rolls", () => this._activateAbilityRolls(root)],
@@ -1172,7 +1173,271 @@ async _handlePreparedSpellDrop(data) {
       }
     }
 
+_activateCulturalFeatureControl(root) {
+  const button = root.querySelector('[data-action="cultural-feature"]');
+  if (!button) return;
 
+  button.addEventListener("click", async (event) => {
+    if (this._calibrationMode || !this.isEditable) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const itemId = button.dataset.itemId;
+
+    if (itemId) {
+      this.actor.items.get(itemId)?.sheet?.render(true);
+      return;
+    }
+
+    await this._openBrackenvaleCulturePicker();
+  });
+}
+
+async _openBrackenvaleCulturePicker() {
+  const cultureNames = [
+    "Brackenvalian",
+    "Old Worlder",
+    "Olekwo",
+    "Broadbelt",
+    "Pawokti",
+    "Maneater Descendant",
+    "Mercenary Orc"
+  ];
+
+  const speciesItem = Array.from(this.actor.items ?? []).find((item) =>
+    ["race", "species"].includes(item.type)
+  );
+
+  const speciesName = String(speciesItem?.name ?? "").trim().toLowerCase();
+
+  const allowedCultures = new Set();
+
+  if (
+    speciesName.includes("human")
+    || speciesName.includes("dwarf")
+    || speciesName.includes("gnome")
+    || speciesName.includes("halfling")
+    || speciesName.includes("orc")
+  ) {
+    allowedCultures.add("Brackenvalian");
+    allowedCultures.add("Old Worlder");
+  }
+
+  if (speciesName.includes("human")) {
+    allowedCultures.add("Olekwo");
+    allowedCultures.add("Broadbelt");
+    allowedCultures.add("Pawokti");
+  }
+
+  if (speciesName.includes("orc")) {
+    allowedCultures.add("Maneater Descendant");
+    allowedCultures.add("Mercenary Orc");
+  }
+
+  if (!allowedCultures.size) {
+    ui.notifications?.warn(
+      "Choose a Species before selecting a Cultural Feature."
+    );
+    return;
+  }
+
+  const candidates = [];
+
+  for (const pack of game.packs ?? []) {
+    if (pack.documentName !== "Item") continue;
+
+    const label = String(
+      pack.metadata?.label
+      ?? pack.title
+      ?? pack.collection
+      ?? ""
+    ).trim();
+
+    if (label.toLowerCase() !== "cultural features") continue;
+
+    try {
+      const index = await pack.getIndex({fields: ["type"]});
+
+      for (const entry of index) {
+        if (entry.type !== "feat") continue;
+        if (!cultureNames.includes(entry.name)) continue;
+        if (!allowedCultures.has(entry.name)) continue;
+
+        candidates.push({
+          name: entry.name,
+          uuid: `Compendium.${pack.collection}.${entry._id}`
+        });
+      }
+    } catch (error) {
+      console.error(
+        `${MODULE_ID} | Could not read Cultural Features compendium`,
+        error
+      );
+    }
+  }
+
+  candidates.sort(
+    (a, b) =>
+      cultureNames.indexOf(a.name) - cultureNames.indexOf(b.name)
+  );
+
+  if (!candidates.length) {
+    ui.notifications?.warn(
+      "No eligible Cultural Features were found in the Cultural Features compendium."
+    );
+    return;
+  }
+
+  document.querySelector(".brackenvale-culture-modal")?.remove();
+
+  const overlay = document.createElement("div");
+  overlay.className =
+    "brackenvale-class-modal brackenvale-culture-modal";
+
+  const panel = document.createElement("div");
+  panel.className = "brackenvale-class-modal-panel";
+
+  const heading = document.createElement("h2");
+  heading.textContent = "Choose a Cultural Feature";
+
+  const intro = document.createElement("p");
+  intro.textContent =
+    `Choose the culture that raised ${this.actor.name}.`;
+
+  const grid = document.createElement("div");
+  grid.className =
+    "brackenvale-class-button-grid brackenvale-culture-button-grid";
+
+  const closeModal = () => {
+    document.removeEventListener("keydown", onKeyDown, true);
+    overlay.remove();
+  };
+
+  const onKeyDown = (event) => {
+    if (event.key !== "Escape") return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    closeModal();
+  };
+
+  for (const choice of candidates) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "brackenvale-class-pick-button";
+    button.textContent = choice.name;
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+
+      try {
+        const sourceItem = await fromUuid(choice.uuid);
+
+        if (!sourceItem) {
+          throw new Error(`Could not resolve ${choice.uuid}`);
+        }
+
+        closeModal();
+
+        await this._addBrackenvaleCulturalFeature(sourceItem);
+      } catch (error) {
+        console.error(
+          `${MODULE_ID} | Could not add Cultural Feature`,
+          error
+        );
+
+        ui.notifications?.error(
+          "Brackenvale could not add that Cultural Feature."
+        );
+
+        button.disabled = false;
+      }
+    });
+
+    grid.append(button);
+  }
+
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "brackenvale-class-modal-close";
+  cancel.textContent = "Cancel";
+  cancel.addEventListener("click", closeModal);
+
+  panel.append(heading, intro, grid, cancel);
+  overlay.append(panel);
+  document.body.append(overlay);
+
+  document.addEventListener("keydown", onKeyDown, true);
+}
+
+
+async _addBrackenvaleCulturalFeature(sourceItem) {
+  if (!sourceItem || sourceItem.type !== "feat") return;
+
+  const cultureNames = new Set([
+    "Brackenvalian",
+    "Old Worlder",
+    "Olekwo",
+    "Broadbelt",
+    "Pawokti",
+    "Maneater Descendant",
+    "Mercenary Orc"
+  ]);
+
+  const existing = Array.from(this.actor.items ?? []).find((item) =>
+    item.type === "feat" && cultureNames.has(item.name)
+  );
+
+  if (existing) {
+    ui.notifications?.warn(
+      `${this.actor.name} already has the Cultural Feature ${existing.name}.`
+    );
+    return;
+  }
+
+  const itemData = sourceItem.toObject();
+  delete itemData._id;
+
+  itemData.flags ??= {};
+  itemData.flags[MODULE_ID] ??= {};
+  itemData.flags[MODULE_ID].culturalFeature = true;
+
+  const Manager =
+    game.dnd5e?.applications?.advancement?.AdvancementManager;
+
+  const supportsAdvancement = Boolean(
+    this.actor.system?.metadata?.supportsAdvancement
+  );
+
+  const hasAdvancement =
+    !foundry.utils.isEmpty(itemData.system?.advancement);
+
+  const advancementsDisabled =
+    game.settings.get("dnd5e", "disableAdvancements");
+
+  if (
+    supportsAdvancement
+    && hasAdvancement
+    && !advancementsDisabled
+    && Manager?.forNewItem
+  ) {
+    const manager = Manager.forNewItem(this.actor, itemData);
+
+    if (manager.steps.length) {
+      manager.render(true);
+      return;
+    }
+  }
+
+  await this.actor.createEmbeddedDocuments(
+    "Item",
+    [itemData],
+    {keepId: false}
+  );
+
+  this.render();
+}
     async _openBrackenvaleOriginPicker(kind) {
       const itemTypes = kind === "background"
         ? ["background"]
@@ -1642,15 +1907,10 @@ delete itemData._id;
       const fields = root.querySelectorAll(
         ".brackenvale-page-fields input[name]"
       );
-const inputIsCurrency = (field) =>
-  [
-    "system.currency.cp",
-    "system.currency.sp",
-    "system.currency.gp"
-  ].includes(field.name);
+
       for (const field of fields) {
 
-field.addEventListener("change", async (event) => {
+      field.addEventListener("change", async (event) => {
           if (this._calibrationMode) return;
 
           const input = event.currentTarget;

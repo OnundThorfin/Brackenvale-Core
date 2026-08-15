@@ -131,6 +131,20 @@
     </div>
   </section>
 {{/if}}
+{{#if isCulturalFeature}}
+  <button
+    type="button"
+    class="overlay-field cultural-feature-control {{#unless itemId}}brackenvale-reference-placeholder{{/unless}}"
+    style="{{style}}"
+    data-component-key="{{key}}"
+    data-layout-part="root"
+    data-action="cultural-feature"
+    data-item-id="{{itemId}}"
+    aria-label="{{label}}"
+    title="{{#if itemId}}Open {{value}}{{else}}Choose a Cultural Feature{{/if}}"
+    {{#unless editable}}disabled{{/unless}}
+  >{{value}}</button>
+{{/if}}
           {{#if isTextField}}
             <input
               class="overlay-field {{className}}"

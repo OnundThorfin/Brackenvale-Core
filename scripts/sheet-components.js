@@ -64,6 +64,8 @@ case "provisionsWidget":
       return prepareLanguageList(component, actor);
     case "proficiencyList":
       return prepareProficiencyList(component, actor);
+    case "culturalFeature":
+      return prepareCulturalFeature(component, actor, editable);
     case "equippedDefenseName":
       return prepareEquippedDefenseName(component, actor);
     case "defenseConditionBubble":
@@ -76,6 +78,31 @@ case "provisionsWidget":
   }
 }
 
+function prepareCulturalFeature(component, actor, editable) {
+  const culturalFeatureNames = new Set([
+    "Brackenvalian",
+    "Old Worlder",
+    "Olekwo",
+    "Broadbelt",
+    "Pawokti",
+    "Maneater Descendant",
+    "Mercenary Orc"
+  ]);
+
+  const item = actor.items.find((entry) =>
+    entry.type === "feat" &&
+    culturalFeatureNames.has(entry.name)
+  );
+
+  return {
+    ...component,
+    isCulturalFeature: true,
+    editable,
+    value: item?.name ?? "Choose a Culture",
+    itemId: item?.id ?? "",
+    style: createPositionStyle(component)
+  };
+}
 
 function prepareFeatureList(component, actor, editable) {
   const items = Array.from(actor.items ?? [])
