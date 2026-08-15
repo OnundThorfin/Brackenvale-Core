@@ -58,18 +58,15 @@
       "width": 33.2,
       "height": 2.1
     },
-    {
-      "component": "textField",
-      "key": "culturalFeature",
-      "name": "flags.brackenvale-core.culturalFeature",
-      "flag": "culturalFeature",
-      "className": "line-field brackenvale-reference-placeholder",
-      "label": "Cultural Feature",
-      "left": 18.9208984375,
-      "top": 16.942003038194446,
-      "width": 33.2,
-      "height": 2.1
-    },
+   {
+  "component": "culturalFeature",
+  "key": "culturalFeature",
+  "label": "Cultural Feature",
+  "left": 18.9208984375,
+  "top": 16.942003038194446,
+  "width": 33.2,
+  "height": 2.1
+},
     {
       "component": "textField",
       "key": "faith",
