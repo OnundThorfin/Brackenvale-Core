@@ -2221,7 +2221,7 @@ input[data-component-key="classLevel"].class-level-interactive {
   gap: 3px;
   align-items: center;
   padding: 2px 4px;
-  background: transparent;
+  background: #ffffff;
   border: 0;
   box-shadow: none;
 }

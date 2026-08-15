@@ -48,13 +48,13 @@
     },
     {
   "component": "spellSlotTracker",
-  "key": "spellSlots",
-  "label": "Spell Slots",
-  "left": 4,
-  "top": 57,
-  "width": 92,
-  "height": 7
-},
+      "key": "spellSlots",
+      "label": "Spell Slots",
+      "left": 4.7178801662761165,
+      "top": 60.082286091765894,
+      "width": 92,
+      "height": 7
+    },
     {
       "component": "cantripList",
       "key": "cantripList",
