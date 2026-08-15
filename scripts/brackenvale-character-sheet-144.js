@@ -1642,9 +1642,16 @@ delete itemData._id;
       const fields = root.querySelectorAll(
         ".brackenvale-page-fields input[name]"
       );
-
+const inputIsCurrency = (field) =>
+  [
+    "system.currency.cp",
+    "system.currency.sp",
+    "system.currency.gp"
+  ].includes(field.name);
       for (const field of fields) {
-        field.addEventListener("change", async (event) => {
+        const eventName = inputIsCurrency(field) ? "input" : "change";
+
+field.addEventListener(eventName, async (event) => {
           if (this._calibrationMode) return;
 
           const input = event.currentTarget;
