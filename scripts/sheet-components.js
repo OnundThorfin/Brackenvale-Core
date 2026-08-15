@@ -34,6 +34,8 @@ case "provisionsWidget":
       return prepareCantripList(component, actor);
       case "preparedSpellList":
   return preparePreparedSpellList(component, actor);
+  case "spellSlotTracker":
+  return prepareSpellSlotTracker(component, actor, editable);
     case "itemSummary":
       return prepareItemSummary(component, actor, editable);
     case "checkboxField":
@@ -1073,6 +1075,32 @@ function preparePreparedSpellList(component, actor) {
     ...component,
     isPreparedSpellList: true,
     rows: spells,
+    style: createPositionStyle(component)
+  };
+}
+function prepareSpellSlotTracker(component, actor, editable) {
+  const rows = [];
+
+  for (let level = 1; level <= 9; level += 1) {
+    const slotData =
+      foundry.utils.getProperty(actor, `system.spells.spell${level}`) ?? {};
+
+    const value = Number(slotData.value ?? 0);
+    const max = Number(slotData.max ?? 0);
+
+    rows.push({
+      level,
+      value,
+      max,
+      path: `system.spells.spell${level}.value`
+    });
+  }
+
+  return {
+    ...component,
+    isSpellSlotTracker: true,
+    editable,
+    rows,
     style: createPositionStyle(component)
   };
 }

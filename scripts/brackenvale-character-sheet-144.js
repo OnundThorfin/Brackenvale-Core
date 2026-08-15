@@ -228,6 +228,7 @@ Hooks.once("init", () => {
         ["supplies", () => this._activateSupplyControls(root)],
         ["illiterate toggle", () => this._activateIlliterateToggle(root)],
         ["flag text areas", () => this._activateFlagTextAreas(root)],
+        ["spell slots", () => this._activateSpellSlotControls(root)],
         ["spell controls", () => this._activateSpellControls(root)],
       ];
 
@@ -688,7 +689,45 @@ _activateProvisionControls(root) {
         });
       }
     }
+_activateSpellSlotControls(root) {
+  for (const button of root.querySelectorAll(
+    '[data-action="adjust-spell-slot"]'
+  )) {
+    button.addEventListener("click", async (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
 
+      event.preventDefault();
+      event.stopPropagation();
+
+      const level = Number(event.currentTarget.dataset.level);
+      const delta = Number(event.currentTarget.dataset.delta);
+
+      if (!Number.isInteger(level) || level < 1 || level > 9) return;
+      if (!Number.isFinite(delta)) return;
+
+      const path = `system.spells.spell${level}`;
+      const slotData =
+        foundry.utils.getProperty(this.actor, path) ?? {};
+
+      const current = Number(slotData.value ?? 0);
+      const max = Number(slotData.max ?? 0);
+
+      const next = Math.max(
+        0,
+        Math.min(max, current + delta)
+      );
+
+      if (next === current) return;
+
+      await this.actor.update({
+        [`${path}.value`]: next
+      });
+
+      this._activePage = 4;
+      this.render();
+    });
+  }
+}
     _activateSpellControls(root) {
   const setupDropZone = (zone, handler) => {
     if (!zone) return;
