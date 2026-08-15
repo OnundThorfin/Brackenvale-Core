@@ -527,6 +527,82 @@
             </div>
           {{/if}}
 
+          {{#if isProvisionsWidget}}
+  <section
+    class="overlay-field provisions-widget"
+    style="{{style}}"
+    data-component-key="{{key}}"
+    data-layout-part="root"
+    aria-label="{{label}}"
+  >
+    <div class="provisions-row">
+      <span class="provisions-label">Fresh Rations</span>
+      <button
+        type="button"
+        class="provisions-button"
+        data-action="adjust-provision"
+        data-provision-key="fresh"
+        data-delta="-1"
+        {{#unless editable}}disabled{{/unless}}
+      >−</button>
+      <span class="provisions-value">{{fresh}}</span>
+      <button
+        type="button"
+        class="provisions-button"
+        data-action="adjust-provision"
+        data-provision-key="fresh"
+        data-delta="1"
+        {{#unless editable}}disabled{{/unless}}
+      >+</button>
+    </div>
+
+    <div class="provisions-row">
+      <span class="provisions-label">Preserved Rations</span>
+      <button
+        type="button"
+        class="provisions-button"
+        data-action="adjust-provision"
+        data-provision-key="preserved"
+        data-delta="-1"
+        {{#unless editable}}disabled{{/unless}}
+      >−</button>
+      <span class="provisions-value">{{preserved}}</span>
+      <button
+        type="button"
+        class="provisions-button"
+        data-action="adjust-provision"
+        data-provision-key="preserved"
+        data-delta="1"
+        {{#unless editable}}disabled{{/unless}}
+      >+</button>
+    </div>
+
+    <div class="provisions-row">
+      <span class="provisions-label">Water</span>
+      <button
+        type="button"
+        class="provisions-button"
+        data-action="adjust-provision"
+        data-provision-key="water"
+        data-delta="-1"
+        {{#unless editable}}disabled{{/unless}}
+      >−</button>
+      <span class="provisions-value">{{water}}</span>
+      <button
+        type="button"
+        class="provisions-button"
+        data-action="adjust-provision"
+        data-provision-key="water"
+        data-delta="1"
+        {{#unless editable}}disabled{{/unless}}
+      >+</button>
+    </div>
+
+    <div class="provisions-slots">
+      Food {{rationSlots}} | Water {{waterSlots}} | Total {{provisionSlots}}
+    </div>
+  </section>
+{{/if}}
           {{#if isSupplyWidget}}
             <div
               class="overlay-field supply-widget"

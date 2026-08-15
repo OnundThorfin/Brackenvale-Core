@@ -22,8 +22,12 @@ export function prepareSheetComponent(component, actor, moduleId, editable = tru
   switch (component.component) {
     case "textField":
       return prepareTextField(component, actor, flags, editable);
+
     case "nativeField":
-      return prepareNativeField(component, actor, editable);
+  return prepareNativeField(component, actor, editable);
+
+case "provisionsWidget":
+  return prepareProvisionsWidget(component, actor, moduleId, editable);
     case "derivedField":
       return prepareDerivedField(component, actor);
     case "cantripList":
@@ -109,6 +113,32 @@ function prepareFeatureList(component, actor, editable) {
     })),
     hasClass: classItems.length > 0,
     editable,
+    style: createPositionStyle(component)
+  };
+}
+
+function prepareProvisionsWidget(component, actor, moduleId, editable) {
+  const stored =
+    foundry.utils.getProperty(actor, `flags.${moduleId}.provisions`)
+    ?? {};
+
+  const fresh = Math.max(0, Number(stored.fresh) || 0);
+  const preserved = Math.max(0, Number(stored.preserved) || 0);
+  const water = Math.max(0, Number(stored.water) || 0);
+
+  const rationSlots = Math.ceil((fresh + preserved) / 5);
+  const waterSlots = water;
+
+  return {
+    ...component,
+    isProvisionsWidget: true,
+    editable,
+    fresh,
+    preserved,
+    water,
+    rationSlots,
+    waterSlots,
+    provisionSlots: rationSlots + waterSlots,
     style: createPositionStyle(component)
   };
 }
