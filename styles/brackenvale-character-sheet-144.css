@@ -2195,3 +2195,21 @@ input[data-component-key="classLevel"].class-level-interactive {
   text-align: center;
   white-space: nowrap;
 }
+/* Page 3 provisions tracker must sit above the packed gear panel. */
+.brackenvale-art-page[data-page="3"] .provisions-widget {
+  z-index: 14 !important;
+  position: absolute;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+.brackenvale-art-sheet.calibration-mode .provisions-widget {
+  z-index: 1000 !important;
+  outline: 3px dashed rgba(155, 32, 32, 0.98) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  cursor: move !important;
+}
+
+.brackenvale-art-sheet.calibration-mode .provisions-widget * {
+  pointer-events: none !important;
+}
