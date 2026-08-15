@@ -170,7 +170,9 @@ function prepareFeatureList(component, actor, editable) {
       ?? "",
 
     hasUses: maxUses > 0,
-    usesLabel: maxUses > 0 ? `${remainingUses}/${maxUses}` : "",
+remainingUses,
+maxUses,
+usesLabel: maxUses > 0 ? `${remainingUses}/${maxUses}` : "",
 
     recoveryLabel,
     actionLabel,

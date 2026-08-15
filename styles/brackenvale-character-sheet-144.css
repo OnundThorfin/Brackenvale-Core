@@ -2307,3 +2307,39 @@ input[data-component-key="classLevel"].class-level-interactive {
 .page2-feature-action {
   opacity: 0.75;
 }
+.page2-feature-uses {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.page2-feature-uses-current {
+  width: 22px;
+  min-width: 22px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(23, 22, 18, 0.45);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  appearance: textfield;
+}
+
+.page2-feature-uses-current::-webkit-outer-spin-button,
+.page2-feature-uses-current::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.page2-feature-uses-current:focus {
+  outline: 1px solid rgba(112, 89, 34, 0.72);
+  background: rgba(255, 252, 225, 0.75);
+}
+
+.page2-feature-uses-separator,
+.page2-feature-uses-max {
+  pointer-events: none;
+}

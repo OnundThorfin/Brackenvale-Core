@@ -297,8 +297,23 @@
 
 <span class="page2-feature-meta">
   {{#if hasUses}}
-    <span class="page2-feature-uses">{{usesLabel}}</span>
-  {{/if}}
+  <span class="page2-feature-uses">
+    <input
+      type="number"
+      class="page2-feature-uses-current"
+      value="{{remainingUses}}"
+      min="0"
+      max="{{maxUses}}"
+      data-action="set-feature-uses"
+      data-item-id="{{id}}"
+      data-max-uses="{{maxUses}}"
+      aria-label="{{name}} remaining uses"
+      {{#unless ../editable}}disabled{{/unless}}
+    >
+    <span class="page2-feature-uses-separator">/</span>
+    <span class="page2-feature-uses-max">{{maxUses}}</span>
+  </span>
+{{/if}}
 
   {{#if recoveryLabel}}
     <span class="page2-feature-recovery">{{recoveryLabel}}</span>

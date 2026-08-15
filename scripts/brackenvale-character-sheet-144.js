@@ -210,6 +210,7 @@ Hooks.once("init", () => {
         ["page tabs", () => this._activateArtworkPageTabs(root)],
         ["item editors", () => this._activateItemEditors(root)],
         ["Page 2 controls", () => this._activatePage2FeatureControls(root)],
+        ["feature uses", () => this._activateFeatureUseControls(root)],
         ["class controls", () => this._activateClassIntegration(root)],
         ["background/species controls", () => this._activateOriginIntegration(root)],
         ["cultural feature", () => this._activateCulturalFeatureControl(root)],
@@ -240,6 +241,58 @@ Hooks.once("init", () => {
         }
       }
     }
+    _activateFeatureUseControls(root) {
+  for (const input of root.querySelectorAll(
+    '[data-action="set-feature-uses"]'
+  )) {
+    input.addEventListener("change", async (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const field = event.currentTarget;
+      const item = this.actor.items.get(field.dataset.itemId);
+
+      if (!item) return;
+
+      const maxUses = Math.max(
+        0,
+        Number(field.dataset.maxUses ?? 0)
+      );
+
+      let remaining = Number(field.value);
+
+      if (!Number.isFinite(remaining)) {
+        remaining = 0;
+      }
+
+      remaining = Math.max(
+        0,
+        Math.min(maxUses, remaining)
+      );
+
+      const spent = Math.max(
+        0,
+        maxUses - remaining
+      );
+
+      await item.update({
+        "system.uses.spent": spent
+      });
+
+      this.render();
+    });
+
+    input.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+
+    input.addEventListener("dblclick", (event) => {
+      event.stopPropagation();
+    });
+  }
+}
 _activateProvisionControls(root) {
   for (const button of root.querySelectorAll(
     "[data-action='adjust-provision']"
