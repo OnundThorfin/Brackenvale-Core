@@ -509,21 +509,23 @@
                     {{/if}}
                   </div>
                 {{/each}}
-              {{#if editable}}
-  {{#if (eq region "packed-left")}}
-    <button
-      type="button"
-      class="equipment-add-item"
-      data-action="add-equipment-item"
-      title="Create a new item"
-    >
-      + Add Item
-    </button>
-  {{/if}}
-{{/if}}
+                             {{#if editable}}
+                  {{#if (eq region "packed-left")}}
+                    <button
+                      type="button"
+                      class="equipment-add-item"
+                      data-action="add-equipment-item"
+                      title="Create a new item"
+                    >
+                      + Add Item
+                    </button>
+                  {{/if}}
+                {{/if}}
+
+              {{/if}}
+              {{/if}}
             </div>
           {{/if}}
-
 
           {{#if isSupplyWidget}}
             <div
