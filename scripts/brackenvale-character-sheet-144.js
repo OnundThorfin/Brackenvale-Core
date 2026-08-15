@@ -1649,9 +1649,8 @@ const inputIsCurrency = (field) =>
     "system.currency.gp"
   ].includes(field.name);
       for (const field of fields) {
-        const eventName = inputIsCurrency(field) ? "input" : "change";
 
-field.addEventListener(eventName, async (event) => {
+field.addEventListener("change", async (event) => {
           if (this._calibrationMode) return;
 
           const input = event.currentTarget;
