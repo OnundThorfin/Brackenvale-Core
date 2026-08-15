@@ -312,6 +312,7 @@ function prepareNativeField(component, actor, editable) {
   return {
     ...component,
     isTextField: true,
+    name: component.path,
     inputType: component.inputType ?? "text",
     value: foundry.utils.getProperty(actor, component.path) ?? "",
     disabled: !editable || component.readonly === true,
