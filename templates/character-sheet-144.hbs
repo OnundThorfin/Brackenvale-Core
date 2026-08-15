@@ -75,6 +75,45 @@
     {{/each}}
   </section>
 {{/if}}
+{{#if isSpellSlotTracker}}
+  <section
+    class="overlay-field page4-spell-slot-tracker"
+    style="{{style}}"
+    data-component-key="{{key}}"
+    data-layout-part="root"
+    aria-label="{{label}}"
+  >
+    {{#each rows}}
+      <div class="page4-spell-slot-row">
+        <span class="page4-spell-slot-level">{{level}}</span>
+
+        <button
+          type="button"
+          class="page4-spell-slot-button"
+          data-action="adjust-spell-slot"
+          data-level="{{level}}"
+          data-delta="-1"
+          title="Spend a level {{level}} spell slot"
+          {{#unless ../editable}}disabled{{/unless}}
+        >−</button>
+
+        <span class="page4-spell-slot-value">{{value}}</span>
+
+        <button
+          type="button"
+          class="page4-spell-slot-button"
+          data-action="adjust-spell-slot"
+          data-level="{{level}}"
+          data-delta="1"
+          title="Recover a level {{level}} spell slot"
+          {{#unless ../editable}}disabled{{/unless}}
+        >+</button>
+
+        <span class="page4-spell-slot-max">/ {{max}}</span>
+      </div>
+    {{/each}}
+  </section>
+{{/if}}
 {{#if isPreparedSpellList}}
   <section
     class="overlay-field page4-prepared-spell-list"
