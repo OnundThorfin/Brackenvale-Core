@@ -132,18 +132,39 @@
   </section>
 {{/if}}
 {{#if isCulturalFeature}}
-  <button
-    type="button"
-    class="overlay-field cultural-feature-control {{#unless itemId}}brackenvale-reference-placeholder{{/unless}}"
+  <div
+    class="overlay-field line-field class-level-wrapper"
     style="{{style}}"
     data-component-key="{{key}}"
     data-layout-part="root"
-    data-action="cultural-feature"
-    data-item-id="{{itemId}}"
-    aria-label="{{label}}"
-    title="{{#if itemId}}Open {{value}}{{else}}Choose a Cultural Feature{{/if}}"
-    {{#unless editable}}disabled{{/unless}}
-  >{{value}}</button>
+  >
+    <span
+      class="class-level-display"
+      data-item-id="{{itemId}}"
+    >{{value}}</span>
+
+    <button
+      type="button"
+      class="class-level-overlay-button"
+      data-action="cultural-feature"
+      data-item-id="{{itemId}}"
+      aria-label="{{label}}"
+      title="{{#if itemId}}Open {{value}}{{else}}Choose a Cultural Feature{{/if}}"
+      {{#unless editable}}disabled{{/unless}}
+    ></button>
+
+    {{#if itemId}}
+      <button
+        type="button"
+        class="class-remove-button"
+        data-action="remove-cultural-feature"
+        data-item-id="{{itemId}}"
+        aria-label="Remove {{value}}"
+        title="Remove Cultural Feature"
+        {{#unless editable}}disabled{{/unless}}
+      >×</button>
+    {{/if}}
+  </div>
 {{/if}}
           {{#if isTextField}}
             <input

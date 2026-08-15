@@ -1175,23 +1175,69 @@ async _handlePreparedSpellDrop(data) {
 
 _activateCulturalFeatureControl(root) {
   const button = root.querySelector('[data-action="cultural-feature"]');
-  if (!button) return;
 
-  button.addEventListener("click", async (event) => {
-    if (this._calibrationMode || !this.isEditable) return;
+  if (button) {
+    button.addEventListener("click", async (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
 
-    event.preventDefault();
-    event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
-    const itemId = button.dataset.itemId;
+      const itemId = button.dataset.itemId;
 
-    if (itemId) {
-      this.actor.items.get(itemId)?.sheet?.render(true);
-      return;
-    }
+      if (itemId) {
+        this.actor.items.get(itemId)?.sheet?.render(true);
+        return;
+      }
 
-    await this._openBrackenvaleCulturePicker();
-  });
+      await this._openBrackenvaleCulturePicker();
+    });
+  }
+
+  const removeButton = root.querySelector(
+    '[data-action="remove-cultural-feature"]'
+  );
+
+  if (removeButton) {
+    removeButton.addEventListener("click", async (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const item = this.actor.items.get(removeButton.dataset.itemId);
+      if (!item) return;
+
+      const DialogV2 = foundry.applications?.api?.DialogV2;
+      let approved = false;
+
+      if (DialogV2?.confirm) {
+        approved = await DialogV2.confirm({
+          window: {title: "Remove Cultural Feature"},
+          content: `
+            <p>
+              Remove <strong>${foundry.utils.escapeHTML(item.name)}</strong>
+              from <strong>${foundry.utils.escapeHTML(this.actor.name)}</strong>?
+            </p>
+            <p class="hint">
+              Benefits granted through D&D advancement will be reversed with it.
+            </p>
+          `,
+          yes: {label: "Remove Cultural Feature"},
+          no: {label: "Cancel"},
+          modal: true
+        });
+      } else {
+        approved = window.confirm(
+          `Remove ${item.name} from ${this.actor.name}?`
+        );
+      }
+
+      if (!approved) return;
+
+      await this._removeAdvancementItem(item);
+    });
+  }
 }
 
 async _openBrackenvaleCulturePicker() {
