@@ -2924,6 +2924,7 @@ delete itemData._id;
             || field.classList.contains("slot-summary-field")
             || field.classList.contains("page2-list-panel")
             || field.classList.contains("illiterate-toggle")
+            || field.classList.contains("circle-field")
           ) {
             field.style.zIndex = "1000";
             field.style.pointerEvents = "auto";
