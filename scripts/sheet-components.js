@@ -115,15 +115,69 @@ function prepareFeatureList(component, actor, editable) {
       return aType.localeCompare(bType) || a.name.localeCompare(b.name);
     });
 
-  const rows = items.map((item) => ({
+  const rows = items.map((item) => {
+  const uses = foundry.utils.getProperty(item, "system.uses") ?? {};
+  const activities = Array.from(
+    foundry.utils.getProperty(item, "system.activities") ?? []
+  );
+
+  const currentUses = Number(uses.spent ?? 0);
+  const maxUses = Number(uses.max ?? 0);
+
+  // D&D5e stores "spent", so remaining = maximum - spent.
+  const remainingUses = Math.max(0, maxUses - currentUses);
+
+  const recovery = Array.isArray(uses.recovery)
+    ? uses.recovery
+    : [];
+
+  let recoveryLabel = "";
+
+  if (recovery.some((r) => r?.period === "sr")) {
+    recoveryLabel = "SR";
+  } else if (recovery.some((r) => r?.period === "lr")) {
+    recoveryLabel = "LR";
+  } else if (recovery.some((r) => r?.period === "dawn")) {
+    recoveryLabel = "DAWN";
+  }
+
+  // Find the first activity that actually has an activation type.
+  const activity = activities.find((a) =>
+    foundry.utils.getProperty(a, "activation.type")
+  );
+
+  const activationType = String(
+    foundry.utils.getProperty(activity, "activation.type") ?? ""
+  );
+
+  const actionLabels = {
+    action: "A",
+    bonus: "BA",
+    reaction: "R",
+    special: "SP"
+  };
+
+  const actionLabel = actionLabels[activationType] ?? "";
+
+  return {
     id: item.id,
     name: item.name,
     img: item.img ?? "",
+
     typeLabel:
       foundry.utils.getProperty(item, "system.type.label")
       ?? foundry.utils.getProperty(item, "system.type.value")
-      ?? ""
-  }));
+      ?? "",
+
+    hasUses: maxUses > 0,
+    usesLabel: maxUses > 0 ? `${remainingUses}/${maxUses}` : "",
+
+    recoveryLabel,
+    actionLabel,
+
+    hasMetadata: maxUses > 0 || recoveryLabel || actionLabel
+  };
+});
 
   const classItems = Array.from(actor.items ?? [])
     .filter((item) => item.type === "class");

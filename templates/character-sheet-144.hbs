@@ -293,10 +293,27 @@
                       data-item-id="{{id}}"
                       title="Open {{name}}"
                     >
-                      <span class="page2-feature-name">{{name}}</span>
-                      {{#if typeLabel}}
-                        <span class="page2-feature-type">{{typeLabel}}</span>
-                      {{/if}}
+                     <span class="page2-feature-name">{{name}}</span>
+
+<span class="page2-feature-meta">
+  {{#if hasUses}}
+    <span class="page2-feature-uses">{{usesLabel}}</span>
+  {{/if}}
+
+  {{#if recoveryLabel}}
+    <span class="page2-feature-recovery">{{recoveryLabel}}</span>
+  {{/if}}
+
+  {{#if actionLabel}}
+    <span class="page2-feature-action">{{actionLabel}}</span>
+  {{/if}}
+
+  {{#unless hasMetadata}}
+    {{#if typeLabel}}
+      <span class="page2-feature-type">{{typeLabel}}</span>
+    {{/if}}
+  {{/unless}}
+</span>
                     </button>
                   {{else}}
                     <div class="page2-empty-list">No features or traits have been granted yet.</div>

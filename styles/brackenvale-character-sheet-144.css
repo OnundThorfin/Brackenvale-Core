@@ -2266,3 +2266,44 @@ input[data-component-key="classLevel"].class-level-interactive {
   text-align: center;
   white-space: nowrap;
 }
+/* Page 2 feature uses, recovery, and action metadata */
+.page2-feature-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px;
+}
+
+.page2-feature-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page2-feature-meta {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.page2-feature-uses,
+.page2-feature-recovery,
+.page2-feature-action,
+.page2-feature-type {
+  font-size: 0.78em;
+  line-height: 1;
+}
+
+.page2-feature-uses {
+  font-weight: 700;
+}
+
+.page2-feature-recovery,
+.page2-feature-action {
+  opacity: 0.75;
+}
