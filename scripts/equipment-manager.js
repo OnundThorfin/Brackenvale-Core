@@ -469,14 +469,49 @@ export function getEquipmentState(actor, moduleId = "brackenvale-core") {
           && !row?.itemId
       ).length
     : 0;
-  const itemSlots = items.reduce((total, entry) => total + entry.slots, 0);
-  const slotsUsed = itemSlots + supplySlots;
+    const provisions =
+  foundry.utils.getProperty(actor, `flags.${moduleId}.provisions`)
+  ?? {};
+
+const freshRations = Math.max(
+  0,
+  Number(provisions.fresh) || 0
+);
+
+const preservedRations = Math.max(
+  0,
+  Number(provisions.preserved) || 0
+);
+
+const waterDays = Math.max(
+  0,
+  Number(provisions.water) || 0
+);
+
+const rationSlots = Math.ceil(
+  (freshRations + preservedRations) / 5
+);
+
+const waterSlots = waterDays;
+
+const provisionSlots = rationSlots + waterSlots;
+ const itemSlots = items.reduce((total, entry) => {
+  if (isProvisionItem(entry.item) || isWaterItem(entry.item)) {
+    return total;
+  }
+
+  return total + entry.slots;
+}, 0);
+  const slotsUsed = itemSlots + supplySlots + provisionSlots;
 
   return {
     items,
     slotCapacity,
     itemSlots,
     supplySlots,
+    provisionSlots,
+rationSlots,
+waterSlots,
     slotsUsed,
     encumbrance: getEncumbranceState(slotsUsed, slotCapacity),
     armor: equipped.find((entry) => entry.isArmor)?.item ?? null,

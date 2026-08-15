@@ -223,6 +223,7 @@ Hooks.once("init", () => {
         ["equipment drop zones", () => this._activateEquipmentDropZones(root)],
         ["equipment controls", () => this._activateEquipmentControls(root)],
         ["equipment dragging", () => this._activateEquipmentDragging(root)],
+        ["provisions", () => this._activateProvisionControls(root)],
         ["supplies", () => this._activateSupplyControls(root)],
         ["illiterate toggle", () => this._activateIlliterateToggle(root)],
         ["flag text areas", () => this._activateFlagTextAreas(root)],
@@ -237,7 +238,45 @@ Hooks.once("init", () => {
         }
       }
     }
+_activateProvisionControls(root) {
+  for (const button of root.querySelectorAll(
+    "[data-action='adjust-provision']"
+  )) {
+    button.addEventListener("click", async (event) => {
+      if (this._calibrationMode || !this.isEditable) return;
 
+      event.preventDefault();
+      event.stopPropagation();
+
+      const key = event.currentTarget.dataset.provisionKey;
+      const delta = Number(event.currentTarget.dataset.delta);
+
+      if (!["fresh", "preserved", "water"].includes(key)) return;
+      if (!Number.isFinite(delta)) return;
+
+      const current =
+        foundry.utils.getProperty(
+          this.actor,
+          `flags.${MODULE_ID}.provisions`
+        ) ?? {};
+
+      const next = {
+        fresh: Math.max(0, Number(current.fresh) || 0),
+        preserved: Math.max(0, Number(current.preserved) || 0),
+        water: Math.max(0, Number(current.water) || 0)
+      };
+
+      next[key] = Math.max(0, next[key] + delta);
+
+      await this.actor.update({
+        [`flags.${MODULE_ID}.provisions`]: next
+      });
+
+      this._activePage = 3;
+      this.render();
+    });
+  }
+}
     _activateSupplyControls(root) {
       const getRows = () => {
         const stored = foundry.utils.getProperty(

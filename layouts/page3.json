@@ -199,6 +199,15 @@
       "height": 5.8
     },
     {
+  "component": "provisionsWidget",
+  "key": "provisions",
+  "label": "Provisions",
+  "left": 53,
+  "top": 66,
+  "width": 38,
+  "height": 10
+},
+    {
       "component": "supplyWidget",
       "key": "supply-dice",
       "label": "Supplies",
