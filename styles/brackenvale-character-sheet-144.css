@@ -2214,14 +2214,14 @@ input[data-component-key="classLevel"].class-level-interactive {
   pointer-events: none !important;
 }
 /* Page 4 spell slot tracker */
-.page4-spell-slot-tracker {
+.brackenvale-page-fields .page4-spell-slot-tracker {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   gap: 3px;
   align-items: center;
   padding: 2px 4px;
-  background: #ffffff;
+ background: #ffffff !important;
   border: 0;
   box-shadow: none;
 }
