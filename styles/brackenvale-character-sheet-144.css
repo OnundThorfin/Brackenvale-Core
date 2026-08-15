@@ -2343,3 +2343,21 @@ input[data-component-key="classLevel"].class-level-interactive {
 .page2-feature-uses-max {
   pointer-events: none;
 }
+.page2-feature-open {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.page2-feature-open:hover,
+.page2-feature-open:focus-visible {
+  background: rgba(142, 114, 45, 0.12) !important;
+}

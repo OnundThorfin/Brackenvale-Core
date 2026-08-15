@@ -284,52 +284,52 @@
                   </div>
                 {{/if}}
 
-                <div class="page2-feature-rows">
-                  {{#each rows}}
-                    <button
-                      type="button"
-                      class="page2-feature-row"
-                      data-action="open-feature"
-                      data-item-id="{{id}}"
-                      title="Open {{name}}"
-                    >
-                     <span class="page2-feature-name">{{name}}</span>
+                <div class="page2-feature-row">
+  <button
+    type="button"
+    class="page2-feature-open"
+    data-action="open-feature"
+    data-item-id="{{id}}"
+    title="Open {{name}}"
+  >
+    <span class="page2-feature-name">{{name}}</span>
+  </button>
 
-<span class="page2-feature-meta">
-  {{#if hasUses}}
-  <span class="page2-feature-uses">
-    <input
-      type="number"
-      class="page2-feature-uses-current"
-      value="{{remainingUses}}"
-      min="0"
-      max="{{maxUses}}"
-      data-action="set-feature-uses"
-      data-item-id="{{id}}"
-      data-max-uses="{{maxUses}}"
-      aria-label="{{name}} remaining uses"
-      {{#unless ../editable}}disabled{{/unless}}
-    >
-    <span class="page2-feature-uses-separator">/</span>
-    <span class="page2-feature-uses-max">{{maxUses}}</span>
-  </span>
-{{/if}}
-
-  {{#if recoveryLabel}}
-    <span class="page2-feature-recovery">{{recoveryLabel}}</span>
-  {{/if}}
-
-  {{#if actionLabel}}
-    <span class="page2-feature-action">{{actionLabel}}</span>
-  {{/if}}
-
-  {{#unless hasMetadata}}
-    {{#if typeLabel}}
-      <span class="page2-feature-type">{{typeLabel}}</span>
+  <span class="page2-feature-meta">
+    {{#if hasUses}}
+      <span class="page2-feature-uses">
+        <input
+          type="number"
+          class="page2-feature-uses-current"
+          value="{{remainingUses}}"
+          min="0"
+          max="{{maxUses}}"
+          data-action="set-feature-uses"
+          data-item-id="{{id}}"
+          data-max-uses="{{maxUses}}"
+          aria-label="{{name}} remaining uses"
+          {{#unless ../editable}}disabled{{/unless}}
+        >
+        <span class="page2-feature-uses-separator">/</span>
+        <span class="page2-feature-uses-max">{{maxUses}}</span>
+      </span>
     {{/if}}
-  {{/unless}}
-</span>
-                    </button>
+
+    {{#if recoveryLabel}}
+      <span class="page2-feature-recovery">{{recoveryLabel}}</span>
+    {{/if}}
+
+    {{#if actionLabel}}
+      <span class="page2-feature-action">{{actionLabel}}</span>
+    {{/if}}
+
+    {{#unless hasMetadata}}
+      {{#if typeLabel}}
+        <span class="page2-feature-type">{{typeLabel}}</span>
+      {{/if}}
+    {{/unless}}
+  </span>
+</div>
                   {{else}}
                     <div class="page2-empty-list">No features or traits have been granted yet.</div>
                   {{/each}}
