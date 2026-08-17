@@ -678,7 +678,7 @@ Hooks.once("ready", () => {
     weather: WEATHER
   };
 
-  overlay.mount();
+  // overlay.mount();
 
   if (game.system.id !== "dnd5e") {
     ui.notifications.warn("Brackenvale Core was designed for the D&D Fifth Edition system.");
