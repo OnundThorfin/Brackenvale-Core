@@ -523,7 +523,7 @@
     {
       "component": "skill",
       "key": "skillPer",
-      "rollKey": "per",
+      "rollKey": "prf",
       "label": "Performance",
       "className": "ability-roll-row",
       "left": 30.769856770833332,
@@ -534,7 +534,7 @@
     {
       "component": "skill",
       "key": "skillPrs",
-      "rollKey": "prs",
+      "rollKey": "per",
       "label": "Persuasion",
       "className": "ability-roll-row",
       "left": 30.6396484375,
