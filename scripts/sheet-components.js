@@ -1247,8 +1247,39 @@ function firstFinite(...values) {
 }
 
 function formatSpeed(actor) {
-  const movement = foundry.utils.getProperty(actor, "system.attributes.movement") ?? {};
-  return `${movement.walk ?? 0} ${movement.units ?? "ft"}`.trim();
+  const movement =
+    foundry.utils.getProperty(actor, "system.attributes.movement") ?? {};
+
+  const baseSpeed = Number(movement.walk ?? 0);
+  const units = movement.units ?? "ft";
+
+  const state = getEquipmentState(actor);
+  const encumbrance = state.encumbrance?.key ?? "normal";
+
+  let speed = baseSpeed;
+
+  switch (encumbrance) {
+    case "encumbered":
+      speed = Math.max(0, baseSpeed - 10);
+      break;
+
+    case "heavily-encumbered":
+      speed = Math.floor(baseSpeed / 2);
+      break;
+
+    case "overloaded":
+      // Your rule says they cannot willingly travel,
+      // not that their combat speed becomes 0.
+      speed = baseSpeed;
+      break;
+
+    case "normal":
+    default:
+      speed = baseSpeed;
+      break;
+  }
+
+  return `${speed} ${units}`.trim();
 }
 
 function formatSignedNumber(value) {
