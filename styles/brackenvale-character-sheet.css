@@ -134,12 +134,6 @@
   }
 }
 
-/* Allow Foundry's native minimized state to collapse the custom sheet. */
-.brackenvale-character-sheet.minimized {
-  min-width: 0 !important;
-  width: 300px !important;
-}
-
 /* Keep Foundry's native sheet header and controls above the artwork layer. */
 .brackenvale-character-sheet > .window-header {
   position: relative;
@@ -2093,4 +2087,10 @@ input[data-component-key="classLevel"].class-level-interactive {
 .brackenvale-origin-button-grid {
   max-height: 55vh !important;
   overflow-y: auto !important;
+}
+/* Compact Brackenvale sheet when Foundry ApplicationV2 minimizes it. */
+.brackenvale-character-sheet[style*="height: 36px"] {
+  width: 320px !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
 }
