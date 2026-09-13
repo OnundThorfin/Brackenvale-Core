@@ -1268,9 +1268,7 @@ function formatSpeed(actor) {
       break;
 
     case "overloaded":
-      // Your rule says they cannot willingly travel,
-      // not that their combat speed becomes 0.
-      speed = baseSpeed;
+      speed = 0;
       break;
 
     case "normal":
