@@ -180,7 +180,26 @@ usesLabel: maxUses > 0 ? `${remainingUses}/${maxUses}` : "",
     hasMetadata: maxUses > 0 || recoveryLabel || actionLabel
   };
 });
+// Add Exhaustion as a synthetic Features & Traits row.
+const exhaustion = Number(
+  foundry.utils.getProperty(actor, "system.attributes.exhaustion") ?? 0
+);
 
+if (exhaustion > 0) {
+  rows.unshift({
+    id: "",
+    name: `Exhaustion — Level ${exhaustion}`,
+    img: "",
+    typeLabel: "Condition",
+    hasUses: false,
+    remainingUses: 0,
+    maxUses: 0,
+    usesLabel: "",
+    recoveryLabel: "",
+    actionLabel: "",
+    hasMetadata: false
+  });
+}
   const classItems = Array.from(actor.items ?? [])
     .filter((item) => item.type === "class");
 
