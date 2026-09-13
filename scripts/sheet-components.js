@@ -1088,17 +1088,25 @@ function getWeaponDamageLabel(item) {
 
   if (!formula) return "";
 
-  /*
-   * Resolve Foundry roll-data references such as:
-   *
-   *   @scale.monk.martial-arts
-   *
-   * into their current value for this actor, e.g.:
-   *
-   *   1d6
-   */
   const actor = item.parent;
+  const modifier = getWeaponAbilityModifier(item);
 
+  /*
+   * @mod is contextual to the weapon/activity, so actor.getRollData()
+   * cannot reliably resolve it. Temporarily protect it while resolving
+   * things like @scale.monk.martial-arts.
+   */
+  const MOD_PLACEHOLDER = "__BRACKENVALE_MOD__";
+  const hadModReference = formula.includes("@mod");
+
+  if (hadModReference) {
+    formula = formula.replaceAll("@mod", MOD_PLACEHOLDER);
+  }
+
+  /*
+   * Resolve actor data references such as:
+   * @scale.monk.martial-arts -> 1d6
+   */
   if (actor && formula.includes("@")) {
     try {
       const rollData =
@@ -1124,18 +1132,28 @@ function getWeaponDamageLabel(item) {
     }
   }
 
-  // Native labels in D&D 5.3 can expose only the base damage dice.
-  // Add the actor's relevant ability modifier when it is not already shown.
-  if (
-    !formula.includes("@mod")
-    && !/[+-]\s*\d+\s*$/.test(formula.trim())
-  ) {
-    const modifier = getWeaponAbilityModifier(item);
+  /*
+   * Restore @mod as the actual ability modifier used by this attack.
+   */
+  if (hadModReference) {
+    formula = formula.replaceAll(
+      MOD_PLACEHOLDER,
+      modifier >= 0 ? `${modifier}` : `(${modifier})`
+    );
+  }
 
-    if (modifier) {
-      formula =
-        `${formula} ${modifier > 0 ? "+" : "−"} ${Math.abs(modifier)}`;
-    }
+  /*
+   * Some D&D 5.3 weapon labels contain only the base damage dice.
+   * If there was no @mod reference and no modifier is already displayed,
+   * add the weapon's relevant ability modifier.
+   */
+  if (
+    !hadModReference
+    && !/[+-]\s*\d+\s*$/.test(formula.trim())
+    && modifier
+  ) {
+    formula =
+      `${formula} ${modifier > 0 ? "+" : "−"} ${Math.abs(modifier)}`;
   }
 
   return formula;
