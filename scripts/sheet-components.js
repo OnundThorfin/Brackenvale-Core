@@ -795,29 +795,57 @@ function prepareDeathSaveBubble(component, actor, editable) {
 }
 
 function prepareWeaponTable(component, actor) {
+  const maxRows = component.maxRows ?? 4;
 
-const weapons = actor.items
-  ?.filter((item) => {
-    if (item.type === "weapon") return true;
+  const candidates = actor.items
+    ?.filter((item) => {
+      // Always allow actual weapon items.
+      if (item.type === "weapon") return true;
 
-    const activities = foundry.utils.getProperty(item, "system.activities");
-    if (!activities) return false;
+      // Also allow non-weapon items that genuinely contain an attack activity.
+      const activities = foundry.utils.getProperty(item, "system.activities");
+      if (!activities) return false;
 
-    const activityList =
-      typeof activities.values === "function"
-        ? Array.from(activities.values())
-        : Array.isArray(activities)
-          ? activities
-          : Object.values(activities);
+      const activityList =
+        typeof activities.values === "function"
+          ? Array.from(activities.values())
+          : Array.isArray(activities)
+            ? activities
+            : Object.values(activities);
 
-    return activityList.some((activity) => activity?.type === "attack");
-  })
-    .slice(0, component.maxRows ?? 4)
-    .map((item) => {
+      return activityList.some((activity) => activity?.type === "attack");
+    }) ?? [];
+
+  // Priority:
+  // 1. Equipped weapon items
+  // 2. Other weapon items
+  // 3. Non-weapon items with attack activities
+  const prioritized = candidates
+    .map((item, index) => ({
+      item,
+      index,
+      priority:
+        item.type === "weapon" && isWeaponEquipped(item)
+          ? 0
+          : item.type === "weapon"
+            ? 1
+            : 2
+    }))
+    .sort((a, b) => {
+      // Keep the actor's original item order within each priority group.
+      if (a.priority !== b.priority) {
+        return a.priority - b.priority;
+      }
+
+      return a.index - b.index;
+    })
+    .slice(0, maxRows)
+    .map(({ item }) => {
       const penalty = getEquipmentDamage(item);
       const capacity = getEquipmentDamageCapacity(item);
       const broken = isEquipmentBroken(item);
       const mastery = getMasteryDetails(item);
+
       return {
         id: item.id,
         name: item.name,
@@ -828,16 +856,27 @@ const weapons = actor.items
         equipped: isWeaponEquipped(item),
         broken
       };
-    }) ?? [];
+    });
 
-  while (weapons.length < (component.maxRows ?? 4)) {
-    weapons.push({
-      id: "", name: "", attack: "", damage: "", mastery: "",
-      masteryReference: "", equipped: false, broken: false
+  while (prioritized.length < maxRows) {
+    prioritized.push({
+      id: "",
+      name: "",
+      attack: "",
+      damage: "",
+      mastery: "",
+      masteryReference: "",
+      equipped: false,
+      broken: false
     });
   }
 
-  return {...component, isWeaponTable: true, weapons, style: createPositionStyle(component)};
+  return {
+    ...component,
+    isWeaponTable: true,
+    weapons: prioritized,
+    style: createPositionStyle(component)
+  };
 }
 
 
