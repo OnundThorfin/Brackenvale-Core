@@ -2360,9 +2360,3 @@ input[data-component-key="classLevel"].class-level-interactive {
 .page2-feature-open:focus-visible {
   background: rgba(142, 114, 45, 0.12) !important;
 }
-/* Compact Brackenvale sheet when Foundry minimizes it. */
-.brackenvale-character-sheet[style*="height: 36px"] {
-  width: 320px !important;
-  min-width: 320px !important;
-  max-width: 320px !important;
-}
