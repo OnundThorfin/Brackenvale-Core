@@ -305,25 +305,99 @@ function prepareLanguageList(component, actor) {
   };
 }
 
+function getToolProficiencyLabel(key) {
+  const tool = CONFIG.DND5E?.tools?.[key];
+
+  const uuid = String(tool?.id ?? "");
+
+  if (uuid) {
+    const match = uuid.match(/^Compendium\.([^.]+\.[^.]+)\.Item\.([^.]+)$/);
+
+    if (match) {
+      const [, packId, documentId] = match;
+      const pack = game.packs.get(packId);
+      const indexed = pack?.index?.get(documentId);
+
+      if (indexed?.name) return indexed.name;
+    }
+  }
+
+  // Fallbacks for cases where the compendium index is unavailable.
+  const fallbackLabels = {
+    alchemist: "Alchemist's Supplies",
+    brewer: "Brewer's Supplies",
+    calligrapher: "Calligrapher's Supplies",
+    carpenter: "Carpenter's Tools",
+    cartographer: "Cartographer's Tools",
+    cobbler: "Cobbler's Tools",
+    cook: "Cook's Utensils",
+    disg: "Disguise Kit",
+    forg: "Forgery Kit",
+    glassblower: "Glassblower's Tools",
+    herb: "Herbalism Kit",
+    jeweler: "Jeweler's Tools",
+    leatherworker: "Leatherworker's Tools",
+    mason: "Mason's Tools",
+    navg: "Navigator's Tools",
+    painter: "Painter's Supplies",
+    pois: "Poisoner's Kit",
+    potter: "Potter's Tools",
+    smith: "Smith's Tools",
+    thief: "Thieves' Tools",
+    tinker: "Tinker's Tools",
+    weaver: "Weaver's Tools",
+    woodcarver: "Woodcarver's Tools"
+  };
+
+  return fallbackLabels[key]
+    ?? key.replace(/(^|[-_ ])\w/g, (match) => match.toUpperCase());
+}
+
 function prepareProficiencyList(component, actor) {
   const sources = [
-    ["Armor", foundry.utils.getProperty(actor, "system.traits.armorProf"), CONFIG.DND5E?.armorProficiencies],
-    ["Weapons", foundry.utils.getProperty(actor, "system.traits.weaponProf"), CONFIG.DND5E?.weaponProficiencies],
-    ["Tools", foundry.utils.getProperty(actor, "system.traits.toolProf"), CONFIG.DND5E?.toolProficiencies]
+    [
+      "Armor",
+      foundry.utils.getProperty(actor, "system.traits.armorProf"),
+      CONFIG.DND5E?.armorProficiencies
+    ],
+    [
+      "Weapons",
+      foundry.utils.getProperty(actor, "system.traits.weaponProf"),
+      CONFIG.DND5E?.weaponProficiencies
+    ]
   ];
 
   const groups = sources.map(([label, raw, config]) => {
     const values = normalizeTraitValues(raw);
-    const rows = Array.from(new Set(localizeConfiguredValues(values, config ?? {})))
-      .sort((a, b) => a.localeCompare(b));
+
+    const rows = Array.from(
+      new Set(localizeConfiguredValues(values, config ?? {}))
+    ).sort((a, b) => a.localeCompare(b));
 
     return {label, rows};
-  }).filter((group) => group.rows.length);
+  });
+
+  // D&D5e 5.3+ stores concrete tool proficiencies under system.tools.
+  const actorTools =
+    foundry.utils.getProperty(actor, "system.tools") ?? {};
+
+  const toolRows = Object.entries(actorTools)
+    .filter(([, data]) => Number(data?.value ?? 0) > 0)
+    .map(([key]) => getToolProficiencyLabel(key))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  if (toolRows.length) {
+    groups.push({
+      label: "Tools",
+      rows: Array.from(new Set(toolRows))
+    });
+  }
 
   return {
     ...component,
     isProficiencyList: true,
-    groups,
+    groups: groups.filter((group) => group.rows.length),
     style: createPositionStyle(component)
   };
 }
@@ -722,14 +796,22 @@ function prepareDeathSaveBubble(component, actor, editable) {
 
 function prepareWeaponTable(component, actor) {
 
-  const weapons = actor.items
-    ?.filter((item) => item.type === "weapon")
-    .sort((a, b) => {
-      const equippedA = isWeaponEquipped(a) ? 1 : 0;
-      const equippedB = isWeaponEquipped(b) ? 1 : 0;
-      if (equippedA !== equippedB) return equippedB - equippedA;
-      return a.name.localeCompare(b.name);
-    })
+const weapons = actor.items
+  ?.filter((item) => {
+    if (item.type === "weapon") return true;
+
+    const activities = foundry.utils.getProperty(item, "system.activities");
+    if (!activities) return false;
+
+    const activityList =
+      typeof activities.values === "function"
+        ? Array.from(activities.values())
+        : Array.isArray(activities)
+          ? activities
+          : Object.values(activities);
+
+    return activityList.some((activity) => activity?.type === "attack");
+  })
     .slice(0, component.maxRows ?? 4)
     .map((item) => {
       const penalty = getEquipmentDamage(item);
