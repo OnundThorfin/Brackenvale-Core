@@ -1073,7 +1073,13 @@ function getWeaponDamageLabel(item) {
       formula = parts
         .map((part) => {
           if (typeof part === "string") return part;
-          return part?.formula ?? part?.number ?? part?.custom?.formula ?? "";
+
+          return (
+            part?.formula
+            ?? part?.number
+            ?? part?.custom?.formula
+            ?? ""
+          );
         })
         .filter(Boolean)
         .join(" + ");
@@ -1082,11 +1088,54 @@ function getWeaponDamageLabel(item) {
 
   if (!formula) return "";
 
-  // Native labels in D&D 5.3 can expose only the base weapon dice.
+  /*
+   * Resolve Foundry roll-data references such as:
+   *
+   *   @scale.monk.martial-arts
+   *
+   * into their current value for this actor, e.g.:
+   *
+   *   1d6
+   */
+  const actor = item.parent;
+
+  if (actor && formula.includes("@")) {
+    try {
+      const rollData =
+        typeof actor.getRollData === "function"
+          ? actor.getRollData()
+          : {};
+
+      formula = Roll.replaceFormulaData(
+        formula,
+        rollData,
+        {
+          missing: "0",
+          warn: false
+        }
+      );
+    } catch (err) {
+      console.warn(
+        "Brackenvale Core | Could not resolve weapon damage formula",
+        item.name,
+        formula,
+        err
+      );
+    }
+  }
+
+  // Native labels in D&D 5.3 can expose only the base damage dice.
   // Add the actor's relevant ability modifier when it is not already shown.
-  if (!formula.includes("@mod") && !/[+-]\s*\d+\s*$/.test(formula.trim())) {
+  if (
+    !formula.includes("@mod")
+    && !/[+-]\s*\d+\s*$/.test(formula.trim())
+  ) {
     const modifier = getWeaponAbilityModifier(item);
-    if (modifier) formula = `${formula} ${modifier > 0 ? "+" : "−"} ${Math.abs(modifier)}`;
+
+    if (modifier) {
+      formula =
+        `${formula} ${modifier > 0 ? "+" : "−"} ${Math.abs(modifier)}`;
+    }
   }
 
   return formula;
